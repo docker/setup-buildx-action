@@ -6,13 +6,13 @@ on:
       - master
       - releases/v*
     paths-ignore:
-      - '**.md'
+      - "**.md"
   pull_request:
     branches:
       - master
       - releases/v*
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
 jobs:
   main:

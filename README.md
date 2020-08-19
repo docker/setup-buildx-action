@@ -57,11 +57,7 @@ If you want support for more platforms you can use our [setup-qemu](https://gith
 name: ci
 
 on:
-  pull_request:
-    branches: master
   push:
-    branches: master
-    tags:
 
 jobs:
   buildx:

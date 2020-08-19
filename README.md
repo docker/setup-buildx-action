@@ -7,6 +7,9 @@
 
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
+> :bulb: See also our [build-push](https://github.com/docker/build-push-action)
+> and [setup-qemu](https://github.com/docker/setup-qemu-action) actions
+
 ![Screenshot](.github/setup-buildx-action.png)
 
 ___

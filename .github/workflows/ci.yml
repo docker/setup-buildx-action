@@ -27,7 +27,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       -
         name: Set up Docker Buildx
         id: buildx
@@ -49,7 +49,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       -
         name: Set up Docker Buildx 1
         id: buildx1
@@ -70,7 +70,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       -
         name: Set up Docker Buildx
         uses: ./
@@ -92,7 +92,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       -
         name: Set up Docker Buildx
         uses: ./
@@ -113,7 +113,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       -
         name: Set up Docker Buildx
         uses: ./
@@ -136,7 +136,7 @@ jobs:
 #    steps:
 #      -
 #        name: Checkout
-#        uses: actions/checkout@v2.3.1
+#        uses: actions/checkout@v2.3.2
 #      -
 #        name: Set up QEMU
 #        uses: docker/setup-qemu-action@master

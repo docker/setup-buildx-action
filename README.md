@@ -7,6 +7,8 @@
 
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
+![Screenshot](.github/setup-buildx-action.png)
+
 ___
 
 * [Usage](#usage)

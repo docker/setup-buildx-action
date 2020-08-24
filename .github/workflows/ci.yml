@@ -121,36 +121,36 @@ jobs:
           driver: docker-container
           driver-opt: ${{ matrix.driver-opt }}
 
-#  with-qemu:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        buildx-version:
-#          - latest
-#          - v0.2.2
-#          - ""
-#        qemu-platforms:
-#          - all
-#          - arm64,riscv64,arm
-#    steps:
-#      -
-#        name: Checkout
-#        uses: actions/checkout@v2.3.2
-#      -
-#        name: Set up QEMU
-#        uses: docker/setup-qemu-action@master
-#        with:
-#          platforms: ${{ matrix.qemu-platforms }}
-#      -
-#        name: Set up Docker Buildx
-#        id: buildx
-#        uses: ./
-#        with:
-#          version: ${{ matrix.buildx-version }}
-#      -
-#        name: Available platforms
-#        run: echo ${{ steps.buildx.outputs.platforms }}
-#      -
-#        name: Builder instance name
-#        run: echo ${{ steps.buildx.outputs.name }}
+  with-qemu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        buildx-version:
+          - latest
+          - v0.2.2
+          - ""
+        qemu-platforms:
+          - all
+          - arm64,riscv64,arm
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2.3.2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          platforms: ${{ matrix.qemu-platforms }}
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: ./
+        with:
+          version: ${{ matrix.buildx-version }}
+      -
+        name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      -
+        name: Builder instance name
+        run: echo ${{ steps.buildx.outputs.name }}

@@ -1,4 +1,5 @@
 import fs = require('fs');
+import * as docker from '../src/docker';
 import * as buildx from '../src/buildx';
 import * as path from 'path';
 import * as os from 'os';
@@ -6,6 +7,10 @@ import * as os from 'os';
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
 
 describe('buildx', () => {
+  async function isDaemonRunning() {
+    return await docker.isDaemonRunning();
+  }
+
   it('is available', async () => {
     expect(await buildx.isAvailable()).toBe(true);
   }, 100000);
@@ -16,12 +21,16 @@ describe('buildx', () => {
     expect(countBuilders).toBeGreaterThan(0);
   }, 100000);
 
-  it('platforms', async () => {
-    const platforms = await buildx.platforms();
-    console.log(`platforms: ${platforms}`);
-    expect(platforms).not.toBeUndefined();
-    expect(platforms).not.toEqual('');
-  }, 100000);
+  (isDaemonRunning() ? it : it.skip)(
+    'platforms',
+    async () => {
+      const platforms = buildx.platforms();
+      console.log(`platforms: ${platforms}`);
+      expect(platforms).not.toBeUndefined();
+      expect(platforms).not.toEqual('');
+    },
+    100000
+  );
 
   it('acquires v0.2.2 version of buildx', async () => {
     const buildxBin = await buildx.install('v0.2.2', tmpDir);

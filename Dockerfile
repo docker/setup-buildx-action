@@ -4,7 +4,7 @@ FROM node:14 AS deps
 WORKDIR /src
 COPY package.json yarn.lock ./
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
-  yarn install 
+  yarn install
 
 FROM scratch AS update-yarn
 COPY --from=deps /src/yarn.lock /
@@ -26,9 +26,9 @@ ARG BUILDX_VERSION=v0.4.2
 ENV RUNNER_TEMP=/tmp/github_runner
 ENV RUNNER_TOOL_CACHE=/tmp/github_tool_cache
 RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
-  curl -fsSL https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.$TARGETOS-$TARGETARCH > /usr/local/lib/docker/cli-plugins/buildx && \
-  chmod +x /usr/local/lib/docker/cli-plugins/buildx && \
-  docker buildx --version && env
+  curl -fsSL https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.$TARGETOS-$TARGETARCH > /usr/local/lib/docker/cli-plugins/docker-buildx && \
+  chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx && \
+  docker buildx version
 COPY . .
 RUN yarn run test
 

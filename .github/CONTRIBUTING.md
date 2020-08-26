@@ -24,9 +24,10 @@ docker buildx bake pre-checkin
 
 # validate all code has correctly formatted and built
 docker buildx bake validate
-```
 
-Note that tests target are currently known to not pass outside Github infrastructure.
+# run tests
+docker buildx bake test
+```
 
 Here are a few things you can do that will increase the likelihood of your pull request being accepted:
 

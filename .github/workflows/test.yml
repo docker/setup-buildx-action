@@ -21,6 +21,10 @@ jobs:
       -
         name: Validate
         run: docker buildx bake validate
+      -
+        name: Test
+        run: docker buildx bake test
+
   test:
     runs-on: ubuntu-latest
     steps:

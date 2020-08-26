@@ -8,12 +8,11 @@ Contributions to this project are [released](https://help.github.com/articles/gi
 
 1. [Fork](https://github.com/docker/setup-buildx-action/fork) and clone the repository
 2. Configure and install the dependencies: `yarn install`
-3. Make sure the tests pass on your machine: `yarn run test`
-4. Create a new branch: `git checkout -b my-branch-name`
-5. Make your change, add tests, and make sure the tests still pass
-6. Run pre-checkin: `yarn run pre-checkin`
-7. Push to your fork and [submit a pull request](https://github.com/docker/setup-buildx-action/compare)
-8. Pat your self on the back and wait for your pull request to be reviewed and merged.
+3. Create a new branch: `git checkout -b my-branch-name`
+4. Make your change, add tests, and make sure the tests still pass
+5. Run pre-checkin: `yarn run pre-checkin`
+6. Push to your fork and [submit a pull request](https://github.com/docker/setup-buildx-action/compare)
+7. Pat yourself on the back and wait for your pull request to be reviewed and merged.
 
 Here are a few things you can do that will increase the likelihood of your pull request being accepted:
 

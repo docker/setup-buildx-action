@@ -12,6 +12,15 @@ on:
       - "**.md"
 
 jobs:
+  test-containerized:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2.3.2
+      -
+        name: Validate
+        run: docker buildx bake validate
   test:
     runs-on: ubuntu-latest
     steps:

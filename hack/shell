@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+iidfile=$(mktemp -t docker-iidfile.XXXXXXXXXX)
+DOCKER_BUILDKIT=1 docker build --iidfile $iidfile --progress=plain .
+docker run -it --rm $(cat $iidfile)
+docker rmi $(cat $iidfile)

@@ -121,6 +121,26 @@ jobs:
           driver: docker-container
           driver-opt: ${{ matrix.driver-opt }}
 
+  docker-driver:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2.3.2
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        id: builder
+        with:
+          driver: docker
+      -
+        name: Verify
+        run: |
+          [[ "${{ steps.builder.outputs.name }}" = "default" ]]
+          docker buildx inspect
+          docker buildx inspect | grep Driver | grep docker
+          docker buildx inspect | grep Status | grep running
+
   with-qemu:
     runs-on: ubuntu-latest
     strategy:

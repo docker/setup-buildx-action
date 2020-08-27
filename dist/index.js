@@ -496,13 +496,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(186));
+const exec = __importStar(__webpack_require__(514));
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const buildx = __importStar(__webpack_require__(295));
 const mexec = __importStar(__webpack_require__(757));
 const stateHelper = __importStar(__webpack_require__(647));
-const core = __importStar(__webpack_require__(186));
-const exec = __importStar(__webpack_require__(514));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -522,23 +522,25 @@ function run() {
             }
             core.info('📣 Buildx info');
             yield exec.exec('docker', ['buildx', 'version']);
-            const builderName = `builder-${process.env.GITHUB_JOB}-${(yield buildx.countBuilders()) + 1}`;
+            const builderName = bxDriver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(yield buildx.countBuilders()) + 1}`;
             core.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
-            core.info('🔨 Creating a new builder instance...');
-            let createArgs = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
-            if (bxDriverOpt) {
-                createArgs.push('--driver-opt', bxDriverOpt);
+            if (bxDriver != 'docker') {
+                core.info('🔨 Creating a new builder instance...');
+                let createArgs = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
+                if (bxDriverOpt) {
+                    createArgs.push('--driver-opt', bxDriverOpt);
+                }
+                if (bxBuildkitdFlags) {
+                    createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
+                }
+                if (bxUse) {
+                    createArgs.push('--use');
+                }
+                yield exec.exec('docker', createArgs);
+                core.info('🏃 Booting builder...');
+                yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
             }
-            if (bxBuildkitdFlags) {
-                createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
-            }
-            if (bxUse) {
-                createArgs.push('--use');
-            }
-            yield exec.exec('docker', createArgs);
-            core.info('🏃 Booting builder...');
-            yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
             if (bxInstall) {
                 core.info('🤝 Setting buildx as default builder...');
                 yield exec.exec('docker', ['buildx', 'install']);
@@ -632,7 +634,7 @@ const os = __importStar(__webpack_require__(87));
 const events = __importStar(__webpack_require__(614));
 const child = __importStar(__webpack_require__(129));
 const path = __importStar(__webpack_require__(622));
-const io = __importStar(__webpack_require__(351));
+const io = __importStar(__webpack_require__(436));
 const ioUtil = __importStar(__webpack_require__(962));
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
@@ -1299,7 +1301,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(241);
+const command_1 = __webpack_require__(351);
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 /**
@@ -1795,105 +1797,6 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 241:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
-/**
- * Commands
- *
- * Command Format:
- *   ::name key=value,key=value::message
- *
- * Examples:
- *   ::warning::This is the message
- *   ::set-env name=MY_VAR::some value
- */
-function issueCommand(command, properties, message) {
-    const cmd = new Command(command, properties, message);
-    process.stdout.write(cmd.toString() + os.EOL);
-}
-exports.issueCommand = issueCommand;
-function issue(name, message = '') {
-    issueCommand(name, {}, message);
-}
-exports.issue = issue;
-const CMD_STRING = '::';
-class Command {
-    constructor(command, properties, message) {
-        if (!command) {
-            command = 'missing.command';
-        }
-        this.command = command;
-        this.properties = properties;
-        this.message = message;
-    }
-    toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-            cmdStr += ' ';
-            let first = true;
-            for (const key in this.properties) {
-                if (this.properties.hasOwnProperty(key)) {
-                    const val = this.properties[key];
-                    if (val) {
-                        if (first) {
-                            first = false;
-                        }
-                        else {
-                            cmdStr += ',';
-                        }
-                        cmdStr += `${key}=${escapeProperty(val)}`;
-                    }
-                }
-            }
-        }
-        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
-        return cmdStr;
-    }
-}
-/**
- * Sanitizes an input into a string so it can be passed into issueCommand safely
- * @param input input to sanitize into a string
- */
-function toCommandValue(input) {
-    if (input === null || input === undefined) {
-        return '';
-    }
-    else if (typeof input === 'string' || input instanceof String) {
-        return input;
-    }
-    return JSON.stringify(input);
-}
-exports.toCommandValue = toCommandValue;
-function escapeData(s) {
-    return toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A');
-}
-function escapeProperty(s) {
-    return toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A')
-        .replace(/:/g, '%3A')
-        .replace(/,/g, '%2C');
-}
-//# sourceMappingURL=command.js.map
-
-/***/ }),
-
 /***/ 279:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -2199,6 +2102,315 @@ module.exports = ltr
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const os = __importStar(__webpack_require__(87));
+/**
+ * Commands
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * Examples:
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+exports.issueCommand = issueCommand;
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+exports.issue = issue;
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            let first = true;
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
+                    }
+                }
+            }
+        }
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+        return cmdStr;
+    }
+}
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+function escapeData(s) {
+    return toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
+}
+function escapeProperty(s) {
+    return toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 357:
+/***/ (function(module) {
+
+module.exports = require("assert");
+
+/***/ }),
+
+/***/ 373:
+/***/ (function(module) {
+
+module.exports = require("crypto");
+
+/***/ }),
+
+/***/ 380:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// Determine if version is greater than all the versions possible in the range.
+const outside = __webpack_require__(420)
+const gtr = (version, range, options) => outside(version, range, '>', options)
+module.exports = gtr
+
+
+/***/ }),
+
+/***/ 383:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// just pre-load all the stuff that index.js lazily exports
+const internalRe = __webpack_require__(523)
+module.exports = {
+  re: internalRe.re,
+  src: internalRe.src,
+  tokens: internalRe.t,
+  SEMVER_SPEC_VERSION: __webpack_require__(293).SEMVER_SPEC_VERSION,
+  SemVer: __webpack_require__(88),
+  compareIdentifiers: __webpack_require__(463).compareIdentifiers,
+  rcompareIdentifiers: __webpack_require__(463).rcompareIdentifiers,
+  parse: __webpack_require__(925),
+  valid: __webpack_require__(601),
+  clean: __webpack_require__(848),
+  inc: __webpack_require__(900),
+  diff: __webpack_require__(297),
+  major: __webpack_require__(688),
+  minor: __webpack_require__(447),
+  patch: __webpack_require__(866),
+  prerelease: __webpack_require__(16),
+  compare: __webpack_require__(309),
+  rcompare: __webpack_require__(417),
+  compareLoose: __webpack_require__(804),
+  compareBuild: __webpack_require__(156),
+  sort: __webpack_require__(426),
+  rsort: __webpack_require__(701),
+  gt: __webpack_require__(123),
+  lt: __webpack_require__(194),
+  eq: __webpack_require__(898),
+  neq: __webpack_require__(17),
+  gte: __webpack_require__(522),
+  lte: __webpack_require__(520),
+  cmp: __webpack_require__(98),
+  coerce: __webpack_require__(466),
+  Comparator: __webpack_require__(532),
+  Range: __webpack_require__(828),
+  satisfies: __webpack_require__(55),
+  toComparators: __webpack_require__(706),
+  maxSatisfying: __webpack_require__(579),
+  minSatisfying: __webpack_require__(832),
+  minVersion: __webpack_require__(179),
+  validRange: __webpack_require__(741),
+  outside: __webpack_require__(420),
+  gtr: __webpack_require__(380),
+  ltr: __webpack_require__(323),
+  intersects: __webpack_require__(8),
+  simplifyRange: __webpack_require__(561),
+  subset: __webpack_require__(863),
+}
+
+
+/***/ }),
+
+/***/ 413:
+/***/ (function(module) {
+
+module.exports = require("stream");
+
+/***/ }),
+
+/***/ 417:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const compare = __webpack_require__(309)
+const rcompare = (a, b, loose) => compare(b, a, loose)
+module.exports = rcompare
+
+
+/***/ }),
+
+/***/ 420:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const SemVer = __webpack_require__(88)
+const Comparator = __webpack_require__(532)
+const {ANY} = Comparator
+const Range = __webpack_require__(828)
+const satisfies = __webpack_require__(55)
+const gt = __webpack_require__(123)
+const lt = __webpack_require__(194)
+const lte = __webpack_require__(520)
+const gte = __webpack_require__(522)
+
+const outside = (version, range, hilo, options) => {
+  version = new SemVer(version, options)
+  range = new Range(range, options)
+
+  let gtfn, ltefn, ltfn, comp, ecomp
+  switch (hilo) {
+    case '>':
+      gtfn = gt
+      ltefn = lte
+      ltfn = lt
+      comp = '>'
+      ecomp = '>='
+      break
+    case '<':
+      gtfn = lt
+      ltefn = gte
+      ltfn = gt
+      comp = '<'
+      ecomp = '<='
+      break
+    default:
+      throw new TypeError('Must provide a hilo val of "<" or ">"')
+  }
+
+  // If it satisifes the range it is not outside
+  if (satisfies(version, range, options)) {
+    return false
+  }
+
+  // From now on, variable terms are as if we're in "gtr" mode.
+  // but note that everything is flipped for the "ltr" function.
+
+  for (let i = 0; i < range.set.length; ++i) {
+    const comparators = range.set[i]
+
+    let high = null
+    let low = null
+
+    comparators.forEach((comparator) => {
+      if (comparator.semver === ANY) {
+        comparator = new Comparator('>=0.0.0')
+      }
+      high = high || comparator
+      low = low || comparator
+      if (gtfn(comparator.semver, high.semver, options)) {
+        high = comparator
+      } else if (ltfn(comparator.semver, low.semver, options)) {
+        low = comparator
+      }
+    })
+
+    // If the edge version comparator has a operator then our version
+    // isn't outside it
+    if (high.operator === comp || high.operator === ecomp) {
+      return false
+    }
+
+    // If the lowest version comparator has an operator and our version
+    // is less than it then it isn't higher than the range
+    if ((!low.operator || low.operator === comp) &&
+        ltefn(version, low.semver)) {
+      return false
+    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+      return false
+    }
+  }
+  return true
+}
+
+module.exports = outside
+
+
+/***/ }),
+
+/***/ 426:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const compareBuild = __webpack_require__(156)
+const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
+module.exports = sort
+
+
+/***/ }),
+
+/***/ 427:
+/***/ (function(module) {
+
+const debug = (
+  typeof process === 'object' &&
+  process.env &&
+  process.env.NODE_DEBUG &&
+  /\bsemver\b/i.test(process.env.NODE_DEBUG)
+) ? (...args) => console.error('SEMVER', ...args)
+  : () => {}
+
+module.exports = debug
+
+
+/***/ }),
+
+/***/ 436:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2488,216 +2700,6 @@ function copyFile(srcFile, destFile, force) {
     });
 }
 //# sourceMappingURL=io.js.map
-
-/***/ }),
-
-/***/ 357:
-/***/ (function(module) {
-
-module.exports = require("assert");
-
-/***/ }),
-
-/***/ 373:
-/***/ (function(module) {
-
-module.exports = require("crypto");
-
-/***/ }),
-
-/***/ 380:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-// Determine if version is greater than all the versions possible in the range.
-const outside = __webpack_require__(420)
-const gtr = (version, range, options) => outside(version, range, '>', options)
-module.exports = gtr
-
-
-/***/ }),
-
-/***/ 383:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-// just pre-load all the stuff that index.js lazily exports
-const internalRe = __webpack_require__(523)
-module.exports = {
-  re: internalRe.re,
-  src: internalRe.src,
-  tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: __webpack_require__(293).SEMVER_SPEC_VERSION,
-  SemVer: __webpack_require__(88),
-  compareIdentifiers: __webpack_require__(463).compareIdentifiers,
-  rcompareIdentifiers: __webpack_require__(463).rcompareIdentifiers,
-  parse: __webpack_require__(925),
-  valid: __webpack_require__(601),
-  clean: __webpack_require__(848),
-  inc: __webpack_require__(900),
-  diff: __webpack_require__(297),
-  major: __webpack_require__(688),
-  minor: __webpack_require__(447),
-  patch: __webpack_require__(866),
-  prerelease: __webpack_require__(16),
-  compare: __webpack_require__(309),
-  rcompare: __webpack_require__(417),
-  compareLoose: __webpack_require__(804),
-  compareBuild: __webpack_require__(156),
-  sort: __webpack_require__(426),
-  rsort: __webpack_require__(701),
-  gt: __webpack_require__(123),
-  lt: __webpack_require__(194),
-  eq: __webpack_require__(898),
-  neq: __webpack_require__(17),
-  gte: __webpack_require__(522),
-  lte: __webpack_require__(520),
-  cmp: __webpack_require__(98),
-  coerce: __webpack_require__(466),
-  Comparator: __webpack_require__(532),
-  Range: __webpack_require__(828),
-  satisfies: __webpack_require__(55),
-  toComparators: __webpack_require__(706),
-  maxSatisfying: __webpack_require__(579),
-  minSatisfying: __webpack_require__(832),
-  minVersion: __webpack_require__(179),
-  validRange: __webpack_require__(741),
-  outside: __webpack_require__(420),
-  gtr: __webpack_require__(380),
-  ltr: __webpack_require__(323),
-  intersects: __webpack_require__(8),
-  simplifyRange: __webpack_require__(561),
-  subset: __webpack_require__(863),
-}
-
-
-/***/ }),
-
-/***/ 413:
-/***/ (function(module) {
-
-module.exports = require("stream");
-
-/***/ }),
-
-/***/ 417:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const compare = __webpack_require__(309)
-const rcompare = (a, b, loose) => compare(b, a, loose)
-module.exports = rcompare
-
-
-/***/ }),
-
-/***/ 420:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const SemVer = __webpack_require__(88)
-const Comparator = __webpack_require__(532)
-const {ANY} = Comparator
-const Range = __webpack_require__(828)
-const satisfies = __webpack_require__(55)
-const gt = __webpack_require__(123)
-const lt = __webpack_require__(194)
-const lte = __webpack_require__(520)
-const gte = __webpack_require__(522)
-
-const outside = (version, range, hilo, options) => {
-  version = new SemVer(version, options)
-  range = new Range(range, options)
-
-  let gtfn, ltefn, ltfn, comp, ecomp
-  switch (hilo) {
-    case '>':
-      gtfn = gt
-      ltefn = lte
-      ltfn = lt
-      comp = '>'
-      ecomp = '>='
-      break
-    case '<':
-      gtfn = lt
-      ltefn = gte
-      ltfn = gt
-      comp = '<'
-      ecomp = '<='
-      break
-    default:
-      throw new TypeError('Must provide a hilo val of "<" or ">"')
-  }
-
-  // If it satisifes the range it is not outside
-  if (satisfies(version, range, options)) {
-    return false
-  }
-
-  // From now on, variable terms are as if we're in "gtr" mode.
-  // but note that everything is flipped for the "ltr" function.
-
-  for (let i = 0; i < range.set.length; ++i) {
-    const comparators = range.set[i]
-
-    let high = null
-    let low = null
-
-    comparators.forEach((comparator) => {
-      if (comparator.semver === ANY) {
-        comparator = new Comparator('>=0.0.0')
-      }
-      high = high || comparator
-      low = low || comparator
-      if (gtfn(comparator.semver, high.semver, options)) {
-        high = comparator
-      } else if (ltfn(comparator.semver, low.semver, options)) {
-        low = comparator
-      }
-    })
-
-    // If the edge version comparator has a operator then our version
-    // isn't outside it
-    if (high.operator === comp || high.operator === ecomp) {
-      return false
-    }
-
-    // If the lowest version comparator has an operator and our version
-    // is less than it then it isn't higher than the range
-    if ((!low.operator || low.operator === comp) &&
-        ltefn(version, low.semver)) {
-      return false
-    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
-      return false
-    }
-  }
-  return true
-}
-
-module.exports = outside
-
-
-/***/ }),
-
-/***/ 426:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const compareBuild = __webpack_require__(156)
-const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
-module.exports = sort
-
-
-/***/ }),
-
-/***/ 427:
-/***/ (function(module) {
-
-const debug = (
-  typeof process === 'object' &&
-  process.env &&
-  process.env.NODE_DEBUG &&
-  /\bsemver\b/i.test(process.env.NODE_DEBUG)
-) ? (...args) => console.error('SEMVER', ...args)
-  : () => {}
-
-module.exports = debug
-
 
 /***/ }),
 
@@ -5339,7 +5341,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(186));
-const io = __importStar(__webpack_require__(351));
+const io = __importStar(__webpack_require__(436));
 const fs = __importStar(__webpack_require__(747));
 const mm = __importStar(__webpack_require__(473));
 const os = __importStar(__webpack_require__(87));

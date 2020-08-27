@@ -1,10 +1,10 @@
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import * as os from 'os';
 import * as path from 'path';
 import * as buildx from './buildx';
 import * as mexec from './exec';
 import * as stateHelper from './state-helper';
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 
 async function run(): Promise<void> {
   try {
@@ -29,26 +29,30 @@ async function run(): Promise<void> {
     core.info('📣 Buildx info');
     await exec.exec('docker', ['buildx', 'version']);
 
-    const builderName: string = `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
+    const builderName: string =
+      bxDriver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
+
     core.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
-    core.info('🔨 Creating a new builder instance...');
-    let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
-    if (bxDriverOpt) {
-      createArgs.push('--driver-opt', bxDriverOpt);
-    }
-    if (bxBuildkitdFlags) {
-      createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
-    }
-    if (bxUse) {
-      createArgs.push('--use');
-    }
+    if (bxDriver != 'docker') {
+      core.info('🔨 Creating a new builder instance...');
+      let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
+      if (bxDriverOpt) {
+        createArgs.push('--driver-opt', bxDriverOpt);
+      }
+      if (bxBuildkitdFlags) {
+        createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
+      }
+      if (bxUse) {
+        createArgs.push('--use');
+      }
 
-    await exec.exec('docker', createArgs);
+      await exec.exec('docker', createArgs);
 
-    core.info('🏃 Booting builder...');
-    await exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+      core.info('🏃 Booting builder...');
+      await exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+    }
 
     if (bxInstall) {
       core.info('🤝 Setting buildx as default builder...');

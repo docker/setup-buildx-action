@@ -10,6 +10,7 @@ FROM scratch AS update-yarn
 COPY --from=deps /src/yarn.lock /
 
 FROM deps AS validate-yarn
+COPY .git .git
 RUN status=$(git status --porcelain -- yarn.lock); if [ -n "$status" ]; then echo $status; exit 1; fi
 
 FROM deps AS base

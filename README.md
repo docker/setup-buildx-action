@@ -8,8 +8,10 @@
 
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
-> :bulb: See also our [build-push](https://github.com/docker/build-push-action)
-> and [setup-qemu](https://github.com/docker/setup-qemu-action) actions
+> :bulb: See also:
+> * [login](https://github.com/docker/login-action) action
+> * [setup-qemu](https://github.com/docker/setup-qemu-action) action
+> * [build-push](https://github.com/docker/build-push-action) action
 
 ![Screenshot](.github/setup-buildx-action.png)
 
@@ -18,6 +20,7 @@ ___
 * [Usage](#usage)
   * [Quick start](#quick-start)
   * [With QEMU](#with-qemu)
+  * [Install by default](#install-by-default)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -87,6 +90,34 @@ jobs:
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+```
+
+### Install by default
+
+Implemented with https://github.com/docker/buildx#setting-buildx-as-default-builder-in-docker-1903
+
+```yaml
+name: ci
+
+on:
+  push:
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        uses: docker/setup-buildx-action@master
+        id: buildx
+        with:
+          install: true
+      -
+        name: Build
+        run: |
+          docker build . # will run buildx
 ```
 
 ## Customizing

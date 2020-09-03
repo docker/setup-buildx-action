@@ -3,6 +3,7 @@ import * as exec from '@actions/exec';
 import * as os from 'os';
 import * as path from 'path';
 import * as buildx from './buildx';
+import * as context from './context';
 import * as mexec from './exec';
 import * as stateHelper from './state-helper';
 
@@ -13,48 +14,40 @@ async function run(): Promise<void> {
       return;
     }
 
-    const bxVersion: string = core.getInput('version');
-    const bxDriver: string = core.getInput('driver') || 'docker-container';
-    const bxDriverOpt: string = core.getInput('driver-opt');
-    const bxBuildkitdFlags: string = core.getInput('buildkitd-flags');
-    const bxInstall: boolean = /true/i.test(core.getInput('install'));
-    const bxUse: boolean = /true/i.test(core.getInput('use'));
-
+    const inputs: context.Inputs = await context.getInputs();
     const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
 
-    if (!(await buildx.isAvailable()) || bxVersion) {
-      await buildx.install(bxVersion || 'latest', dockerConfigHome);
+    if (!(await buildx.isAvailable()) || inputs.version) {
+      await buildx.install(inputs.version || 'latest', dockerConfigHome);
     }
 
     core.info('📣 Buildx info');
     await exec.exec('docker', ['buildx', 'version']);
 
     const builderName: string =
-      bxDriver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
-
+      inputs.driver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
     core.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
-    if (bxDriver != 'docker') {
+    if (inputs.driver !== 'docker') {
       core.info('🔨 Creating a new builder instance...');
-      let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
-      if (bxDriverOpt) {
-        createArgs.push('--driver-opt', bxDriverOpt);
+      let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
+      await context.asyncForEach(inputs.driverOpts, async driverOpt => {
+        createArgs.push('--driver-opt', driverOpt);
+      });
+      if (inputs.buildkitdFlags) {
+        createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
       }
-      if (bxBuildkitdFlags) {
-        createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
-      }
-      if (bxUse) {
+      if (inputs.use) {
         createArgs.push('--use');
       }
-
       await exec.exec('docker', createArgs);
 
       core.info('🏃 Booting builder...');
       await exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
     }
 
-    if (bxInstall) {
+    if (inputs.install) {
       core.info('🤝 Setting buildx as default builder...');
       await exec.exec('docker', ['buildx', 'install']);
     }

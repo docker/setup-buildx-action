@@ -22,7 +22,7 @@ jobs:
       matrix:
         buildx-version:
           - latest
-          - v0.4.1
+          - v0.2.2
           - ""
     steps:
       -
@@ -150,7 +150,7 @@ jobs:
       matrix:
         buildx-version:
           - latest
-          - v0.4.1
+          - v0.2.2
           - ""
         qemu-platforms:
           - all

@@ -3,26 +3,34 @@ import * as docker from '../src/docker';
 import * as buildx from '../src/buildx';
 import * as path from 'path';
 import * as os from 'os';
+import * as semver from 'semver';
+import * as exec from '@actions/exec';
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+describe('getVersion', () => {
+  it('valid', async () => {
+    await exec.exec('docker', ['buildx', 'version']);
+    const version = await buildx.getVersion();
+    console.log(`version: ${version}`);
+    expect(semver.valid(version)).not.toBeNull();
+  }, 100000);
+});
 
-describe('buildx', () => {
+describe('parseVersion', () => {
+  test.each([
+    ['github.com/docker/buildx 0.4.1+azure bda4882a65349ca359216b135896bddc1d92461c', '0.4.1'],
+    ['github.com/docker/buildx v0.4.1 bda4882a65349ca359216b135896bddc1d92461c', '0.4.1'],
+    ['github.com/docker/buildx v0.4.2 fb7b670b764764dc4716df3eba07ffdae4cc47b2', '0.4.2']
+  ])('given %p', async (stdout, expected) => {
+    expect(await buildx.parseVersion(stdout)).toEqual(expected);
+  });
+});
+
+describe('platforms', () => {
   async function isDaemonRunning() {
     return await docker.isDaemonRunning();
   }
-
-  it('is available', async () => {
-    expect(await buildx.isAvailable()).toBe(true);
-  }, 100000);
-
-  it('count builders', async () => {
-    const countBuilders = await buildx.countBuilders();
-    console.log(`countBuilders: ${countBuilders}`);
-    expect(countBuilders).toBeGreaterThan(0);
-  }, 100000);
-
   (isDaemonRunning() ? it : it.skip)(
-    'platforms',
+    'valid',
     async () => {
       const platforms = buildx.platforms();
       console.log(`platforms: ${platforms}`);
@@ -31,13 +39,23 @@ describe('buildx', () => {
     },
     100000
   );
+});
 
+describe('countBuilders', () => {
+  it('valid', async () => {
+    const countBuilders = await buildx.countBuilders();
+    console.log(`countBuilders: ${countBuilders}`);
+    expect(countBuilders).toBeGreaterThan(0);
+  }, 100000);
+});
+
+describe('install', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
   it('acquires v0.2.2 version of buildx', async () => {
     const buildxBin = await buildx.install('v0.2.2', tmpDir);
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
-
   it('acquires latest version of buildx', async () => {
     const buildxBin = await buildx.install('latest', tmpDir);
     console.log(buildxBin);

@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import * as buildx from './buildx';
 import * as context from './context';
 import * as mexec from './exec';
@@ -21,8 +22,8 @@ async function run(): Promise<void> {
       await buildx.install(inputs.version || 'latest', dockerConfigHome);
     }
 
-    core.info('📣 Buildx info');
-    await exec.exec('docker', ['buildx', 'version']);
+    const buildxVersion = await buildx.getVersion();
+    core.info(`📣 Buildx version: ${buildxVersion}`);
 
     const builderName: string =
       inputs.driver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
@@ -35,7 +36,7 @@ async function run(): Promise<void> {
       await context.asyncForEach(inputs.driverOpts, async driverOpt => {
         createArgs.push('--driver-opt', driverOpt);
       });
-      if (inputs.buildkitdFlags) {
+      if (inputs.buildkitdFlags && semver.satisfies(buildxVersion, '>=0.3.0')) {
         createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
       }
       if (inputs.use) {

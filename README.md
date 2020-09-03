@@ -131,7 +131,7 @@ Following inputs can be used as `step.with` keys
 | `version`          | String  | [Buildx](https://github.com/docker/buildx) version. (e.g. `v0.3.0`, `latest`) |
 | `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx#--driver-driver) to be used (default `docker-container`) |
 | `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx#--driver-opt-options) |
-| `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon |
+| `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (default `--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host`) |
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
 

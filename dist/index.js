@@ -6528,7 +6528,8 @@ function getInputs() {
             version: core.getInput('version'),
             driver: core.getInput('driver') || 'docker-container',
             driverOpts: yield getInputList('driver-opts', true),
-            buildkitdFlags: core.getInput('buildkitd-flags'),
+            buildkitdFlags: core.getInput('buildkitd-flags') ||
+                '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
             install: /true/i.test(core.getInput('install')),
             use: /true/i.test(core.getInput('use'))
         };

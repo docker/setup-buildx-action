@@ -501,6 +501,7 @@ const exec = __importStar(__webpack_require__(514));
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const buildx = __importStar(__webpack_require__(295));
+const context = __importStar(__webpack_require__(842));
 const mexec = __importStar(__webpack_require__(757));
 const stateHelper = __importStar(__webpack_require__(647));
 function run() {
@@ -510,38 +511,33 @@ function run() {
                 core.setFailed('Only supported on linux platform');
                 return;
             }
-            const bxVersion = core.getInput('version');
-            const bxDriver = core.getInput('driver') || 'docker-container';
-            const bxDriverOpt = core.getInput('driver-opt');
-            const bxBuildkitdFlags = core.getInput('buildkitd-flags');
-            const bxInstall = /true/i.test(core.getInput('install'));
-            const bxUse = /true/i.test(core.getInput('use'));
+            const inputs = yield context.getInputs();
             const dockerConfigHome = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
-            if (!(yield buildx.isAvailable()) || bxVersion) {
-                yield buildx.install(bxVersion || 'latest', dockerConfigHome);
+            if (!(yield buildx.isAvailable()) || inputs.version) {
+                yield buildx.install(inputs.version || 'latest', dockerConfigHome);
             }
             core.info('📣 Buildx info');
             yield exec.exec('docker', ['buildx', 'version']);
-            const builderName = bxDriver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(yield buildx.countBuilders()) + 1}`;
+            const builderName = inputs.driver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(yield buildx.countBuilders()) + 1}`;
             core.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
-            if (bxDriver != 'docker') {
+            if (inputs.driver !== 'docker') {
                 core.info('🔨 Creating a new builder instance...');
-                let createArgs = ['buildx', 'create', '--name', builderName, '--driver', bxDriver];
-                if (bxDriverOpt) {
-                    createArgs.push('--driver-opt', bxDriverOpt);
+                let createArgs = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
+                yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
+                    createArgs.push('--driver-opt', driverOpt);
+                }));
+                if (inputs.buildkitdFlags) {
+                    createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
                 }
-                if (bxBuildkitdFlags) {
-                    createArgs.push('--buildkitd-flags', bxBuildkitdFlags);
-                }
-                if (bxUse) {
+                if (inputs.use) {
                     createArgs.push('--use');
                 }
                 yield exec.exec('docker', createArgs);
                 core.info('🏃 Booting builder...');
                 yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
             }
-            if (bxInstall) {
+            if (inputs.install) {
                 core.info('🤝 Setting buildx as default builder...');
                 yield exec.exec('docker', ['buildx', 'install']);
             }
@@ -1942,15 +1938,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.install = exports.platforms = exports.countBuilders = exports.isAvailable = void 0;
 const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(383));
 const util = __importStar(__webpack_require__(669));
+const context = __importStar(__webpack_require__(842));
 const exec = __importStar(__webpack_require__(757));
 const github = __importStar(__webpack_require__(928));
 const core = __importStar(__webpack_require__(186));
 const tc = __importStar(__webpack_require__(784));
-const osPlat = os.platform();
 function isAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec.exec(`docker`, ['buildx'], true).then(res => {
@@ -2010,7 +2005,7 @@ function install(inputVersion, dockerConfigHome) {
         if (!fs.existsSync(pluginsDir)) {
             fs.mkdirSync(pluginsDir, { recursive: true });
         }
-        const filename = osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+        const filename = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
         const pluginPath = path.join(pluginsDir, filename);
         core.debug(`Plugin path is ${pluginPath}`);
         fs.copyFileSync(path.join(toolPath, filename), pluginPath);
@@ -2023,10 +2018,10 @@ exports.install = install;
 function download(version) {
     return __awaiter(this, void 0, void 0, function* () {
         version = semver.clean(version) || '';
-        const platform = osPlat == 'win32' ? 'windows' : osPlat;
-        const ext = osPlat == 'win32' ? '.exe' : '';
+        const platform = context.osPlat == 'win32' ? 'windows' : context.osPlat;
+        const ext = context.osPlat == 'win32' ? '.exe' : '';
         const filename = util.format('buildx-v%s.%s-amd64%s', version, platform, ext);
-        const targetFile = osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+        const targetFile = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
         const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, filename);
         let downloadPath;
         try {
@@ -6486,6 +6481,78 @@ module.exports = minSatisfying
 /***/ (function(module) {
 
 module.exports = require("url");
+
+/***/ }),
+
+/***/ 842:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osPlat = void 0;
+const os = __importStar(__webpack_require__(87));
+const core = __importStar(__webpack_require__(186));
+exports.osPlat = os.platform();
+function getInputs() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return {
+            version: core.getInput('version'),
+            driver: core.getInput('driver') || 'docker-container',
+            driverOpts: yield getInputList('driver-opts', true),
+            buildkitdFlags: core.getInput('buildkitd-flags'),
+            install: /true/i.test(core.getInput('install')),
+            use: /true/i.test(core.getInput('use'))
+        };
+    });
+}
+exports.getInputs = getInputs;
+function getInputList(name, ignoreComma) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const items = core.getInput(name);
+        if (items == '') {
+            return [];
+        }
+        return items
+            .split(/\r?\n/)
+            .reduce((acc, line) => acc.concat(!ignoreComma ? line.split(',') : line).map(pat => pat.trim()), []);
+    });
+}
+exports.getInputList = getInputList;
+exports.asyncForEach = (array, callback) => __awaiter(void 0, void 0, void 0, function* () {
+    for (let index = 0; index < array.length; index++) {
+        yield callback(array[index], index, array);
+    }
+});
+//# sourceMappingURL=context.js.map
 
 /***/ }),
 

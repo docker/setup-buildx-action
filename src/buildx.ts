@@ -1,14 +1,12 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as util from 'util';
+import * as context from './context';
 import * as exec from './exec';
 import * as github from './github';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
-
-const osPlat: string = os.platform();
 
 export async function isAvailable(): Promise<Boolean> {
   return await exec.exec(`docker`, ['buildx'], true).then(res => {
@@ -65,7 +63,7 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
     fs.mkdirSync(pluginsDir, {recursive: true});
   }
 
-  const filename: string = osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+  const filename: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
   const pluginPath: string = path.join(pluginsDir, filename);
   core.debug(`Plugin path is ${pluginPath}`);
   fs.copyFileSync(path.join(toolPath, filename), pluginPath);
@@ -78,10 +76,10 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
 
 async function download(version: string): Promise<string> {
   version = semver.clean(version) || '';
-  const platform: string = osPlat == 'win32' ? 'windows' : osPlat;
-  const ext: string = osPlat == 'win32' ? '.exe' : '';
+  const platform: string = context.osPlat == 'win32' ? 'windows' : context.osPlat;
+  const ext: string = context.osPlat == 'win32' ? '.exe' : '';
   const filename: string = util.format('buildx-v%s.%s-amd64%s', version, platform, ext);
-  const targetFile: string = osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
+  const targetFile: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
 
   const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, filename);
   let downloadPath: string;

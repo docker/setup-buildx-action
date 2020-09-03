@@ -14,8 +14,8 @@ inputs:
     description: 'Sets the builder driver to be used'
     default: 'docker-container'
     required: false
-  driver-opt:
-    description: 'Passes additional driver-specific options. Eg. image=moby/buildkit:master'
+  driver-opts:
+    description: 'List of additional driver-specific options. Eg. image=moby/buildkit:master'
     required: false
   buildkitd-flags:
     description: 'Flags for buildkitd daemon'

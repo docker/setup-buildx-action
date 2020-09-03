@@ -107,9 +107,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver-opt:
+        driver-opts:
           - image=moby/buildkit:latest
-          - image=moby/buildkit:master
+          - |
+            image=moby/buildkit:master
+            network=host
     steps:
       -
         name: Checkout
@@ -119,7 +121,7 @@ jobs:
         uses: ./
         with:
           driver: docker-container
-          driver-opt: ${{ matrix.driver-opt }}
+          driver-opts: ${{ matrix.driver-opts }}
 
   docker-driver:
     runs-on: ubuntu-latest

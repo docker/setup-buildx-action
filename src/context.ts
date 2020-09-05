@@ -17,7 +17,9 @@ export async function getInputs(): Promise<Inputs> {
     version: core.getInput('version'),
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: await getInputList('driver-opts', true),
-    buildkitdFlags: core.getInput('buildkitd-flags'),
+    buildkitdFlags:
+      core.getInput('buildkitd-flags') ||
+      '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
     install: /true/i.test(core.getInput('install')),
     use: /true/i.test(core.getInput('use'))
   };

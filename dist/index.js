@@ -500,6 +500,7 @@ const core = __importStar(__webpack_require__(186));
 const exec = __importStar(__webpack_require__(514));
 const os = __importStar(__webpack_require__(87));
 const path = __importStar(__webpack_require__(622));
+const semver = __importStar(__webpack_require__(383));
 const buildx = __importStar(__webpack_require__(295));
 const context = __importStar(__webpack_require__(842));
 const mexec = __importStar(__webpack_require__(757));
@@ -516,8 +517,8 @@ function run() {
             if (!(yield buildx.isAvailable()) || inputs.version) {
                 yield buildx.install(inputs.version || 'latest', dockerConfigHome);
             }
-            core.info('📣 Buildx info');
-            yield exec.exec('docker', ['buildx', 'version']);
+            const buildxVersion = yield buildx.getVersion();
+            core.info(`📣 Buildx version: ${buildxVersion}`);
             const builderName = inputs.driver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(yield buildx.countBuilders()) + 1}`;
             core.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
@@ -527,7 +528,7 @@ function run() {
                 yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
                     createArgs.push('--driver-opt', driverOpt);
                 }));
-                if (inputs.buildkitdFlags) {
+                if (inputs.buildkitdFlags && semver.satisfies(buildxVersion, '>=0.3.0')) {
                     createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
                 }
                 if (inputs.use) {
@@ -1936,7 +1937,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.install = exports.platforms = exports.countBuilders = exports.isAvailable = void 0;
+exports.install = exports.platforms = exports.countBuilders = exports.isAvailable = exports.parseVersion = exports.getVersion = void 0;
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(383));
@@ -1946,6 +1947,27 @@ const exec = __importStar(__webpack_require__(757));
 const github = __importStar(__webpack_require__(928));
 const core = __importStar(__webpack_require__(186));
 const tc = __importStar(__webpack_require__(784));
+function getVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
+            if (res.stderr != '' && !res.success) {
+                throw new Error(res.stderr);
+            }
+            return parseVersion(res.stdout);
+        });
+    });
+}
+exports.getVersion = getVersion;
+function parseVersion(stdout) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const matches = /\sv?([0-9.]+)/.exec(stdout);
+        if (!matches) {
+            throw new Error(`Cannot parse Buildx version`);
+        }
+        return semver.clean(matches[1]);
+    });
+}
+exports.parseVersion = parseVersion;
 function isAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec.exec(`docker`, ['buildx'], true).then(res => {
@@ -6528,7 +6550,8 @@ function getInputs() {
             version: core.getInput('version'),
             driver: core.getInput('driver') || 'docker-container',
             driverOpts: yield getInputList('driver-opts', true),
-            buildkitdFlags: core.getInput('buildkitd-flags'),
+            buildkitdFlags: core.getInput('buildkitd-flags') ||
+                '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
             install: /true/i.test(core.getInput('install')),
             use: /true/i.test(core.getInput('use'))
         };

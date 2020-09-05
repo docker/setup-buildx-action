@@ -8,6 +8,23 @@ import * as github from './github';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
+export async function getVersion(): Promise<string> {
+  return await exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
+    if (res.stderr != '' && !res.success) {
+      throw new Error(res.stderr);
+    }
+    return parseVersion(res.stdout);
+  });
+}
+
+export async function parseVersion(stdout: string): Promise<string> {
+  const matches = /\sv?([0-9.]+)/.exec(stdout);
+  if (!matches) {
+    throw new Error(`Cannot parse Buildx version`);
+  }
+  return semver.clean(matches[1]);
+}
+
 export async function isAvailable(): Promise<Boolean> {
   return await exec.exec(`docker`, ['buildx'], true).then(res => {
     if (res.stderr != '' && !res.success) {

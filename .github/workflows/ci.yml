@@ -143,6 +143,39 @@ jobs:
           docker buildx inspect | grep Driver | grep docker
           docker buildx inspect | grep Status | grep running
 
+  context:
+    runs-on: ubuntu-latest
+    services:
+      dind:
+        image: docker:dind
+        options: >-
+          --privileged
+          --health-cmd "docker info"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          DOCKER_TLS_CERTDIR: ""
+        ports:
+          - 2375:2375
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2.3.2
+      -
+        name: Create context
+        run: |
+          docker context create mycontext --docker host=tcp://127.0.0.1:2375
+      -
+        name: Check context
+        run: |
+          docker --context mycontext info
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          context: mycontext
+
   with-qemu:
     runs-on: ubuntu-latest
     strategy:

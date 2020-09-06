@@ -42,6 +42,9 @@ async function run(): Promise<void> {
       if (inputs.use) {
         createArgs.push('--use');
       }
+      if (inputs.context) {
+        createArgs.push(inputs.context);
+      }
       await exec.exec('docker', createArgs);
 
       core.info('🏃 Booting builder...');

@@ -128,12 +128,13 @@ Following inputs can be used as `step.with` keys
 
 | Name               | Type    | Description                       |
 |--------------------|---------|-----------------------------------|
-| `version`          | String  | [Buildx](https://github.com/docker/buildx) version. (e.g. `v0.3.0`, `latest`) |
+| `version`          | String  | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`) |
 | `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx#--driver-driver) to be used (default `docker-container`) |
-| `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx#--driver-opt-options) |
+| `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx#--driver-opt-options) (eg. `image=moby/buildkit:master`) |
 | `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
+| `context`          | String  | [Name of a context](https://github.com/docker/buildx#buildx-create-options-contextendpoint) from `docker context ls` or an endpoint as the address for docker socket (eg. `DOCKER_HOST` value) |
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

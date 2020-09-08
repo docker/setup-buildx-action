@@ -30,7 +30,7 @@ inputs:
     default: 'true'
     required: false
   endpoint:
-    description: 'Address for docker socket or context from `docker context ls (eg. DOCKER_HOST value)'
+    description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
 
 outputs:

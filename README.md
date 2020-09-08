@@ -134,7 +134,7 @@ Following inputs can be used as `step.with` keys
 | `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
-| `endpoint`         | String  | [Address for docker socket](https://github.com/docker/buildx#buildx-create-options-contextendpoint) or context from `docker context ls` (eg. `DOCKER_HOST` value) |
+| `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx#buildx-create-options-contextendpoint) or context from `docker context ls` |
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

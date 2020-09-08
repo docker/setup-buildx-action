@@ -2042,12 +2042,8 @@ function install(inputVersion, dockerConfigHome) {
 exports.install = install;
 function download(version) {
     return __awaiter(this, void 0, void 0, function* () {
-        version = semver.clean(version) || '';
-        const platform = context.osPlat == 'win32' ? 'windows' : context.osPlat;
-        const ext = context.osPlat == 'win32' ? '.exe' : '';
-        const filename = util.format('buildx-v%s.%s-amd64%s', version, platform, ext);
         const targetFile = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-        const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, filename);
+        const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, yield filename(version));
         let downloadPath;
         try {
             core.info(`⬇️ Downloading ${downloadUrl}...`);
@@ -2058,6 +2054,33 @@ function download(version) {
             throw error;
         }
         return yield tc.cacheFile(downloadPath, targetFile, 'buildx', version);
+    });
+}
+function filename(version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let arch;
+        switch (context.osArch) {
+            case 'x64': {
+                arch = 'amd64';
+                break;
+            }
+            case 'ppc64': {
+                arch = 'ppc64le';
+                break;
+            }
+            case 'arm': {
+                const arm_version = process.config.variables.arm_version;
+                arch = arm_version ? 'arm-v' + arm_version : 'arm';
+                break;
+            }
+            default: {
+                arch = context.osArch;
+                break;
+            }
+        }
+        const platform = context.osPlat == 'win32' ? 'windows' : context.osPlat;
+        const ext = context.osPlat == 'win32' ? '.exe' : '';
+        return util.format('buildx-v%s.%s-%s%s', version, platform, arch, ext);
     });
 }
 //# sourceMappingURL=buildx.js.map
@@ -6543,10 +6566,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osPlat = void 0;
+exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osArch = exports.osPlat = void 0;
 const os = __importStar(__webpack_require__(87));
 const core = __importStar(__webpack_require__(186));
 exports.osPlat = os.platform();
+exports.osArch = os.arch();
 function getInputs() {
     return __awaiter(this, void 0, void 0, function* () {
         return {

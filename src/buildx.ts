@@ -92,13 +92,12 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
 }
 
 async function download(version: string): Promise<string> {
-  version = semver.clean(version) || '';
-  const platform: string = context.osPlat == 'win32' ? 'windows' : context.osPlat;
-  const ext: string = context.osPlat == 'win32' ? '.exe' : '';
-  const filename: string = util.format('buildx-v%s.%s-amd64%s', version, platform, ext);
   const targetFile: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-
-  const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, filename);
+  const downloadUrl = util.format(
+    'https://github.com/docker/buildx/releases/download/v%s/%s',
+    version,
+    await filename(version)
+  );
   let downloadPath: string;
 
   try {
@@ -110,4 +109,30 @@ async function download(version: string): Promise<string> {
   }
 
   return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
+}
+
+async function filename(version: string): Promise<string> {
+  let arch: string;
+  switch (context.osArch) {
+    case 'x64': {
+      arch = 'amd64';
+      break;
+    }
+    case 'ppc64': {
+      arch = 'ppc64le';
+      break;
+    }
+    case 'arm': {
+      const arm_version = (process.config.variables as any).arm_version;
+      arch = arm_version ? 'arm-v' + arm_version : 'arm';
+      break;
+    }
+    default: {
+      arch = context.osArch;
+      break;
+    }
+  }
+  const platform: string = context.osPlat == 'win32' ? 'windows' : context.osPlat;
+  const ext: string = context.osPlat == 'win32' ? '.exe' : '';
+  return util.format('buildx-v%s.%s-%s%s', version, platform, arch, ext);
 }

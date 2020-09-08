@@ -8,14 +8,14 @@ branding:
 
 inputs:
   version:
-    description: 'Buildx version. e.g. v0.3.0'
+    description: 'Buildx version. (eg. v0.3.0)'
     required: false
   driver:
     description: 'Sets the builder driver to be used'
     default: 'docker-container'
     required: false
   driver-opts:
-    description: 'List of additional driver-specific options. Eg. image=moby/buildkit:master'
+    description: 'List of additional driver-specific options. (eg. image=moby/buildkit:master)'
     required: false
   buildkitd-flags:
     description: 'Flags for buildkitd daemon'
@@ -28,6 +28,9 @@ inputs:
   use:
     description: 'Switch to this builder instance'
     default: 'true'
+    required: false
+  endpoint:
+    description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
 
 outputs:

@@ -534,6 +534,9 @@ function run() {
                 if (inputs.use) {
                     createArgs.push('--use');
                 }
+                if (inputs.endpoint) {
+                    createArgs.push(inputs.endpoint);
+                }
                 yield exec.exec('docker', createArgs);
                 core.info('🏃 Booting builder...');
                 yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
@@ -6577,7 +6580,8 @@ function getInputs() {
             buildkitdFlags: core.getInput('buildkitd-flags') ||
                 '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
             install: /true/i.test(core.getInput('install')),
-            use: /true/i.test(core.getInput('use'))
+            use: /true/i.test(core.getInput('use')),
+            endpoint: core.getInput('endpoint')
         };
     });
 }

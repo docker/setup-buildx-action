@@ -42,8 +42,8 @@ async function run(): Promise<void> {
       if (inputs.use) {
         createArgs.push('--use');
       }
-      if (inputs.context) {
-        createArgs.push(inputs.context);
+      if (inputs.endpoint) {
+        createArgs.push(inputs.endpoint);
       }
       await exec.exec('docker', createArgs);
 

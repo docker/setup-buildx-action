@@ -143,7 +143,7 @@ jobs:
           docker buildx inspect | grep Driver | grep docker
           docker buildx inspect | grep Status | grep running
 
-  context:
+  endpoint:
     runs-on: ubuntu-latest
     services:
       dind:
@@ -174,7 +174,7 @@ jobs:
         name: Set up Docker Buildx
         uses: ./
         with:
-          context: mycontext
+          endpoint: mycontext
 
   with-qemu:
     runs-on: ubuntu-latest

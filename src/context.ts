@@ -11,7 +11,7 @@ export interface Inputs {
   buildkitdFlags: string;
   install: boolean;
   use: boolean;
-  context: string;
+  endpoint: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -24,7 +24,7 @@ export async function getInputs(): Promise<Inputs> {
       '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
     install: /true/i.test(core.getInput('install')),
     use: /true/i.test(core.getInput('use')),
-    context: core.getInput('context')
+    endpoint: core.getInput('endpoint')
   };
 }
 

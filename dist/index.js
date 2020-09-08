@@ -534,8 +534,8 @@ function run() {
                 if (inputs.use) {
                     createArgs.push('--use');
                 }
-                if (inputs.context) {
-                    createArgs.push(inputs.context);
+                if (inputs.endpoint) {
+                    createArgs.push(inputs.endpoint);
                 }
                 yield exec.exec('docker', createArgs);
                 core.info('🏃 Booting builder...');
@@ -6581,7 +6581,7 @@ function getInputs() {
                 '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
             install: /true/i.test(core.getInput('install')),
             use: /true/i.test(core.getInput('use')),
-            context: core.getInput('context')
+            endpoint: core.getInput('endpoint')
         };
     });
 }

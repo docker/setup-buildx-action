@@ -29,8 +29,8 @@ inputs:
     description: 'Switch to this builder instance'
     default: 'true'
     required: false
-  context:
-    description: 'Name of a context from docker context ls or an endpoint as the address for docker socket (eg. DOCKER_HOST value)'
+  endpoint:
+    description: 'Address for docker socket or context from `docker context ls (eg. DOCKER_HOST value)'
     required: false
 
 outputs:

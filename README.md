@@ -48,7 +48,7 @@ jobs:
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@master
+        uses: docker/setup-buildx-action@v1
         with:
           version: latest
       -
@@ -78,13 +78,13 @@ jobs:
         uses: actions/checkout@v2
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@master
+        uses: docker/setup-qemu-action@v1
         with:
           platforms: all
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@master
+        uses: docker/setup-buildx-action@v1
         with:
           version: latest
       -
@@ -110,7 +110,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        uses: docker/setup-buildx-action@master
+        uses: docker/setup-buildx-action@v1
         id: buildx
         with:
           install: true

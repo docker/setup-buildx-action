@@ -33,11 +33,21 @@ async function run(): Promise<void> {
     if (inputs.driver !== 'docker') {
       core.info('🔨 Creating a new builder instance...');
       let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
-      await context.asyncForEach(inputs.driverOpts, async driverOpt => {
-        createArgs.push('--driver-opt', driverOpt);
-      });
-      if (inputs.buildkitdFlags && semver.satisfies(buildxVersion, '>=0.3.0')) {
-        createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
+      if (semver.satisfies(buildxVersion, '>=0.3.0')) {
+        let hasImageDriverOpt: boolean = false;
+        await context.asyncForEach(inputs.driverOpts, async driverOpt => {
+          if (driverOpt.startsWith('image=')) {
+            hasImageDriverOpt = true;
+          }
+          createArgs.push('--driver-opt', driverOpt);
+        });
+        if (!hasImageDriverOpt) {
+          //FIXME: Temporary fix (docker/build-push-action#154, docker/build-push-action#162)
+          createArgs.push('--driver-opt', 'image=moby/buildkit:v0.8-beta');
+        }
+        if (inputs.buildkitdFlags) {
+          createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
+        }
       }
       if (inputs.use) {
         createArgs.push('--use');

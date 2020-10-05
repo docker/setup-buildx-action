@@ -525,11 +525,21 @@ function run() {
             if (inputs.driver !== 'docker') {
                 core.info('🔨 Creating a new builder instance...');
                 let createArgs = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
-                yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
-                    createArgs.push('--driver-opt', driverOpt);
-                }));
-                if (inputs.buildkitdFlags && semver.satisfies(buildxVersion, '>=0.3.0')) {
-                    createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
+                if (semver.satisfies(buildxVersion, '>=0.3.0')) {
+                    let hasImageDriverOpt = false;
+                    yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
+                        if (driverOpt.startsWith('image=')) {
+                            hasImageDriverOpt = true;
+                        }
+                        createArgs.push('--driver-opt', driverOpt);
+                    }));
+                    if (!hasImageDriverOpt) {
+                        //FIXME: Temporary fix (docker/build-push-action#154, docker/build-push-action#162)
+                        createArgs.push('--driver-opt', 'image=moby/buildkit:v0.8-beta');
+                    }
+                    if (inputs.buildkitdFlags) {
+                        createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
+                    }
                 }
                 if (inputs.use) {
                     createArgs.push('--use');

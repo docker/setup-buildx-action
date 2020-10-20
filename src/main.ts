@@ -19,7 +19,9 @@ async function run(): Promise<void> {
     const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
 
     if (!(await buildx.isAvailable()) || inputs.version) {
+      core.startGroup(`👉 Installing Buildx`);
       await buildx.install(inputs.version || 'latest', dockerConfigHome);
+      core.endGroup();
     }
 
     const buildxVersion = await buildx.getVersion();
@@ -31,7 +33,7 @@ async function run(): Promise<void> {
     stateHelper.setBuilderName(builderName);
 
     if (inputs.driver !== 'docker') {
-      core.info('🔨 Creating a new builder instance...');
+      core.startGroup(`🔨 Creating a new builder instance`);
       let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
       if (semver.satisfies(buildxVersion, '>=0.3.0')) {
         let hasImageDriverOpt: boolean = false;
@@ -56,20 +58,24 @@ async function run(): Promise<void> {
         createArgs.push(inputs.endpoint);
       }
       await exec.exec('docker', createArgs);
+      core.endGroup();
 
-      core.info('🏃 Booting builder...');
+      core.startGroup(`🏃 Booting builder`);
       await exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+      core.endGroup();
     }
 
     if (inputs.install) {
-      core.info('🤝 Setting buildx as default builder...');
+      core.startGroup(`🤝 Setting buildx as default builder`);
       await exec.exec('docker', ['buildx', 'install']);
+      core.endGroup();
     }
 
-    core.info('🛒 Extracting available platforms...');
+    core.startGroup(`🛒 Extracting available platforms`);
     const platforms = await buildx.platforms();
     core.info(`${platforms}`);
     core.setOutput('platforms', platforms);
+    core.endGroup();
   } catch (error) {
     core.setFailed(error.message);
   }

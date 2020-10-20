@@ -515,7 +515,9 @@ function run() {
             const inputs = yield context.getInputs();
             const dockerConfigHome = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
             if (!(yield buildx.isAvailable()) || inputs.version) {
+                core.startGroup(`👉 Installing Buildx`);
                 yield buildx.install(inputs.version || 'latest', dockerConfigHome);
+                core.endGroup();
             }
             const buildxVersion = yield buildx.getVersion();
             core.info(`📣 Buildx version: ${buildxVersion}`);
@@ -523,7 +525,7 @@ function run() {
             core.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
             if (inputs.driver !== 'docker') {
-                core.info('🔨 Creating a new builder instance...');
+                core.startGroup(`🔨 Creating a new builder instance`);
                 let createArgs = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
                 if (semver.satisfies(buildxVersion, '>=0.3.0')) {
                     let hasImageDriverOpt = false;
@@ -548,17 +550,21 @@ function run() {
                     createArgs.push(inputs.endpoint);
                 }
                 yield exec.exec('docker', createArgs);
-                core.info('🏃 Booting builder...');
+                core.endGroup();
+                core.startGroup(`🏃 Booting builder`);
                 yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+                core.endGroup();
             }
             if (inputs.install) {
-                core.info('🤝 Setting buildx as default builder...');
+                core.startGroup(`🤝 Setting buildx as default builder`);
                 yield exec.exec('docker', ['buildx', 'install']);
+                core.endGroup();
             }
-            core.info('🛒 Extracting available platforms...');
+            core.startGroup(`🛒 Extracting available platforms`);
             const platforms = yield buildx.platforms();
             core.info(`${platforms}`);
             core.setOutput('platforms', platforms);
+            core.endGroup();
         }
         catch (error) {
             core.setFailed(error.message);

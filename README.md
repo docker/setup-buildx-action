@@ -81,8 +81,6 @@ jobs:
         name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-        with:
-          version: latest
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}

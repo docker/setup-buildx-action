@@ -34,15 +34,6 @@ export async function isAvailable(): Promise<Boolean> {
   });
 }
 
-export async function countBuilders(): Promise<number> {
-  return await exec.exec(`docker`, ['buildx', 'ls'], true).then(res => {
-    if (res.stderr != '' && !res.success) {
-      throw new Error(`Cannot list builders: ${res.stderr}`);
-    }
-    return (res.stdout.trim().split(`\n`).length - 1) / 2;
-  });
-}
-
 export async function platforms(): Promise<String | undefined> {
   return await exec.exec(`docker`, ['buildx', 'inspect'], true).then(res => {
     if (res.stderr != '' && !res.success) {

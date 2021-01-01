@@ -27,8 +27,7 @@ async function run(): Promise<void> {
     const buildxVersion = await buildx.getVersion();
     core.info(`📣 Buildx version: ${buildxVersion}`);
 
-    const builderName: string =
-      inputs.driver == 'docker' ? 'default' : `builder-${process.env.GITHUB_JOB}-${(await buildx.countBuilders()) + 1}`;
+    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${require('uuid').v4()}`;
     core.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 

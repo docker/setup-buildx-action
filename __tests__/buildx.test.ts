@@ -41,14 +41,6 @@ describe('platforms', () => {
   );
 });
 
-describe('countBuilders', () => {
-  it('valid', async () => {
-    const countBuilders = await buildx.countBuilders();
-    console.log(`countBuilders: ${countBuilders}`);
-    expect(countBuilders).toBeGreaterThan(0);
-  }, 100000);
-});
-
 describe('install', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
   it('acquires v0.2.2 version of buildx', async () => {

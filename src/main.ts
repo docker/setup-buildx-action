@@ -8,6 +8,9 @@ import * as context from './context';
 import * as mexec from './exec';
 import * as stateHelper from './state-helper';
 
+const buildkitStepLogMaxSize = 1024 * 8192;
+const buildkitStepLogMaxSpeed = -1;
+
 async function run(): Promise<void> {
   try {
     if (os.platform() !== 'linux') {
@@ -38,6 +41,8 @@ async function run(): Promise<void> {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
           createArgs.push('--driver-opt', driverOpt);
         });
+        createArgs.push('--driver-opt', 'env.BUILDKIT_STEP_LOG_MAX_SIZE=' + buildkitStepLogMaxSize);
+        createArgs.push('--driver-opt', 'env.BUILDKIT_STEP_LOG_MAX_SPEED=' + buildkitStepLogMaxSpeed);
         if (inputs.buildkitdFlags) {
           createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
         }

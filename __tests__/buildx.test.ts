@@ -43,8 +43,8 @@ describe('platforms', () => {
 
 describe('install', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
-  it('acquires v0.2.2 version of buildx', async () => {
-    const buildxBin = await buildx.install('v0.2.2', tmpDir);
+  it('acquires v0.4.1 version of buildx', async () => {
+    const buildxBin = await buildx.install('v0.4.1', tmpDir);
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);

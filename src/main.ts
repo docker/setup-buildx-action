@@ -52,7 +52,11 @@ async function run(): Promise<void> {
       core.endGroup();
 
       core.startGroup(`🏃 Booting builder`);
-      await exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+      let bootstrapArgs: Array<string> = ['buildx', 'inspect', '--bootstrap'];
+      if (semver.satisfies(buildxVersion, '>=0.4.0')) {
+        bootstrapArgs.push('--builder', builderName);
+      }
+      await exec.exec('docker', bootstrapArgs);
       core.endGroup();
     }
 

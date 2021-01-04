@@ -557,7 +557,11 @@ function run() {
                 yield exec.exec('docker', createArgs);
                 core.endGroup();
                 core.startGroup(`🏃 Booting builder`);
-                yield exec.exec('docker', ['buildx', 'inspect', '--bootstrap']);
+                let bootstrapArgs = ['buildx', 'inspect', '--bootstrap'];
+                if (semver.satisfies(buildxVersion, '>=0.4.0')) {
+                    bootstrapArgs.push('--builder', builderName);
+                }
+                yield exec.exec('docker', bootstrapArgs);
                 core.endGroup();
             }
             if (inputs.install) {

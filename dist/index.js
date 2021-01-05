@@ -518,8 +518,6 @@ const buildx = __importStar(__webpack_require__(295));
 const context = __importStar(__webpack_require__(842));
 const mexec = __importStar(__webpack_require__(757));
 const stateHelper = __importStar(__webpack_require__(647));
-const buildkitStepLogMaxSize = 1024 * 8192;
-const buildkitStepLogMaxSpeed = -1;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -546,8 +544,6 @@ function run() {
                     yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
                         createArgs.push('--driver-opt', driverOpt);
                     }));
-                    createArgs.push('--driver-opt', 'env.BUILDKIT_STEP_LOG_MAX_SIZE=' + buildkitStepLogMaxSize);
-                    createArgs.push('--driver-opt', 'env.BUILDKIT_STEP_LOG_MAX_SPEED=' + buildkitStepLogMaxSpeed);
                     if (inputs.buildkitdFlags) {
                         createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
                     }

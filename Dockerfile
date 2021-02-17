@@ -1,4 +1,4 @@
-#syntax=docker/dockerfile:1.1-experimental
+#syntax=docker/dockerfile:1.2
 
 FROM node:14 AS deps
 WORKDIR /src

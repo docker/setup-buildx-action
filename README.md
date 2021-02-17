@@ -8,6 +8,11 @@
 
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
+This action will create and boot a builder that can be used in the following steps of your workflow if you're using
+[buildx](https://github.com/docker/buildx). By default, the `docker-container` [builder driver](https://github.com/docker/buildx#--driver-driver)
+will be used to be able to build multi-platform images and export cache thanks to the [BuildKit](https://github.com/moby/buildkit)
+container.
+
 > :bulb: See also:
 > * [login](https://github.com/docker/login-action) action
 > * [setup-qemu](https://github.com/docker/setup-qemu-action) action

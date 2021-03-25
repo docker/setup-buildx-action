@@ -14,10 +14,10 @@
   dependencies:
     "@actions/io" "^1.0.1"
 
-"@actions/http-client@^1.0.8", "@actions/http-client@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@actions/http-client/-/http-client-1.0.9.tgz#af1947d020043dbc6a3b4c5918892095c30ffb52"
-  integrity sha512-0O4SsJ7q+MK0ycvXPl2e6bMXV7dxAXOGjrXS1eTF9s2S401Tp6c/P3c3Joz04QefC1J6Gt942Wl2jbm3f4mLcg==
+"@actions/http-client@^1.0.10", "@actions/http-client@^1.0.8":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@actions/http-client/-/http-client-1.0.10.tgz#df57d64c437b412a1933741b697069d4349473fd"
+  integrity sha512-nU0gAkR0eHPLg/3lU/0+pIZIw7lkILsP8jDBRmISJ5r5g4fmtD4O9oa3BuW843vLwKlw8XCnqT7F98XEiqsFBA==
   dependencies:
     tunnel "0.0.6"
 

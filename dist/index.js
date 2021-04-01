@@ -528,17 +528,17 @@ function run() {
             const inputs = yield context.getInputs();
             const dockerConfigHome = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
             if (!(yield buildx.isAvailable()) || inputs.version) {
-                core.startGroup(`👉 Installing Buildx`);
+                core.startGroup(`Installing buildx`);
                 yield buildx.install(inputs.version || 'latest', dockerConfigHome);
                 core.endGroup();
             }
             const buildxVersion = yield buildx.getVersion();
-            core.info(`📣 Buildx version: ${buildxVersion}`);
+            core.info(`Using buildx ${buildxVersion}`);
             const builderName = inputs.driver == 'docker' ? 'default' : `builder-${__webpack_require__(840).v4()}`;
             core.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
             if (inputs.driver !== 'docker') {
-                core.startGroup(`🔨 Creating a new builder instance`);
+                core.startGroup(`Creating a new builder instance`);
                 let createArgs = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
                 if (semver.satisfies(buildxVersion, '>=0.3.0')) {
                     yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
@@ -556,7 +556,7 @@ function run() {
                 }
                 yield exec.exec('docker', createArgs);
                 core.endGroup();
-                core.startGroup(`🏃 Booting builder`);
+                core.startGroup(`Booting builder`);
                 let bootstrapArgs = ['buildx', 'inspect', '--bootstrap'];
                 if (semver.satisfies(buildxVersion, '>=0.4.0')) {
                     bootstrapArgs.push('--builder', builderName);
@@ -565,11 +565,11 @@ function run() {
                 core.endGroup();
             }
             if (inputs.install) {
-                core.startGroup(`🤝 Setting buildx as default builder`);
+                core.startGroup(`Setting buildx as default builder`);
                 yield exec.exec('docker', ['buildx', 'install']);
                 core.endGroup();
             }
-            core.startGroup(`🛒 Extracting available platforms`);
+            core.startGroup(`Extracting available platforms`);
             const platforms = yield buildx.platforms();
             core.info(`${platforms}`);
             core.setOutput('platforms', platforms);
@@ -2185,7 +2185,7 @@ function install(inputVersion, dockerConfigHome) {
         if (!release) {
             throw new Error(`Cannot find buildx ${inputVersion} release`);
         }
-        core.debug(`Release found: ${release.tag_name}`);
+        core.debug(`Release ${release.tag_name} found`);
         const version = release.tag_name.replace(/^v+|v+$/g, '');
         let toolPath;
         toolPath = tc.find('buildx', version);
@@ -2205,7 +2205,7 @@ function install(inputVersion, dockerConfigHome) {
         const pluginPath = path.join(pluginsDir, filename);
         core.debug(`Plugin path is ${pluginPath}`);
         fs.copyFileSync(path.join(toolPath, filename), pluginPath);
-        core.info('🔨 Fixing perms...');
+        core.info('Fixing perms');
         fs.chmodSync(pluginPath, '0755');
         return pluginPath;
     });
@@ -2217,7 +2217,7 @@ function download(version) {
         const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, yield filename(version));
         let downloadPath;
         try {
-            core.info(`⬇️ Downloading ${downloadUrl}...`);
+            core.info(`Downloading ${downloadUrl}`);
             downloadPath = yield tc.downloadTool(downloadUrl);
             core.debug(`Downloaded to ${downloadPath}`);
         }

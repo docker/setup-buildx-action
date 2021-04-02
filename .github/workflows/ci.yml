@@ -1,18 +1,18 @@
 name: ci
 
 on:
+  schedule:
+    - cron: '0 10 * * *' # everyday at 10am
   push:
     branches:
-      - master
-      - releases/v*
-    paths-ignore:
-      - "**.md"
+      - 'master'
+      - 'releases/v*'
+    tags:
+      - 'v*'
   pull_request:
     branches:
-      - master
-      - releases/v*
-    paths-ignore:
-      - "**.md"
+      - 'master'
+      - 'releases/v*'
 
 jobs:
   main:

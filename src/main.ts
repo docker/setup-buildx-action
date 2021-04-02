@@ -19,20 +19,20 @@ async function run(): Promise<void> {
     const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
 
     if (!(await buildx.isAvailable()) || inputs.version) {
-      core.startGroup(`👉 Installing Buildx`);
+      core.startGroup(`Installing buildx`);
       await buildx.install(inputs.version || 'latest', dockerConfigHome);
       core.endGroup();
     }
 
     const buildxVersion = await buildx.getVersion();
-    core.info(`📣 Buildx version: ${buildxVersion}`);
+    core.info(`Using buildx ${buildxVersion}`);
 
     const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${require('uuid').v4()}`;
     core.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
     if (inputs.driver !== 'docker') {
-      core.startGroup(`🔨 Creating a new builder instance`);
+      core.startGroup(`Creating a new builder instance`);
       let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
       if (semver.satisfies(buildxVersion, '>=0.3.0')) {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
@@ -51,7 +51,7 @@ async function run(): Promise<void> {
       await exec.exec('docker', createArgs);
       core.endGroup();
 
-      core.startGroup(`🏃 Booting builder`);
+      core.startGroup(`Booting builder`);
       let bootstrapArgs: Array<string> = ['buildx', 'inspect', '--bootstrap'];
       if (semver.satisfies(buildxVersion, '>=0.4.0')) {
         bootstrapArgs.push('--builder', builderName);
@@ -61,12 +61,12 @@ async function run(): Promise<void> {
     }
 
     if (inputs.install) {
-      core.startGroup(`🤝 Setting buildx as default builder`);
+      core.startGroup(`Setting buildx as default builder`);
       await exec.exec('docker', ['buildx', 'install']);
       core.endGroup();
     }
 
-    core.startGroup(`🛒 Extracting available platforms`);
+    core.startGroup(`Extracting available platforms`);
     const platforms = await buildx.platforms();
     core.info(`${platforms}`);
     core.setOutput('platforms', platforms);

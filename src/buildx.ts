@@ -52,7 +52,7 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
   if (!release) {
     throw new Error(`Cannot find buildx ${inputVersion} release`);
   }
-  core.debug(`Release found: ${release.tag_name}`);
+  core.debug(`Release ${release.tag_name} found`);
   const version = release.tag_name.replace(/^v+|v+$/g, '');
 
   let toolPath: string;
@@ -76,7 +76,7 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
   core.debug(`Plugin path is ${pluginPath}`);
   fs.copyFileSync(path.join(toolPath, filename), pluginPath);
 
-  core.info('🔨 Fixing perms...');
+  core.info('Fixing perms');
   fs.chmodSync(pluginPath, '0755');
 
   return pluginPath;
@@ -92,7 +92,7 @@ async function download(version: string): Promise<string> {
   let downloadPath: string;
 
   try {
-    core.info(`⬇️ Downloading ${downloadUrl}...`);
+    core.info(`Downloading ${downloadUrl}`);
     downloadPath = await tc.downloadTool(downloadUrl);
     core.debug(`Downloaded to ${downloadPath}`);
   } catch (error) {

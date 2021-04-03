@@ -9,14 +9,9 @@
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
 This action will create and boot a builder that can be used in the following steps of your workflow if you're using
-[buildx](https://github.com/docker/buildx). By default, the `docker-container` [builder driver](https://github.com/docker/buildx#--driver-driver)
+[buildx](https://github.com/docker/buildx). By default, the `docker-container` [builder driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver)
 will be used to be able to build multi-platform images and export cache thanks to the [BuildKit](https://github.com/moby/buildkit)
 container.
-
-> :bulb: See also:
-> * [login](https://github.com/docker/login-action) action
-> * [setup-qemu](https://github.com/docker/setup-qemu-action) action
-> * [build-push](https://github.com/docker/build-push-action) action
 
 ![Screenshot](.github/setup-buildx-action.png)
 
@@ -128,12 +123,12 @@ Following inputs can be used as `step.with` keys
 | Name               | Type    | Description                       |
 |--------------------|---------|-----------------------------------|
 | `version`          | String  | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`) |
-| `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx#--driver-driver) to be used (default `docker-container`) |
-| `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx#--driver-opt-options) (eg. `image=moby/buildkit:master`) |
+| `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver) to be used (default `docker-container`) |
+| `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver-opt) (eg. `image=moby/buildkit:master`) |
 | `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
-| `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx#buildx-create-options-contextendpoint) or context from `docker context ls` |
+| `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

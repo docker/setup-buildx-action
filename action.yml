@@ -32,6 +32,9 @@ inputs:
   endpoint:
     description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
+  config:
+    description: 'Optional config file path'
+    required: false
 
 outputs:
   name:

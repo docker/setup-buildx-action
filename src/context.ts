@@ -12,6 +12,7 @@ export interface Inputs {
   install: boolean;
   use: boolean;
   endpoint: string;
+  config: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -24,7 +25,8 @@ export async function getInputs(): Promise<Inputs> {
       '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
     install: /true/i.test(core.getInput('install')),
     use: /true/i.test(core.getInput('use')),
-    endpoint: core.getInput('endpoint')
+    endpoint: core.getInput('endpoint'),
+    config: core.getInput('config')
   };
 }
 

@@ -129,6 +129,7 @@ Following inputs can be used as `step.with` keys
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
 | `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
+| `config`           | String  | [Optional config file path](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

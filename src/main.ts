@@ -48,6 +48,9 @@ async function run(): Promise<void> {
       if (inputs.endpoint) {
         createArgs.push(inputs.endpoint);
       }
+      if (inputs.config) {
+        createArgs.push('--config', inputs.config);
+      }
       await exec.exec('docker', createArgs);
       core.endGroup();
 

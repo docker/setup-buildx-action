@@ -28,7 +28,7 @@ async function run(): Promise<void> {
     core.info(`Using buildx ${buildxVersion}`);
 
     const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${require('uuid').v4()}`;
-    core.setOutput('name', builderName);
+    context.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
     if (inputs.driver !== 'docker') {
@@ -69,10 +69,14 @@ async function run(): Promise<void> {
       core.endGroup();
     }
 
-    core.startGroup(`Extracting available platforms`);
-    const platforms = await buildx.platforms();
-    core.info(`${platforms}`);
-    core.setOutput('platforms', platforms);
+    core.startGroup(`Inspect builder`);
+    const builder = await buildx.inspect(builderName);
+    core.info(JSON.stringify(builder, undefined, 2));
+    context.setOutput('driver', builder.driver);
+    context.setOutput('endpoint', builder.node_endpoint);
+    context.setOutput('status', builder.node_status);
+    context.setOutput('flags', builder.node_flags);
+    context.setOutput('platforms', builder.node_platforms);
     core.endGroup();
   } catch (error) {
     core.setFailed(error.message);

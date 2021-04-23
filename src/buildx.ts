@@ -8,6 +8,16 @@ import * as github from './github';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
+export type Builder = {
+  name?: string;
+  driver?: string;
+  node_name?: string;
+  node_endpoint?: string;
+  node_status?: string;
+  node_flags?: string;
+  node_platforms?: string;
+};
+
 export async function getVersion(): Promise<string> {
   return await exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
     if (res.stderr != '' && !res.success) {
@@ -34,16 +44,50 @@ export async function isAvailable(): Promise<Boolean> {
   });
 }
 
-export async function platforms(): Promise<String | undefined> {
-  return await exec.exec(`docker`, ['buildx', 'inspect'], true).then(res => {
+export async function inspect(name: string): Promise<Builder> {
+  return await exec.exec(`docker`, ['buildx', 'inspect', name], true).then(res => {
     if (res.stderr != '' && !res.success) {
       throw new Error(res.stderr);
     }
-    for (const line of res.stdout.trim().split(`\n`)) {
-      if (line.startsWith('Platforms')) {
-        return line.replace('Platforms: ', '').replace(/\s/g, '').trim();
+    const builder: Builder = {};
+    itlines: for (const line of res.stdout.trim().split(`\n`)) {
+      const [key, ...rest] = line.split(':');
+      const value = rest.map(v => v.trim()).join(':');
+      if (key.length == 0 || value.length == 0) {
+        continue;
+      }
+      switch (key) {
+        case 'Name': {
+          if (builder.name == undefined) {
+            builder.name = value;
+          } else {
+            builder.node_name = value;
+          }
+          break;
+        }
+        case 'Driver': {
+          builder.driver = value;
+          break;
+        }
+        case 'Endpoint': {
+          builder.node_endpoint = value;
+          break;
+        }
+        case 'Status': {
+          builder.node_status = value;
+          break;
+        }
+        case 'Flags': {
+          builder.node_flags = value;
+          break;
+        }
+        case 'Platforms': {
+          builder.node_platforms = value.replace(/\s/g, '');
+          break itlines;
+        }
       }
     }
+    return builder;
   });
 }
 

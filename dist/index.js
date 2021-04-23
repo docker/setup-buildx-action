@@ -535,7 +535,7 @@ function run() {
             const buildxVersion = yield buildx.getVersion();
             core.info(`Using buildx ${buildxVersion}`);
             const builderName = inputs.driver == 'docker' ? 'default' : `builder-${__webpack_require__(840).v4()}`;
-            core.setOutput('name', builderName);
+            context.setOutput('name', builderName);
             stateHelper.setBuilderName(builderName);
             if (inputs.driver !== 'docker') {
                 core.startGroup(`Creating a new builder instance`);
@@ -572,10 +572,14 @@ function run() {
                 yield exec.exec('docker', ['buildx', 'install']);
                 core.endGroup();
             }
-            core.startGroup(`Extracting available platforms`);
-            const platforms = yield buildx.platforms();
-            core.info(`${platforms}`);
-            core.setOutput('platforms', platforms);
+            core.startGroup(`Inspect builder`);
+            const builder = yield buildx.inspect(builderName);
+            core.info(JSON.stringify(builder, undefined, 2));
+            context.setOutput('driver', builder.driver);
+            context.setOutput('endpoint', builder.node_endpoint);
+            context.setOutput('status', builder.node_status);
+            context.setOutput('flags', builder.node_flags);
+            context.setOutput('platforms', builder.node_platforms);
             core.endGroup();
         }
         catch (error) {
@@ -2126,7 +2130,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.install = exports.platforms = exports.isAvailable = exports.parseVersion = exports.getVersion = void 0;
+exports.install = exports.inspect = exports.isAvailable = exports.parseVersion = exports.getVersion = void 0;
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(383));
@@ -2168,21 +2172,56 @@ function isAvailable() {
     });
 }
 exports.isAvailable = isAvailable;
-function platforms() {
+function inspect(name) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield exec.exec(`docker`, ['buildx', 'inspect'], true).then(res => {
+        return yield exec.exec(`docker`, ['buildx', 'inspect', name], true).then(res => {
             if (res.stderr != '' && !res.success) {
                 throw new Error(res.stderr);
             }
-            for (const line of res.stdout.trim().split(`\n`)) {
-                if (line.startsWith('Platforms')) {
-                    return line.replace('Platforms: ', '').replace(/\s/g, '').trim();
+            const builder = {};
+            itlines: for (const line of res.stdout.trim().split(`\n`)) {
+                const [key, ...rest] = line.split(':');
+                const value = rest.map(v => v.trim()).join(':');
+                if (key.length == 0 || value.length == 0) {
+                    continue;
+                }
+                switch (key) {
+                    case 'Name': {
+                        if (builder.name == undefined) {
+                            builder.name = value;
+                        }
+                        else {
+                            builder.node_name = value;
+                        }
+                        break;
+                    }
+                    case 'Driver': {
+                        builder.driver = value;
+                        break;
+                    }
+                    case 'Endpoint': {
+                        builder.node_endpoint = value;
+                        break;
+                    }
+                    case 'Status': {
+                        builder.node_status = value;
+                        break;
+                    }
+                    case 'Flags': {
+                        builder.node_flags = value;
+                        break;
+                    }
+                    case 'Platforms': {
+                        builder.node_platforms = value.replace(/\s/g, '');
+                        break itlines;
+                    }
                 }
             }
+            return builder;
         });
     });
 }
-exports.platforms = platforms;
+exports.inspect = inspect;
 function install(inputVersion, dockerConfigHome) {
     return __awaiter(this, void 0, void 0, function* () {
         const release = yield github.getRelease(inputVersion);
@@ -8011,9 +8050,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osArch = exports.osPlat = void 0;
+exports.setOutput = exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osArch = exports.osPlat = void 0;
 const os = __importStar(__webpack_require__(87));
 const core = __importStar(__webpack_require__(186));
+const command_1 = __webpack_require__(351);
 exports.osPlat = os.platform();
 exports.osArch = os.arch();
 function getInputs() {
@@ -8050,6 +8090,11 @@ exports.asyncForEach = (array, callback) => __awaiter(void 0, void 0, void 0, fu
         yield callback(array[index], index, array);
     }
 });
+// FIXME: Temp fix https://github.com/actions/toolkit/issues/777
+function setOutput(name, value) {
+    command_1.issueCommand('set-output', { name }, value);
+}
+exports.setOutput = setOutput;
 //# sourceMappingURL=context.js.map
 
 /***/ }),

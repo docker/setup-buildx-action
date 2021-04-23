@@ -23,6 +23,9 @@ jobs:
         with:
           targets: validate
       -
+        name: Set up Docker Buildx
+        uses: ./
+      -
         name: Test
         uses: docker/bake-action@v1
         with:

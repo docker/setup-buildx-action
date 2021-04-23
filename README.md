@@ -50,11 +50,13 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
       -
-        name: Builder instance name
-        run: echo ${{ steps.buildx.outputs.name }}
-      -
-        name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
+        name: Inspect builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
 ```
 
 ### With QEMU
@@ -129,7 +131,7 @@ Following inputs can be used as `step.with` keys
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
 | `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
-| `config`           | String  | [Optional config file path](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
+| `config`           | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
 
 > `CSV` type must be a newline-delimited string
 > ```yaml
@@ -147,8 +149,12 @@ Following outputs are available
 
 | Name          | Type    | Description                           |
 |---------------|---------|---------------------------------------|
-| `name`        | String  | Builder instance name |
-| `platforms`   | String  | Available platforms (comma separated) |
+| `name`        | String  | Builder name |
+| `driver`      | String  | Builder driver |
+| `endpoint`    | String  | Builder node endpoint |
+| `status`      | String  | Builder node status |
+| `flags`       | String  | Builder node flags (if applicable) |
+| `platforms`   | String  | Builder node platforms available (comma separated) |
 
 ### environment variables
 

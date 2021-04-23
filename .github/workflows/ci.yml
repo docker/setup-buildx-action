@@ -216,6 +216,38 @@ jobs:
         with:
           endpoint: mycontext
 
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Create buildkitd conf
+        run: |
+          cat > /tmp/buildkitd.toml <<EOL
+          debug = true
+          [registry."docker.io"]
+            mirrors = ["mirror.gcr.io"]
+          EOL
+      -
+        name: Create Dockerfile
+        run: |
+          cat > ./Dockerfile <<EOL
+          FROM alpine
+          EOL
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          buildkitd-flags: --debug
+          config: /tmp/buildkitd.toml
+      -
+        name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+
   with-qemu:
     runs-on: ubuntu-latest
     strategy:

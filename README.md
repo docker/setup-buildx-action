@@ -28,7 +28,6 @@ ___
 * [Notes](#notes)
   * [BuildKit container logs](#buildkit-container-logs)
 * [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
-* [Limitation](#limitation)
 
 ## Usage
 
@@ -200,7 +199,3 @@ updates:
     schedule:
       interval: "daily"
 ```
-
-## Limitation
-
-This action is only available for Linux [virtual environments](https://docs.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners#supported-virtual-environments-and-hardware-resources).

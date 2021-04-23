@@ -77,6 +77,34 @@ jobs:
           echo "Flags:     ${{ steps.buildx2.outputs.flags }}"
           echo "Platforms: ${{ steps.buildx2.outputs.platforms }}"
 
+  error:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Stop docker
+        run: |
+          sudo systemctl stop docker
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        continue-on-error: true
+        uses: ./
+      -
+        name: Check
+        run: |
+          echo "${{ toJson(steps.buildx) }}"
+          if [ "${{ steps.buildx.outcome }}" != "failure" ] || [ "${{ steps.buildx.conclusion }}" != "success" ]; then
+            echo "::error::Should have failed"
+            exit 1
+          fi
+      -
+        name: Dump context
+        if: always()
+        uses: crazy-max/ghaction-dump-context@v1
+
   debug:
     runs-on: ubuntu-latest
     steps:

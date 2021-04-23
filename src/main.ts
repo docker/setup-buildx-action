@@ -10,10 +10,10 @@ import * as stateHelper from './state-helper';
 
 async function run(): Promise<void> {
   try {
-    if (os.platform() !== 'linux') {
-      core.setFailed('Only supported on linux platform');
-      return;
-    }
+    core.startGroup(`Docker info`);
+    await exec.exec('docker', ['version']);
+    await exec.exec('docker', ['info']);
+    core.endGroup();
 
     const inputs: context.Inputs = await context.getInputs();
     const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');

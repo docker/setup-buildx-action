@@ -25,6 +25,8 @@ ___
   * [inputs](#inputs)
   * [outputs](#outputs)
   * [environment variables](#environment-variables)
+* [Notes](#notes)
+  * [BuildKit container logs](#buildkit-container-logs)
 * [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
 * [Limitation](#limitation)
 
@@ -163,6 +165,25 @@ The following [official docker environment variables](https://docs.docker.com/en
 | Name            | Type    | Default      | Description                                    |
 |-----------------|---------|-------------|-------------------------------------------------|
 | `DOCKER_CONFIG` | String  | `~/.docker` | The location of your client configuration files |
+
+## Notes
+
+### BuildKit container logs
+
+To display BuildKit container logs (when `docker-container` driver is used) you have to [enable step debug logging](https://docs.github.com/en/actions/managing-workflow-runs/enabling-debug-logging#enabling-step-debug-logging)
+or you can also enable debugging in the [setup-buildx action step](https://github.com/docker/setup-buildx-action):
+
+```yaml
+  -
+    name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v1
+    with:
+      buildkitd-flags: --debug
+```
+
+Logs will be available at the end of a job:
+
+![BuildKit container logs](.github/buildkit-container-logs.png)
 
 ## Keep up-to-date with GitHub Dependabot
 

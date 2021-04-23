@@ -519,6 +519,7 @@ const context = __importStar(__webpack_require__(842));
 const mexec = __importStar(__webpack_require__(757));
 const stateHelper = __importStar(__webpack_require__(647));
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (os.platform() !== 'linux') {
@@ -581,6 +582,12 @@ function run() {
             context.setOutput('flags', builder.node_flags);
             context.setOutput('platforms', builder.node_platforms);
             core.endGroup();
+            if (inputs.driver == 'docker-container') {
+                stateHelper.setContainerName(`buildx_buildkit_${builder.node_name}`);
+            }
+            if (core.isDebug() || ((_a = builder.node_flags) === null || _a === void 0 ? void 0 : _a.includes('--debug'))) {
+                stateHelper.setDebug('true');
+            }
         }
         catch (error) {
             core.setFailed(error.message);
@@ -589,14 +596,24 @@ function run() {
 }
 function cleanup() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (stateHelper.builderName.length == 0) {
-            return;
+        if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
+            core.startGroup(`BuildKit container logs`);
+            yield mexec.exec('docker', ['logs', `${stateHelper.containerName}`], false).then(res => {
+                if (res.stderr != '' && !res.success) {
+                    core.warning(res.stderr);
+                }
+            });
+            core.endGroup();
         }
-        yield mexec.exec('docker', ['buildx', 'rm', `${stateHelper.builderName}`], false).then(res => {
-            if (res.stderr != '' && !res.success) {
-                core.warning(res.stderr);
-            }
-        });
+        if (stateHelper.builderName.length > 0) {
+            core.startGroup(`Removing builder`);
+            yield mexec.exec('docker', ['buildx', 'rm', `${stateHelper.builderName}`], false).then(res => {
+                if (res.stderr != '' && !res.success) {
+                    core.warning(res.stderr);
+                }
+            });
+            core.endGroup();
+        }
     });
 }
 if (!stateHelper.IsPost) {
@@ -5623,14 +5640,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setBuilderName = exports.builderName = exports.IsPost = void 0;
+exports.setContainerName = exports.setBuilderName = exports.setDebug = exports.containerName = exports.builderName = exports.IsDebug = exports.IsPost = void 0;
 const core = __importStar(__webpack_require__(186));
 exports.IsPost = !!process.env['STATE_isPost'];
+exports.IsDebug = !!process.env['STATE_isDebug'];
 exports.builderName = process.env['STATE_builderName'] || '';
+exports.containerName = process.env['STATE_containerName'] || '';
+function setDebug(debug) {
+    core.saveState('isDebug', debug);
+}
+exports.setDebug = setDebug;
 function setBuilderName(builderName) {
     core.saveState('builderName', builderName);
 }
 exports.setBuilderName = setBuilderName;
+function setContainerName(containerName) {
+    core.saveState('containerName', containerName);
+}
+exports.setContainerName = setContainerName;
 if (!exports.IsPost) {
     core.saveState('isPost', 'true');
 }

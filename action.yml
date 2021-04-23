@@ -33,14 +33,22 @@ inputs:
     description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
   config:
-    description: 'Optional config file path'
+    description: 'BuildKit config file'
     required: false
 
 outputs:
   name:
-    description: 'Builder instance name'
+    description: 'Builder name'
+  driver:
+    description: 'Builder driver'
+  endpoint:
+    description: 'Builder node endpoint'
+  status:
+    description: 'Builder node status'
+  flags:
+    description: 'Builder node flags (if applicable)'
   platforms:
-    description: 'Available platforms (comma separated)'
+    description: 'Builder node platforms available (comma separated)'
 
 runs:
   using: 'node12'

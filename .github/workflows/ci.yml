@@ -35,11 +35,13 @@ jobs:
         with:
           version: ${{ matrix.buildx-version }}
       -
-        name: Builder instance name
-        run: echo ${{ steps.buildx.outputs.name }}
-      -
-        name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
+        name: Inspect builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
       -
         name: Dump context
         uses: crazy-max/ghaction-dump-context@v1
@@ -55,15 +57,25 @@ jobs:
         id: buildx1
         uses: ./
       -
-        name: Builder 1 instance name
-        run: echo ${{ steps.buildx1.outputs.name }}
+        name: Inspect builder 1
+        run: |
+          echo "Name:      ${{ steps.buildx1.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx1.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx1.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx1.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx1.outputs.platforms }}"
       -
         name: Set up Docker Buildx 2
         id: buildx2
         uses: ./
       -
-        name: Builder 2 instance name
-        run: echo ${{ steps.buildx2.outputs.name }}
+        name: Inspect builder 2
+        run: |
+          echo "Name:      ${{ steps.buildx2.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx2.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx2.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx2.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx2.outputs.platforms }}"
 
   install:
     runs-on: ubuntu-latest
@@ -204,8 +216,10 @@ jobs:
         with:
           version: ${{ matrix.buildx-version }}
       -
-        name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
-      -
-        name: Builder instance name
-        run: echo ${{ steps.buildx.outputs.name }}
+        name: Inspect builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"

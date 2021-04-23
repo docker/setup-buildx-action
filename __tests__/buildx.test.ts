@@ -25,17 +25,19 @@ describe('parseVersion', () => {
   });
 });
 
-describe('platforms', () => {
+describe('inspect', () => {
   async function isDaemonRunning() {
     return await docker.isDaemonRunning();
   }
   (isDaemonRunning() ? it : it.skip)(
     'valid',
     async () => {
-      const platforms = buildx.platforms();
-      console.log(`platforms: ${platforms}`);
-      expect(platforms).not.toBeUndefined();
-      expect(platforms).not.toEqual('');
+      const builder = await buildx.inspect('');
+      console.log('builder', builder);
+      expect(builder).not.toBeUndefined();
+      expect(builder.name).not.toEqual('');
+      expect(builder.driver).not.toEqual('');
+      expect(builder.node_platforms).not.toEqual('');
     },
     100000
   );

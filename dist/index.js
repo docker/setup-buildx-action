@@ -522,10 +522,10 @@ function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (os.platform() !== 'linux') {
-                core.setFailed('Only supported on linux platform');
-                return;
-            }
+            core.startGroup(`Docker info`);
+            yield exec.exec('docker', ['version']);
+            yield exec.exec('docker', ['info']);
+            core.endGroup();
             const inputs = yield context.getInputs();
             const dockerConfigHome = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
             if (!(yield buildx.isAvailable()) || inputs.version) {

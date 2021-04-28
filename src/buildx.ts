@@ -20,7 +20,7 @@ export type Builder = {
 
 export async function getVersion(): Promise<string> {
   return await exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
-    if (res.stderr != '' && !res.success) {
+    if (res.stderr.length > 0 && !res.success) {
       throw new Error(res.stderr);
     }
     return parseVersion(res.stdout);
@@ -37,7 +37,7 @@ export async function parseVersion(stdout: string): Promise<string> {
 
 export async function isAvailable(): Promise<Boolean> {
   return await exec.exec(`docker`, ['buildx'], true).then(res => {
-    if (res.stderr != '' && !res.success) {
+    if (res.stderr.length > 0 && !res.success) {
       return false;
     }
     return res.success;
@@ -46,7 +46,7 @@ export async function isAvailable(): Promise<Boolean> {
 
 export async function inspect(name: string): Promise<Builder> {
   return await exec.exec(`docker`, ['buildx', 'inspect', name], true).then(res => {
-    if (res.stderr != '' && !res.success) {
+    if (res.stderr.length > 0 && !res.success) {
       throw new Error(res.stderr);
     }
     const builder: Builder = {};
@@ -170,4 +170,22 @@ async function filename(version: string): Promise<string> {
   const platform: string = context.osPlat == 'win32' ? 'windows' : context.osPlat;
   const ext: string = context.osPlat == 'win32' ? '.exe' : '';
   return util.format('buildx-v%s.%s-%s%s', version, platform, arch, ext);
+}
+
+export async function getBuildKitVersion(containerID: string): Promise<string> {
+  return exec.exec(`docker`, ['inspect', '--format', '{{.Config.Image}}', containerID], true).then(bkitimage => {
+    if (bkitimage.success && bkitimage.stdout.length > 0) {
+      return exec.exec(`docker`, ['run', '--rm', bkitimage.stdout, '--version'], true).then(bkitversion => {
+        if (bkitversion.success && bkitversion.stdout.length > 0) {
+          return `${bkitimage.stdout} => ${bkitversion.stdout}`;
+        } else if (bkitversion.stderr.length > 0) {
+          core.warning(bkitversion.stderr);
+        }
+        return bkitversion.stdout;
+      });
+    } else if (bkitimage.stderr.length > 0) {
+      core.warning(bkitimage.stderr);
+    }
+    return bkitimage.stdout;
+  });
 }

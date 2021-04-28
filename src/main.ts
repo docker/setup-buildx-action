@@ -81,6 +81,9 @@ async function run(): Promise<void> {
 
     if (inputs.driver == 'docker-container') {
       stateHelper.setContainerName(`buildx_buildkit_${builder.node_name}`);
+      core.startGroup(`BuildKit version`);
+      core.info(await buildx.getBuildKitVersion(`buildx_buildkit_${builder.node_name}`));
+      core.endGroup();
     }
     if (core.isDebug() || builder.node_flags?.includes('--debug')) {
       stateHelper.setDebug('true');
@@ -94,7 +97,7 @@ async function cleanup(): Promise<void> {
   if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
     core.startGroup(`BuildKit container logs`);
     await mexec.exec('docker', ['logs', `${stateHelper.containerName}`], false).then(res => {
-      if (res.stderr != '' && !res.success) {
+      if (res.stderr.length > 0 && !res.success) {
         core.warning(res.stderr);
       }
     });
@@ -104,7 +107,7 @@ async function cleanup(): Promise<void> {
   if (stateHelper.builderName.length > 0) {
     core.startGroup(`Removing builder`);
     await mexec.exec('docker', ['buildx', 'rm', `${stateHelper.builderName}`], false).then(res => {
-      if (res.stderr != '' && !res.success) {
+      if (res.stderr.length > 0 && !res.success) {
         core.warning(res.stderr);
       }
     });

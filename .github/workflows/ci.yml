@@ -243,6 +243,8 @@ jobs:
         uses: ./
         with:
           endpoint: mycontext
+        env:
+          DOCKER_CONTEXT: mycontext
 
   config:
     runs-on: ubuntu-latest

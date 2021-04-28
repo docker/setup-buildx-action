@@ -584,6 +584,9 @@ function run() {
             core.endGroup();
             if (inputs.driver == 'docker-container') {
                 stateHelper.setContainerName(`buildx_buildkit_${builder.node_name}`);
+                core.startGroup(`BuildKit version`);
+                core.info(yield buildx.getBuildKitVersion(`buildx_buildkit_${builder.node_name}`));
+                core.endGroup();
             }
             if (core.isDebug() || ((_a = builder.node_flags) === null || _a === void 0 ? void 0 : _a.includes('--debug'))) {
                 stateHelper.setDebug('true');
@@ -599,7 +602,7 @@ function cleanup() {
         if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
             core.startGroup(`BuildKit container logs`);
             yield mexec.exec('docker', ['logs', `${stateHelper.containerName}`], false).then(res => {
-                if (res.stderr != '' && !res.success) {
+                if (res.stderr.length > 0 && !res.success) {
                     core.warning(res.stderr);
                 }
             });
@@ -608,7 +611,7 @@ function cleanup() {
         if (stateHelper.builderName.length > 0) {
             core.startGroup(`Removing builder`);
             yield mexec.exec('docker', ['buildx', 'rm', `${stateHelper.builderName}`], false).then(res => {
-                if (res.stderr != '' && !res.success) {
+                if (res.stderr.length > 0 && !res.success) {
                     core.warning(res.stderr);
                 }
             });
@@ -2147,7 +2150,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.install = exports.inspect = exports.isAvailable = exports.parseVersion = exports.getVersion = void 0;
+exports.getBuildKitVersion = exports.install = exports.inspect = exports.isAvailable = exports.parseVersion = exports.getVersion = void 0;
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
 const semver = __importStar(__webpack_require__(383));
@@ -2160,7 +2163,7 @@ const tc = __importStar(__webpack_require__(784));
 function getVersion() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
-            if (res.stderr != '' && !res.success) {
+            if (res.stderr.length > 0 && !res.success) {
                 throw new Error(res.stderr);
             }
             return parseVersion(res.stdout);
@@ -2181,7 +2184,7 @@ exports.parseVersion = parseVersion;
 function isAvailable() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec.exec(`docker`, ['buildx'], true).then(res => {
-            if (res.stderr != '' && !res.success) {
+            if (res.stderr.length > 0 && !res.success) {
                 return false;
             }
             return res.success;
@@ -2192,7 +2195,7 @@ exports.isAvailable = isAvailable;
 function inspect(name) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec.exec(`docker`, ['buildx', 'inspect', name], true).then(res => {
-            if (res.stderr != '' && !res.success) {
+            if (res.stderr.length > 0 && !res.success) {
                 throw new Error(res.stderr);
             }
             const builder = {};
@@ -2314,6 +2317,28 @@ function filename(version) {
         return util.format('buildx-v%s.%s-%s%s', version, platform, arch, ext);
     });
 }
+function getBuildKitVersion(containerID) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return exec.exec(`docker`, ['inspect', '--format', '{{.Config.Image}}', containerID], true).then(bkitimage => {
+            if (bkitimage.success && bkitimage.stdout.length > 0) {
+                return exec.exec(`docker`, ['run', '--rm', bkitimage.stdout, '--version'], true).then(bkitversion => {
+                    if (bkitversion.success && bkitversion.stdout.length > 0) {
+                        return `${bkitimage.stdout} => ${bkitversion.stdout}`;
+                    }
+                    else if (bkitversion.stderr.length > 0) {
+                        core.warning(bkitversion.stderr);
+                    }
+                    return bkitversion.stdout;
+                });
+            }
+            else if (bkitimage.stderr.length > 0) {
+                core.warning(bkitimage.stderr);
+            }
+            return bkitimage.stdout;
+        });
+    });
+}
+exports.getBuildKitVersion = getBuildKitVersion;
 //# sourceMappingURL=buildx.js.map
 
 /***/ }),

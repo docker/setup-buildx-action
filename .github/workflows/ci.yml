@@ -128,7 +128,7 @@ jobs:
           buildkitd-flags: --debug
       -
         name: Build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le
@@ -274,7 +274,7 @@ jobs:
           config: /tmp/buildkitd.toml
       -
         name: Build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.4.0
         with:
           context: .
 

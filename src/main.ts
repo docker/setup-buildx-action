@@ -25,8 +25,6 @@ async function run(): Promise<void> {
     }
 
     const buildxVersion = await buildx.getVersion();
-    core.info(`Using buildx ${buildxVersion}`);
-
     const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${require('uuid').v4()}`;
     context.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);

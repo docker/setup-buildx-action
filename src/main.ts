@@ -1,12 +1,11 @@
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as buildx from './buildx';
 import * as context from './context';
-import * as mexec from './exec';
 import * as stateHelper from './state-helper';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 async function run(): Promise<void> {
   try {
@@ -94,21 +93,29 @@ async function run(): Promise<void> {
 async function cleanup(): Promise<void> {
   if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
     core.startGroup(`BuildKit container logs`);
-    await mexec.exec('docker', ['logs', `${stateHelper.containerName}`], false).then(res => {
-      if (res.stderr.length > 0 && !res.success) {
-        core.warning(res.stderr);
-      }
-    });
+    await exec
+      .getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
+        ignoreReturnCode: true
+      })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(res.stderr.trim());
+        }
+      });
     core.endGroup();
   }
 
   if (stateHelper.builderName.length > 0) {
     core.startGroup(`Removing builder`);
-    await mexec.exec('docker', ['buildx', 'rm', `${stateHelper.builderName}`], false).then(res => {
-      if (res.stderr.length > 0 && !res.success) {
-        core.warning(res.stderr);
-      }
-    });
+    await exec
+      .getExecOutput('docker', ['buildx', 'rm', `${stateHelper.builderName}`], {
+        ignoreReturnCode: true
+      })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(res.stderr.trim());
+        }
+      });
     core.endGroup();
   }
 }

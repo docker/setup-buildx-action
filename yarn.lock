@@ -21,20 +21,20 @@
   dependencies:
     tunnel "0.0.6"
 
-"@actions/io@^1.0.1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@actions/io/-/io-1.0.2.tgz#2f614b6e69ce14d191180451eb38e6576a6e6b27"
-  integrity sha512-J8KuFqVPr3p6U8W93DOXlXW6zFvrQAJANdS+vw0YhusLIq+bszW8zmK2Fh1C2kDPX8FMvwIl1OUcFgvJoXLbAg==
+"@actions/io@^1.0.1", "@actions/io@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@actions/io/-/io-1.1.1.tgz#4a157406309e212ab27ed3ae30e8c1d641686a66"
+  integrity sha512-Qi4JoKXjmE0O67wAOH6y0n26QXhMKMFo7GD/4IXNVcrtLjUlGjGuVys6pQgwF3ArfGTQu0XpqaNr0YhED2RaRA==
 
-"@actions/tool-cache@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@actions/tool-cache/-/tool-cache-1.7.0.tgz#bd9d5996d8cd3c50b61b8d6d1c3fb134e962cc21"
-  integrity sha512-ybO7s67MueJVwWGP4kLynzjW/4Rsiy5/RD9+XJsi/8JHbmYjXdBiluuJdwanQOsmQvZJRe8OkNzaLEnLuMu+qA==
+"@actions/tool-cache@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@actions/tool-cache/-/tool-cache-1.7.1.tgz#f9f4f822cb639da6facdf3e22ea571361ab26f92"
+  integrity sha512-y1xxxOhXaBUIUit3lhepmu/0xdgiTMpnZRLmVdtF0hTm521doi+MdRRRP62czHvM7wxH6epj4JPNJQ3iJpOrkQ==
   dependencies:
     "@actions/core" "^1.2.6"
     "@actions/exec" "^1.0.0"
     "@actions/http-client" "^1.0.8"
-    "@actions/io" "^1.0.1"
+    "@actions/io" "^1.1.1"
     semver "^6.1.0"
     uuid "^3.3.2"
 

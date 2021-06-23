@@ -8433,8 +8433,8 @@ function getInputs() {
             driverOpts: yield getInputList('driver-opts', true),
             buildkitdFlags: core.getInput('buildkitd-flags') ||
                 '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
-            install: /true/i.test(core.getInput('install')),
-            use: /true/i.test(core.getInput('use')),
+            install: core.getBooleanInput('install'),
+            use: core.getBooleanInput('use'),
             endpoint: core.getInput('endpoint'),
             config: core.getInput('config')
         };

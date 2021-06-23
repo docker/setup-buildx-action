@@ -3,9 +3,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as util from 'util';
 import * as context from './context';
-import * as exec from './exec';
 import * as github from './github';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 
 export type Builder = {
@@ -18,77 +18,92 @@ export type Builder = {
   node_platforms?: string;
 };
 
+export async function isAvailable(): Promise<Boolean> {
+  return await exec
+    .getExecOutput('docker', ['buildx'], {
+      ignoreReturnCode: true,
+      silent: true
+    })
+    .then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        return false;
+      }
+      return res.exitCode == 0;
+    });
+}
+
 export async function getVersion(): Promise<string> {
-  return await exec.exec(`docker`, ['buildx', 'version'], true).then(res => {
-    if (res.stderr.length > 0 && !res.success) {
-      throw new Error(res.stderr);
-    }
-    return parseVersion(res.stdout);
-  });
+  return await exec
+    .getExecOutput('docker', ['buildx', 'version'], {
+      ignoreReturnCode: true,
+      silent: true
+    })
+    .then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
+      }
+      return parseVersion(res.stdout);
+    });
 }
 
 export async function parseVersion(stdout: string): Promise<string> {
   const matches = /\sv?([0-9.]+)/.exec(stdout);
   if (!matches) {
-    throw new Error(`Cannot parse Buildx version`);
+    throw new Error(`Cannot parse buildx version`);
   }
   return semver.clean(matches[1]);
 }
 
-export async function isAvailable(): Promise<Boolean> {
-  return await exec.exec(`docker`, ['buildx'], true).then(res => {
-    if (res.stderr.length > 0 && !res.success) {
-      return false;
-    }
-    return res.success;
-  });
-}
-
 export async function inspect(name: string): Promise<Builder> {
-  return await exec.exec(`docker`, ['buildx', 'inspect', name], true).then(res => {
-    if (res.stderr.length > 0 && !res.success) {
-      throw new Error(res.stderr);
-    }
-    const builder: Builder = {};
-    itlines: for (const line of res.stdout.trim().split(`\n`)) {
-      const [key, ...rest] = line.split(':');
-      const value = rest.map(v => v.trim()).join(':');
-      if (key.length == 0 || value.length == 0) {
-        continue;
+  return await exec
+    .getExecOutput(`docker`, ['buildx', 'inspect', name], {
+      ignoreReturnCode: true,
+      silent: true
+    })
+    .then(res => {
+      if (res.stderr.length > 0 && res.exitCode != 0) {
+        throw new Error(res.stderr.trim());
       }
-      switch (key) {
-        case 'Name': {
-          if (builder.name == undefined) {
-            builder.name = value;
-          } else {
-            builder.node_name = value;
+      const builder: Builder = {};
+      itlines: for (const line of res.stdout.trim().split(`\n`)) {
+        const [key, ...rest] = line.split(':');
+        const value = rest.map(v => v.trim()).join(':');
+        if (key.length == 0 || value.length == 0) {
+          continue;
+        }
+        switch (key) {
+          case 'Name': {
+            if (builder.name == undefined) {
+              builder.name = value;
+            } else {
+              builder.node_name = value;
+            }
+            break;
           }
-          break;
-        }
-        case 'Driver': {
-          builder.driver = value;
-          break;
-        }
-        case 'Endpoint': {
-          builder.node_endpoint = value;
-          break;
-        }
-        case 'Status': {
-          builder.node_status = value;
-          break;
-        }
-        case 'Flags': {
-          builder.node_flags = value;
-          break;
-        }
-        case 'Platforms': {
-          builder.node_platforms = value.replace(/\s/g, '');
-          break itlines;
+          case 'Driver': {
+            builder.driver = value;
+            break;
+          }
+          case 'Endpoint': {
+            builder.node_endpoint = value;
+            break;
+          }
+          case 'Status': {
+            builder.node_status = value;
+            break;
+          }
+          case 'Flags': {
+            builder.node_flags = value;
+            break;
+          }
+          case 'Platforms': {
+            builder.node_platforms = value.replace(/\s/g, '');
+            break itlines;
+          }
         }
       }
-    }
-    return builder;
-  });
+      return builder;
+    });
 }
 
 export async function install(inputVersion: string, dockerConfigHome: string): Promise<string> {
@@ -173,19 +188,29 @@ async function filename(version: string): Promise<string> {
 }
 
 export async function getBuildKitVersion(containerID: string): Promise<string> {
-  return exec.exec(`docker`, ['inspect', '--format', '{{.Config.Image}}', containerID], true).then(bkitimage => {
-    if (bkitimage.success && bkitimage.stdout.length > 0) {
-      return exec.exec(`docker`, ['run', '--rm', bkitimage.stdout, '--version'], true).then(bkitversion => {
-        if (bkitversion.success && bkitversion.stdout.length > 0) {
-          return `${bkitimage.stdout} => ${bkitversion.stdout}`;
-        } else if (bkitversion.stderr.length > 0) {
-          core.warning(bkitversion.stderr);
-        }
-        return bkitversion.stdout;
-      });
-    } else if (bkitimage.stderr.length > 0) {
-      core.warning(bkitimage.stderr);
-    }
-    return bkitimage.stdout;
-  });
+  return exec
+    .getExecOutput(`docker`, ['inspect', '--format', '{{.Config.Image}}', containerID], {
+      ignoreReturnCode: true,
+      silent: true
+    })
+    .then(bkitimage => {
+      if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
+        return exec
+          .getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout, '--version'], {
+            ignoreReturnCode: true,
+            silent: true
+          })
+          .then(bkitversion => {
+            if (bkitversion.exitCode == 0 && bkitversion.stdout.length > 0) {
+              return `${bkitimage.stdout} => ${bkitversion.stdout}`;
+            } else if (bkitversion.stderr.length > 0) {
+              core.warning(bkitversion.stderr.trim());
+            }
+            return bkitversion.stdout;
+          });
+      } else if (bkitimage.stderr.length > 0) {
+        core.warning(bkitimage.stderr.trim());
+      }
+      return bkitimage.stdout;
+    });
 }

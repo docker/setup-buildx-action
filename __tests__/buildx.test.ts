@@ -23,7 +23,7 @@ describe('getVersion', () => {
         silent: true
       })
       .then(res => {
-        return !res.stdout.includes(' ') && res.exitCode == 0;
+        return !res.stdout.trim().includes(' ') && res.exitCode == 0;
       });
   }
   (isDaemonRunning() ? it : it.skip)(
@@ -55,7 +55,7 @@ describe('inspect', () => {
         silent: true
       })
       .then(res => {
-        return !res.stdout.includes(' ') && res.exitCode == 0;
+        return !res.stdout.trim().includes(' ') && res.exitCode == 0;
       });
   }
   (isDaemonRunning() ? it : it.skip)(

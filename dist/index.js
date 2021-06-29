@@ -72,7 +72,7 @@ function getVersion() {
             if (res.stderr.length > 0 && res.exitCode != 0) {
                 throw new Error(res.stderr.trim());
             }
-            return parseVersion(res.stdout);
+            return parseVersion(res.stdout.trim());
         });
     });
 }
@@ -227,24 +227,24 @@ function getBuildKitVersion(containerID) {
             .then(bkitimage => {
             if (bkitimage.exitCode == 0 && bkitimage.stdout.length > 0) {
                 return exec
-                    .getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout, '--version'], {
+                    .getExecOutput(`docker`, ['run', '--rm', bkitimage.stdout.trim(), '--version'], {
                     ignoreReturnCode: true,
                     silent: true
                 })
                     .then(bkitversion => {
                     if (bkitversion.exitCode == 0 && bkitversion.stdout.length > 0) {
-                        return `${bkitimage.stdout} => ${bkitversion.stdout}`;
+                        return `${bkitimage.stdout.trim()} => ${bkitversion.stdout.trim()}`;
                     }
                     else if (bkitversion.stderr.length > 0) {
                         core.warning(bkitversion.stderr.trim());
                     }
-                    return bkitversion.stdout;
+                    return bkitversion.stdout.trim();
                 });
             }
             else if (bkitimage.stderr.length > 0) {
                 core.warning(bkitimage.stderr.trim());
             }
-            return bkitimage.stdout;
+            return bkitimage.stdout.trim();
         });
     });
 }

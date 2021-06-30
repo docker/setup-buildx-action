@@ -35,6 +35,10 @@ inputs:
   config:
     description: 'BuildKit config file'
     required: false
+  github-token:
+    description: 'GitHub Token as provided by secrets'
+    default: ${{ github.token }}
+    required: true
 
 outputs:
   name:

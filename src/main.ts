@@ -19,7 +19,11 @@ async function run(): Promise<void> {
 
     if (!(await buildx.isAvailable()) || inputs.version) {
       core.startGroup(`Installing buildx`);
-      await buildx.install(inputs.version || 'latest', dockerConfigHome);
+      if (inputs.version.startsWith('pr-') || inputs.version.startsWith('runid-')) {
+        await buildx.downloadArtifact(inputs.version, inputs.githubToken, dockerConfigHome);
+      } else {
+        await buildx.downloadRelease(inputs.version || 'latest', dockerConfigHome);
+      }
       core.endGroup();
     }
 

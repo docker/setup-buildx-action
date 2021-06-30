@@ -106,7 +106,29 @@ export async function inspect(name: string): Promise<Builder> {
     });
 }
 
-export async function install(inputVersion: string, dockerConfigHome: string): Promise<string> {
+export async function downloadArtifact(
+  inputVersion: string,
+  inputToken: string,
+  dockerConfigHome: string
+): Promise<string> {
+  const [type, value] = inputVersion.split('-');
+  let runID: number;
+  if (type == 'pr') {
+    runID = await github.getPullRunID(parseInt(value), inputToken);
+  } else {
+    runID = parseInt(value);
+  }
+
+  let toolPath: string;
+  toolPath = tc.find('buildx', runID.toString());
+  if (!toolPath) {
+    toolPath = await github.downloadArtifact(runID, inputToken);
+  }
+
+  return installPlugin(toolPath, dockerConfigHome);
+}
+
+export async function downloadRelease(inputVersion: string, dockerConfigHome: string): Promise<string> {
   const release: github.GitHubRelease | null = await github.getRelease(inputVersion);
   if (!release) {
     throw new Error(`Cannot find buildx ${inputVersion} release`);
@@ -124,6 +146,10 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
     toolPath = await download(version);
   }
 
+  return installPlugin(toolPath, dockerConfigHome);
+}
+
+async function installPlugin(toolPath: string, dockerConfigHome: string): Promise<string> {
   const pluginsDir: string = path.join(dockerConfigHome, 'cli-plugins');
   core.debug(`Plugins dir is ${pluginsDir}`);
   if (!fs.existsSync(pluginsDir)) {
@@ -146,7 +172,7 @@ async function download(version: string): Promise<string> {
   const downloadUrl = util.format(
     'https://github.com/docker/buildx/releases/download/v%s/%s',
     version,
-    await filename(version)
+    filename(version)
   );
   let downloadPath: string;
 
@@ -161,7 +187,7 @@ async function download(version: string): Promise<string> {
   return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
 }
 
-async function filename(version: string): Promise<string> {
+export function filename(version: string): string {
   let arch: string;
   switch (context.osArch) {
     case 'x64': {

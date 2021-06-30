@@ -1,7 +1,10 @@
 import * as os from 'os';
 import * as core from '@actions/core';
 import {issueCommand} from '@actions/core/lib/command';
+import fs from 'fs';
+import path from 'path';
 
+let _tmpDir: string;
 export const osPlat: string = os.platform();
 export const osArch: string = os.arch();
 
@@ -14,6 +17,14 @@ export interface Inputs {
   use: boolean;
   endpoint: string;
   config: string;
+  githubToken: string;
+}
+
+export function tmpDir(): string {
+  if (!_tmpDir) {
+    _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
+  }
+  return _tmpDir;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -27,7 +38,8 @@ export async function getInputs(): Promise<Inputs> {
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
-    config: core.getInput('config')
+    config: core.getInput('config'),
+    githubToken: core.getInput('github-token')
   };
 }
 

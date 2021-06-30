@@ -72,15 +72,15 @@ describe('inspect', () => {
   );
 });
 
-describe('install', () => {
+describe('downloadRelease', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
   it('acquires v0.4.1 version of buildx', async () => {
-    const buildxBin = await buildx.install('v0.4.1', tmpDir);
+    const buildxBin = await buildx.downloadRelease('v0.4.1', tmpDir);
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
   it('acquires latest version of buildx', async () => {
-    const buildxBin = await buildx.install('latest', tmpDir);
+    const buildxBin = await buildx.downloadRelease('latest', tmpDir);
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);

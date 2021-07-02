@@ -1,9 +1,19 @@
+import fs from 'fs';
 import * as os from 'os';
+import path from 'path';
 import * as core from '@actions/core';
 import {issueCommand} from '@actions/core/lib/command';
 
+let _tmpDir: string;
 export const osPlat: string = os.platform();
 export const osArch: string = os.arch();
+
+export function tmpDir(): string {
+  if (!_tmpDir) {
+    _tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
+  }
+  return _tmpDir;
+}
 
 export interface Inputs {
   version: string;
@@ -21,9 +31,7 @@ export async function getInputs(): Promise<Inputs> {
     version: core.getInput('version'),
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: await getInputList('driver-opts', true),
-    buildkitdFlags:
-      core.getInput('buildkitd-flags') ||
-      '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+    buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
@@ -39,10 +47,7 @@ export async function getInputList(name: string, ignoreComma?: boolean): Promise
   return items
     .split(/\r?\n/)
     .filter(x => x)
-    .reduce<string[]>(
-      (acc, line) => acc.concat(!ignoreComma ? line.split(',').filter(x => x) : line).map(pat => pat.trim()),
-      []
-    );
+    .reduce<string[]>((acc, line) => acc.concat(!ignoreComma ? line.split(',').filter(x => x) : line).map(pat => pat.trim()), []);
 }
 
 export const asyncForEach = async (array, callback) => {

@@ -1,9 +1,9 @@
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
 import * as buildx from './buildx';
 import * as context from './context';
 import * as stateHelper from './state-helper';
+import * as util from './util';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
@@ -17,8 +17,12 @@ async function run(): Promise<void> {
     const inputs: context.Inputs = await context.getInputs();
     const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
 
-    if (!(await buildx.isAvailable()) || inputs.version) {
-      core.startGroup(`Installing buildx`);
+    if (util.isValidUrl(inputs.version)) {
+      core.startGroup(`Build and install buildx`);
+      await buildx.build(inputs.version, dockerConfigHome);
+      core.endGroup();
+    } else if (!(await buildx.isAvailable()) || inputs.version) {
+      core.startGroup(`Download and install buildx`);
       await buildx.install(inputs.version || 'latest', dockerConfigHome);
       core.endGroup();
     }
@@ -31,7 +35,7 @@ async function run(): Promise<void> {
     if (inputs.driver !== 'docker') {
       core.startGroup(`Creating a new builder instance`);
       let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
-      if (semver.satisfies(buildxVersion, '>=0.3.0')) {
+      if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
           createArgs.push('--driver-opt', driverOpt);
         });
@@ -53,7 +57,7 @@ async function run(): Promise<void> {
 
       core.startGroup(`Booting builder`);
       let bootstrapArgs: Array<string> = ['buildx', 'inspect', '--bootstrap'];
-      if (semver.satisfies(buildxVersion, '>=0.4.0')) {
+      if (buildx.satisfies(buildxVersion, '>=0.4.0')) {
         bootstrapArgs.push('--builder', builderName);
       }
       await exec.exec('docker', bootstrapArgs);

@@ -35,12 +35,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getBuildKitVersion = exports.install = exports.inspect = exports.parseVersion = exports.getVersion = exports.isAvailable = void 0;
+exports.getBuildKitVersion = exports.install = exports.build = exports.inspect = exports.satisfies = exports.parseVersion = exports.getVersion = exports.isAvailable = void 0;
 const fs = __importStar(__nccwpck_require__(5747));
 const path = __importStar(__nccwpck_require__(5622));
 const semver = __importStar(__nccwpck_require__(1383));
 const util = __importStar(__nccwpck_require__(1669));
 const context = __importStar(__nccwpck_require__(3842));
+const git = __importStar(__nccwpck_require__(3374));
 const github = __importStar(__nccwpck_require__(5928));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
@@ -78,15 +79,17 @@ function getVersion() {
 }
 exports.getVersion = getVersion;
 function parseVersion(stdout) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const matches = /\sv?([0-9.]+)/.exec(stdout);
-        if (!matches) {
-            throw new Error(`Cannot parse buildx version`);
-        }
-        return semver.clean(matches[1]);
-    });
+    const matches = /\sv?([0-9a-f]{7}|[0-9.]+)/.exec(stdout);
+    if (!matches) {
+        throw new Error(`Cannot parse buildx version`);
+    }
+    return matches[1];
 }
 exports.parseVersion = parseVersion;
+function satisfies(version, range) {
+    return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
+}
+exports.satisfies = satisfies;
 function inspect(name) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield exec
@@ -142,6 +145,33 @@ function inspect(name) {
     });
 }
 exports.inspect = inspect;
+function build(inputBuildRef, dockerConfigHome) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let [repo, ref] = inputBuildRef.split('#');
+        if (ref.length == 0) {
+            ref = 'master';
+        }
+        const sha = yield git.getRemoteSha(repo, ref);
+        core.debug(`Remote ref ${sha} found`);
+        let toolPath;
+        toolPath = tc.find('buildx', sha);
+        if (!toolPath) {
+            const outFolder = path.join(context.tmpDir(), 'out').split(path.sep).join(path.posix.sep);
+            toolPath = yield exec
+                .getExecOutput('docker', ['buildx', 'build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outFolder}`, inputBuildRef], {
+                ignoreReturnCode: true
+            })
+                .then(res => {
+                if (res.stderr.length > 0 && res.exitCode != 0) {
+                    core.warning(res.stderr.trim());
+                }
+                return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', sha);
+            });
+        }
+        return setPlugin(toolPath, dockerConfigHome);
+    });
+}
+exports.build = build;
 function install(inputVersion, dockerConfigHome) {
     return __awaiter(this, void 0, void 0, function* () {
         const release = yield github.getRelease(inputVersion);
@@ -159,6 +189,12 @@ function install(inputVersion, dockerConfigHome) {
             }
             toolPath = yield download(version);
         }
+        return setPlugin(toolPath, dockerConfigHome);
+    });
+}
+exports.install = install;
+function setPlugin(toolPath, dockerConfigHome) {
+    return __awaiter(this, void 0, void 0, function* () {
         const pluginsDir = path.join(dockerConfigHome, 'cli-plugins');
         core.debug(`Plugins dir is ${pluginsDir}`);
         if (!fs.existsSync(pluginsDir)) {
@@ -173,7 +209,6 @@ function install(inputVersion, dockerConfigHome) {
         return pluginPath;
     });
 }
-exports.install = install;
 function download(version) {
     return __awaiter(this, void 0, void 0, function* () {
         const targetFile = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
@@ -286,21 +321,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setOutput = exports.asyncForEach = exports.getInputList = exports.getInputs = exports.osArch = exports.osPlat = void 0;
+exports.setOutput = exports.asyncForEach = exports.getInputList = exports.getInputs = exports.tmpDir = exports.osArch = exports.osPlat = void 0;
+const fs_1 = __importDefault(__nccwpck_require__(5747));
 const os = __importStar(__nccwpck_require__(2087));
+const path_1 = __importDefault(__nccwpck_require__(5622));
 const core = __importStar(__nccwpck_require__(2186));
 const command_1 = __nccwpck_require__(7351);
+let _tmpDir;
 exports.osPlat = os.platform();
 exports.osArch = os.arch();
+function tmpDir() {
+    if (!_tmpDir) {
+        _tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os.tmpdir(), 'docker-setup-buildx-')).split(path_1.default.sep).join(path_1.default.posix.sep);
+    }
+    return _tmpDir;
+}
+exports.tmpDir = tmpDir;
 function getInputs() {
     return __awaiter(this, void 0, void 0, function* () {
         return {
             version: core.getInput('version'),
             driver: core.getInput('driver') || 'docker-container',
             driverOpts: yield getInputList('driver-opts', true),
-            buildkitdFlags: core.getInput('buildkitd-flags') ||
-                '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+            buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
             install: core.getBooleanInput('install'),
             use: core.getBooleanInput('use'),
             endpoint: core.getInput('endpoint'),
@@ -334,6 +381,66 @@ function setOutput(name, value) {
 }
 exports.setOutput = setOutput;
 //# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 3374:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getRemoteSha = void 0;
+const exec = __importStar(__nccwpck_require__(1514));
+function getRemoteSha(repo, ref) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield exec
+            .getExecOutput(`git`, ['ls-remote', repo, ref], {
+            ignoreReturnCode: true,
+            silent: true
+        })
+            .then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+                throw new Error(res.stderr);
+            }
+            const [rsha, rref] = res.stdout.trim().split(/[\s\t]/);
+            if (rsha.length == 0) {
+                throw new Error(`Cannot find remote ref for ${repo}#${ref}`);
+            }
+            return rsha;
+        });
+    });
+}
+exports.getRemoteSha = getRemoteSha;
+//# sourceMappingURL=git.js.map
 
 /***/ }),
 
@@ -419,10 +526,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const os = __importStar(__nccwpck_require__(2087));
 const path = __importStar(__nccwpck_require__(5622));
-const semver = __importStar(__nccwpck_require__(1383));
 const buildx = __importStar(__nccwpck_require__(9295));
 const context = __importStar(__nccwpck_require__(3842));
 const stateHelper = __importStar(__nccwpck_require__(8647));
+const util = __importStar(__nccwpck_require__(4024));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 function run() {
@@ -435,8 +542,13 @@ function run() {
             core.endGroup();
             const inputs = yield context.getInputs();
             const dockerConfigHome = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
-            if (!(yield buildx.isAvailable()) || inputs.version) {
-                core.startGroup(`Installing buildx`);
+            if (util.isValidUrl(inputs.version)) {
+                core.startGroup(`Build and install buildx`);
+                yield buildx.build(inputs.version, dockerConfigHome);
+                core.endGroup();
+            }
+            else if (!(yield buildx.isAvailable()) || inputs.version) {
+                core.startGroup(`Download and install buildx`);
                 yield buildx.install(inputs.version || 'latest', dockerConfigHome);
                 core.endGroup();
             }
@@ -447,7 +559,7 @@ function run() {
             if (inputs.driver !== 'docker') {
                 core.startGroup(`Creating a new builder instance`);
                 let createArgs = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
-                if (semver.satisfies(buildxVersion, '>=0.3.0')) {
+                if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
                     yield context.asyncForEach(inputs.driverOpts, (driverOpt) => __awaiter(this, void 0, void 0, function* () {
                         createArgs.push('--driver-opt', driverOpt);
                     }));
@@ -468,7 +580,7 @@ function run() {
                 core.endGroup();
                 core.startGroup(`Booting builder`);
                 let bootstrapArgs = ['buildx', 'inspect', '--bootstrap'];
-                if (semver.satisfies(buildxVersion, '>=0.4.0')) {
+                if (buildx.satisfies(buildxVersion, '>=0.4.0')) {
                     bootstrapArgs.push('--builder', builderName);
                 }
                 yield exec.exec('docker', bootstrapArgs);
@@ -590,6 +702,27 @@ if (!exports.IsPost) {
     core.saveState('isPost', 'true');
 }
 //# sourceMappingURL=state-helper.js.map
+
+/***/ }),
+
+/***/ 4024:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isValidUrl = void 0;
+function isValidUrl(url) {
+    try {
+        new URL(url);
+    }
+    catch (e) {
+        return false;
+    }
+    return true;
+}
+exports.isValidUrl = isValidUrl;
+//# sourceMappingURL=util.js.map
 
 /***/ }),
 

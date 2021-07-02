@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as util from 'util';
 import * as context from './context';
+import * as git from './git';
 import * as github from './github';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
@@ -46,12 +47,16 @@ export async function getVersion(): Promise<string> {
     });
 }
 
-export async function parseVersion(stdout: string): Promise<string> {
-  const matches = /\sv?([0-9.]+)/.exec(stdout);
+export function parseVersion(stdout: string): string {
+  const matches = /\sv?([0-9a-f]{7}|[0-9.]+)/.exec(stdout);
   if (!matches) {
     throw new Error(`Cannot parse buildx version`);
   }
-  return semver.clean(matches[1]);
+  return matches[1];
+}
+
+export function satisfies(version: string, range: string): boolean {
+  return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
 }
 
 export async function inspect(name: string): Promise<Builder> {
@@ -106,6 +111,34 @@ export async function inspect(name: string): Promise<Builder> {
     });
 }
 
+export async function build(inputBuildRef: string, dockerConfigHome: string): Promise<string> {
+  let [repo, ref] = inputBuildRef.split('#');
+  if (ref.length == 0) {
+    ref = 'master';
+  }
+
+  const sha = await git.getRemoteSha(repo, ref);
+  core.debug(`Remote ref ${sha} found`);
+
+  let toolPath: string;
+  toolPath = tc.find('buildx', sha);
+  if (!toolPath) {
+    const outFolder = path.join(context.tmpDir(), 'out').split(path.sep).join(path.posix.sep);
+    toolPath = await exec
+      .getExecOutput('docker', ['buildx', 'build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outFolder}`, inputBuildRef], {
+        ignoreReturnCode: true
+      })
+      .then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          core.warning(res.stderr.trim());
+        }
+        return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', sha);
+      });
+  }
+
+  return setPlugin(toolPath, dockerConfigHome);
+}
+
 export async function install(inputVersion: string, dockerConfigHome: string): Promise<string> {
   const release: github.GitHubRelease | null = await github.getRelease(inputVersion);
   if (!release) {
@@ -124,6 +157,10 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
     toolPath = await download(version);
   }
 
+  return setPlugin(toolPath, dockerConfigHome);
+}
+
+async function setPlugin(toolPath: string, dockerConfigHome: string): Promise<string> {
   const pluginsDir: string = path.join(dockerConfigHome, 'cli-plugins');
   core.debug(`Plugins dir is ${pluginsDir}`);
   if (!fs.existsSync(pluginsDir)) {
@@ -143,11 +180,7 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
 
 async function download(version: string): Promise<string> {
   const targetFile: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
-  const downloadUrl = util.format(
-    'https://github.com/docker/buildx/releases/download/v%s/%s',
-    version,
-    await filename(version)
-  );
+  const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, await filename(version));
   let downloadPath: string;
 
   try {

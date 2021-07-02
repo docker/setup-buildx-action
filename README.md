@@ -125,7 +125,7 @@ Following inputs can be used as `step.with` keys
 
 | Name               | Type    | Description                       |
 |--------------------|---------|-----------------------------------|
-| `version`          | String  | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`) |
+| `version`          | String  | [buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`) |
 | `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver) to be used (default `docker-container`) |
 | `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver-opt) (eg. `image=moby/buildkit:master`) |
 | `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |

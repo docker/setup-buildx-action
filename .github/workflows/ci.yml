@@ -313,3 +313,37 @@ jobs:
           echo "Status:    ${{ steps.buildx.outputs.status }}"
           echo "Flags:     ${{ steps.buildx.outputs.flags }}"
           echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
+
+  build-ref:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ref:
+          - master
+          - refs/tags/v0.5.1
+          - refs/pull/648/head
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          version: https://github.com/docker/buildx.git#${{ matrix.ref }}
+      -
+        name: Check version
+        run: |
+          docker buildx version
+      -
+        name: Create Dockerfile
+        run: |
+          cat > ./Dockerfile <<EOL
+          FROM alpine
+          EOL
+      -
+        name: Build
+        uses: docker/build-push-action@master
+        with:
+          context: .

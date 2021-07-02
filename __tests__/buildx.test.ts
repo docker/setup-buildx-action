@@ -1,9 +1,18 @@
-import fs = require('fs');
-import * as buildx from '../src/buildx';
-import * as path from 'path';
+import * as fs from 'fs';
 import * as os from 'os';
+import * as path from 'path';
+import * as buildx from '../src/buildx';
+import * as context from '../src/context';
 import * as semver from 'semver';
 import * as exec from '@actions/exec';
+
+jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
+  const tmpDir = path.join('/tmp/.docker-setup-buildx-jest').split(path.sep).join(path.posix.sep);
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, {recursive: true});
+  }
+  return tmpDir;
+});
 
 describe('isAvailable', () => {
   const execSpy: jest.SpyInstance = jest.spyOn(exec, 'getExecOutput');
@@ -41,9 +50,20 @@ describe('parseVersion', () => {
   test.each([
     ['github.com/docker/buildx 0.4.1+azure bda4882a65349ca359216b135896bddc1d92461c', '0.4.1'],
     ['github.com/docker/buildx v0.4.1 bda4882a65349ca359216b135896bddc1d92461c', '0.4.1'],
-    ['github.com/docker/buildx v0.4.2 fb7b670b764764dc4716df3eba07ffdae4cc47b2', '0.4.2']
+    ['github.com/docker/buildx v0.4.2 fb7b670b764764dc4716df3eba07ffdae4cc47b2', '0.4.2'],
+    ['github.com/docker/buildx f117971 f11797113e5a9b86bd976329c5dbb8a8bfdfadfa', 'f117971']
   ])('given %p', async (stdout, expected) => {
-    expect(await buildx.parseVersion(stdout)).toEqual(expected);
+    expect(buildx.parseVersion(stdout)).toEqual(expected);
+  });
+});
+
+describe('satisfies', () => {
+  test.each([
+    ['0.4.1', '>=0.3.2', true],
+    ['bda4882a65349ca359216b135896bddc1d92461c', '>0.1.0', false],
+    ['f117971', '>0.6.0', true]
+  ])('given %p', async (version, range, expected) => {
+    expect(buildx.satisfies(version, range)).toBe(expected);
   });
 });
 
@@ -70,6 +90,15 @@ describe('inspect', () => {
     },
     100000
   );
+});
+
+describe('build', () => {
+  it.skip('valid', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
+    console.log(buildxBin);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
 });
 
 describe('install', () => {

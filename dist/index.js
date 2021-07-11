@@ -151,10 +151,16 @@ function build(inputBuildRef, dockerConfigHome) {
         if (ref.length == 0) {
             ref = 'master';
         }
-        const sha = yield git.getRemoteSha(repo, ref);
-        core.debug(`Remote ref ${sha} found`);
+        let vspec;
+        if (ref.match(/^[0-9a-fA-F]{40}$/)) {
+            vspec = ref;
+        }
+        else {
+            vspec = yield git.getRemoteSha(repo, ref);
+        }
+        core.debug(`Tool version spec ${vspec}`);
         let toolPath;
-        toolPath = tc.find('buildx', sha);
+        toolPath = tc.find('buildx', vspec);
         if (!toolPath) {
             const outFolder = path.join(context.tmpDir(), 'out').split(path.sep).join(path.posix.sep);
             toolPath = yield exec
@@ -165,7 +171,7 @@ function build(inputBuildRef, dockerConfigHome) {
                 if (res.stderr.length > 0 && res.exitCode != 0) {
                     core.warning(res.stderr.trim());
                 }
-                return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', sha);
+                return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
             });
         }
         return setPlugin(toolPath, dockerConfigHome);

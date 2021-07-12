@@ -117,11 +117,16 @@ export async function build(inputBuildRef: string, dockerConfigHome: string): Pr
     ref = 'master';
   }
 
-  const sha = await git.getRemoteSha(repo, ref);
-  core.debug(`Remote ref ${sha} found`);
+  let vspec: string;
+  if (ref.match(/^[0-9a-fA-F]{40}$/)) {
+    vspec = ref;
+  } else {
+    vspec = await git.getRemoteSha(repo, ref);
+  }
+  core.debug(`Tool version spec ${vspec}`);
 
   let toolPath: string;
-  toolPath = tc.find('buildx', sha);
+  toolPath = tc.find('buildx', vspec);
   if (!toolPath) {
     const outFolder = path.join(context.tmpDir(), 'out').split(path.sep).join(path.posix.sep);
     toolPath = await exec
@@ -132,7 +137,7 @@ export async function build(inputBuildRef: string, dockerConfigHome: string): Pr
         if (res.stderr.length > 0 && res.exitCode != 0) {
           core.warning(res.stderr.trim());
         }
-        return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', sha);
+        return tc.cacheFile(`${outFolder}/buildx`, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx', 'buildx', vspec);
       });
   }
 

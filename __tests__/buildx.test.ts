@@ -93,9 +93,14 @@ describe('inspect', () => {
 });
 
 describe('build', () => {
-  it.skip('valid', async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+  it.skip('builds refs/pull/648/head', async () => {
     const buildxBin = await buildx.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
+    console.log(buildxBin);
+    expect(fs.existsSync(buildxBin)).toBe(true);
+  }, 100000);
+  it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
+    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir);
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);

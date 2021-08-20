@@ -322,8 +322,8 @@ jobs:
         ref:
           - master
           - refs/tags/v0.5.1
-          - refs/pull/648/head
-          - 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14
+          - refs/pull/731/head
+          - cb185f095fd3d9444e0aa605d3789e9e05f2a1e7
     steps:
       -
         name: Checkout

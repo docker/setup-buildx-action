@@ -91,7 +91,7 @@ jobs:
 
 ### Install by default
 
-Implemented with https://github.com/docker/buildx#setting-buildx-as-default-builder-in-docker-1903
+Implemented with https://github.com/docker/buildx#set-buildx-as-the-default-builder
 
 ```yaml
 name: ci

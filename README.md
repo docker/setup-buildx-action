@@ -21,6 +21,9 @@ ___
   * [Quick start](#quick-start)
   * [With QEMU](#with-qemu)
   * [Install by default](#install-by-default)
+  * [BuildKit daemon configuration](#buildkit-daemon-configuration)
+    * [Registry mirror](#registry-mirror)
+    * [Max parallelism](#max-parallelism)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -91,8 +94,6 @@ jobs:
 
 ### Install by default
 
-Implemented with https://github.com/docker/buildx#setting-buildx-as-default-builder-in-docker-1903
-
 ```yaml
 name: ci
 
@@ -117,6 +118,68 @@ jobs:
           docker build . # will run buildx
 ```
 
+### BuildKit daemon configuration
+
+You can provide a [BuildKit configuration](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md)
+to your builder if you're using the [`docker-container` driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver)
+(default) with the `config` or `config-inline` inputs:
+
+#### Registry mirror
+
+You can configure a registry mirror using an inline block directly in your
+workflow with the `config-inline` input:
+
+```yaml
+name: ci
+
+on:
+  push:
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+```
+
+#### Max parallelism
+
+You can limit the parallelism of the BuildKit solver which is particularly
+useful for low-powered machines.
+
+You can use the `config-inline` input like the
+previous example, or you can use a dedicated BuildKit config file from your
+repo if you want with the `config` input:
+
+```toml
+# .github/buildkitd.toml
+[worker.oci]
+  max-parallelism = 4
+```
+
+```yaml
+name: ci
+
+on:
+  push:
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          config: .github/buildkitd.toml
+```
+
 ## Customizing
 
 ### inputs
@@ -133,6 +196,9 @@ Following inputs can be used as `step.with` keys
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
 | `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
 | `config`           | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
+| `config-inline`    | String  | Same as `config` but inline |
+
+> `config` and `config-inline` are mutually exclusive.
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

@@ -35,6 +35,9 @@ inputs:
   config:
     description: 'BuildKit config file'
     required: false
+  config-inline:
+    description: 'Inline BuildKit config'
+    required: false
 
 outputs:
   name:

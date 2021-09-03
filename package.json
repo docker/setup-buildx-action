@@ -32,6 +32,7 @@
     "@actions/http-client": "^1.0.11",
     "@actions/tool-cache": "^1.7.1",
     "semver": "^7.3.5",
+    "tmp": "^0.2.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

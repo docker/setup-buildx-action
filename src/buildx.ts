@@ -19,6 +19,28 @@ export type Builder = {
   node_platforms?: string;
 };
 
+export async function getConfigInline(s: string): Promise<string> {
+  return getConfig(s, false);
+}
+
+export async function getConfigFile(s: string): Promise<string> {
+  return getConfig(s, true);
+}
+
+export async function getConfig(s: string, file: boolean): Promise<string> {
+  if (file) {
+    if (!fs.existsSync(s)) {
+      throw new Error(`config file ${s} not found`);
+    }
+    s = fs.readFileSync(s, {encoding: 'utf-8'});
+  }
+  const configFile = context.tmpNameSync({
+    tmpdir: context.tmpDir()
+  });
+  fs.writeFileSync(configFile, s);
+  return configFile;
+}
+
 export async function isAvailable(): Promise<Boolean> {
   return await exec
     .getExecOutput('docker', ['buildx'], {

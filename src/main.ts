@@ -50,7 +50,9 @@ async function run(): Promise<void> {
         createArgs.push(inputs.endpoint);
       }
       if (inputs.config) {
-        createArgs.push('--config', inputs.config);
+        createArgs.push('--config', await buildx.getConfigFile(inputs.config));
+      } else if (inputs.configInline) {
+        createArgs.push('--config', await buildx.getConfigInline(inputs.configInline));
       }
       await exec.exec('docker', createArgs);
       core.endGroup();

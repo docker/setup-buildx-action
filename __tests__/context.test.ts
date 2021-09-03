@@ -11,6 +11,10 @@ jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
   return tmpDir;
 });
 
+jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
+  return path.join('/tmp/.docker-setup-buildx-jest', '.tmpname-jest').split(path.sep).join(path.posix.sep);
+});
+
 describe('getInputList', () => {
   it('handles single line correctly', async () => {
     await setInput('foo', 'bar');

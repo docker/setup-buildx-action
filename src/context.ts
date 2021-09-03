@@ -1,6 +1,7 @@
 import fs from 'fs';
 import * as os from 'os';
 import path from 'path';
+import * as tmp from 'tmp';
 import * as core from '@actions/core';
 import {issueCommand} from '@actions/core/lib/command';
 
@@ -15,6 +16,10 @@ export function tmpDir(): string {
   return _tmpDir;
 }
 
+export function tmpNameSync(options?: tmp.TmpNameOptions): string {
+  return tmp.tmpNameSync(options);
+}
+
 export interface Inputs {
   version: string;
   driver: string;
@@ -24,6 +29,7 @@ export interface Inputs {
   use: boolean;
   endpoint: string;
   config: string;
+  configInline: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -35,7 +41,8 @@ export async function getInputs(): Promise<Inputs> {
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
-    config: core.getInput('config')
+    config: core.getInput('config'),
+    configInline: core.getInput('config-inline')
   };
 }
 

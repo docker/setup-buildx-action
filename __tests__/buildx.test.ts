@@ -6,12 +6,18 @@ import * as context from '../src/context';
 import * as semver from 'semver';
 import * as exec from '@actions/exec';
 
+const tmpNameSync = path.join('/tmp/.docker-setup-buildx-jest', '.tmpname-jest').split(path.sep).join(path.posix.sep);
+
 jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
   const tmpDir = path.join('/tmp/.docker-setup-buildx-jest').split(path.sep).join(path.posix.sep);
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
+});
+
+jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
+  return tmpNameSync;
 });
 
 describe('isAvailable', () => {
@@ -118,4 +124,38 @@ describe('install', () => {
     console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
+});
+
+describe('getConfig', () => {
+  test.each([
+    ['debug = true', false, 'debug = true', false],
+    [`notfound.toml`, true, '', true],
+    [
+      `${path.join(__dirname, 'fixtures', 'buildkitd.toml').split(path.sep).join(path.posix.sep)}`,
+      true,
+      `debug = true
+[registry."docker.io"]
+  mirrors = ["mirror.gcr.io"]
+`,
+      false
+    ]
+  ])('given %p config', async (val, file, exValue, invalid) => {
+    try {
+      let config: string;
+      if (file) {
+        config = await buildx.getConfigFile(val);
+      } else {
+        config = await buildx.getConfigInline(val);
+      }
+      expect(true).toBe(!invalid);
+      console.log(`config: ${config}`);
+      expect(config).toEqual(`${tmpNameSync}`);
+      const configValue = await fs.readFileSync(tmpNameSync, 'utf-8');
+      console.log(`configValue: ${configValue}`);
+      expect(configValue).toEqual(exValue);
+    } catch (err) {
+      console.log(err);
+      expect(true).toBe(invalid);
+    }
+  });
 });

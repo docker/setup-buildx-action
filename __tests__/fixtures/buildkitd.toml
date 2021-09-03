@@ -1,0 +1,3 @@
+debug = true
+[registry."docker.io"]
+  mirrors = ["mirror.gcr.io"]

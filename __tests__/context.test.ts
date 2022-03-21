@@ -1,3 +1,4 @@
+import {beforeEach, describe, expect, it, jest} from '@jest/globals';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -19,63 +20,54 @@ describe('getInputList', () => {
   it('handles single line correctly', async () => {
     await setInput('foo', 'bar');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar']);
   });
 
   it('handles multiple lines correctly', async () => {
     setInput('foo', 'bar\nbaz');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz']);
   });
 
   it('remove empty lines correctly', async () => {
     setInput('foo', 'bar\n\nbaz');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz']);
   });
 
   it('handles comma correctly', async () => {
     setInput('foo', 'bar,baz');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz']);
   });
 
   it('remove empty result correctly', async () => {
     setInput('foo', 'bar,baz,');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz']);
   });
 
   it('handles different new lines correctly', async () => {
     setInput('foo', 'bar\r\nbaz');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz']);
   });
 
   it('handles different new lines and comma correctly', async () => {
     setInput('foo', 'bar\r\nbaz,bat');
     const res = await context.getInputList('foo');
-    console.log(res);
     expect(res).toEqual(['bar', 'baz', 'bat']);
   });
 
   it('handles multiple lines and ignoring comma correctly', async () => {
     setInput('driver-opts', 'image=moby/buildkit:master\nnetwork=host');
     const res = await context.getInputList('driver-opts', true);
-    console.log(res);
     expect(res).toEqual(['image=moby/buildkit:master', 'network=host']);
   });
 
   it('handles different new lines and ignoring comma correctly', async () => {
     setInput('driver-opts', 'image=moby/buildkit:master\r\nnetwork=host');
     const res = await context.getInputList('driver-opts', true);
-    console.log(res);
     expect(res).toEqual(['image=moby/buildkit:master', 'network=host']);
   });
 });
@@ -95,19 +87,22 @@ describe('asyncForEach', () => {
 
 describe('setOutput', () => {
   beforeEach(() => {
-    process.stdout.write = jest.fn();
+    process.stdout.write = jest.fn() as typeof process.stdout.write;
   });
 
+  // eslint-disable-next-line jest/expect-expect
   it('setOutput produces the correct command', () => {
     context.setOutput('some output', 'some value');
     assertWriteCalls([`::set-output name=some output::some value${os.EOL}`]);
   });
 
+  // eslint-disable-next-line jest/expect-expect
   it('setOutput handles bools', () => {
     context.setOutput('some output', false);
     assertWriteCalls([`::set-output name=some output::false${os.EOL}`]);
   });
 
+  // eslint-disable-next-line jest/expect-expect
   it('setOutput handles numbers', () => {
     context.setOutput('some output', 1.01);
     assertWriteCalls([`::set-output name=some output::1.01${os.EOL}`]);

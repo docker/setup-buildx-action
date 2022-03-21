@@ -10,7 +10,7 @@ export async function getRemoteSha(repo: string, ref: string): Promise<string> {
       if (res.stderr.length > 0 && res.exitCode != 0) {
         throw new Error(res.stderr);
       }
-      const [rsha, rref] = res.stdout.trim().split(/[\s\t]/);
+      const [rsha] = res.stdout.trim().split(/[\s\t]/);
       if (rsha.length == 0) {
         throw new Error(`Cannot find remote ref for ${repo}#${ref}`);
       }

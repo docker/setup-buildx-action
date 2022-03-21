@@ -1,3 +1,4 @@
+import {describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -21,9 +22,10 @@ jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
 });
 
 describe('isAvailable', () => {
-  const execSpy: jest.SpyInstance = jest.spyOn(exec, 'getExecOutput');
+  const execSpy = jest.spyOn(exec, 'getExecOutput');
   buildx.isAvailable();
 
+  // eslint-disable-next-line jest/no-standalone-expect
   expect(execSpy).toHaveBeenCalledWith(`docker`, ['buildx'], {
     silent: true,
     ignoreReturnCode: true
@@ -31,25 +33,10 @@ describe('isAvailable', () => {
 });
 
 describe('getVersion', () => {
-  async function isDaemonRunning() {
-    return await exec
-      .getExecOutput(`docker`, ['version', '--format', '{{.Server.Os}}'], {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(res => {
-        return !res.stdout.trim().includes(' ') && res.exitCode == 0;
-      });
-  }
-  (isDaemonRunning() ? it : it.skip)(
-    'valid',
-    async () => {
-      const version = await buildx.getVersion();
-      console.log(`version: ${version}`);
-      expect(semver.valid(version)).not.toBeNull();
-    },
-    100000
-  );
+  it('valid', async () => {
+    const version = await buildx.getVersion();
+    expect(semver.valid(version)).not.toBeNull();
+  });
 });
 
 describe('parseVersion', () => {
@@ -74,54 +61,41 @@ describe('satisfies', () => {
 });
 
 describe('inspect', () => {
-  async function isDaemonRunning() {
-    return await exec
-      .getExecOutput(`docker`, ['version', '--format', '{{.Server.Os}}'], {
-        ignoreReturnCode: true,
-        silent: true
-      })
-      .then(res => {
-        return !res.stdout.trim().includes(' ') && res.exitCode == 0;
-      });
-  }
-  (isDaemonRunning() ? it : it.skip)(
-    'valid',
-    async () => {
-      const builder = await buildx.inspect('');
-      console.log('builder', builder);
-      expect(builder).not.toBeUndefined();
-      expect(builder.name).not.toEqual('');
-      expect(builder.driver).not.toEqual('');
-      expect(builder.node_platforms).not.toEqual('');
-    },
-    100000
-  );
+  it('valid', async () => {
+    const builder = await buildx.inspect('');
+    expect(builder).not.toBeUndefined();
+    expect(builder.name).not.toEqual('');
+    expect(builder.driver).not.toEqual('');
+    expect(builder.node_platforms).not.toEqual('');
+  }, 100000);
 });
 
 describe('build', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds refs/pull/648/head', async () => {
     const buildxBin = await buildx.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
-    console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
+
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
     const buildxBin = await buildx.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir);
-    console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });
 
 describe('install', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
+
   it('acquires v0.4.1 version of buildx', async () => {
     const buildxBin = await buildx.install('v0.4.1', tmpDir);
-    console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
+
   it('acquires latest version of buildx', async () => {
     const buildxBin = await buildx.install('latest', tmpDir);
-    console.log(buildxBin);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });
@@ -148,13 +122,11 @@ describe('getConfig', () => {
         config = await buildx.getConfigInline(val);
       }
       expect(true).toBe(!invalid);
-      console.log(`config: ${config}`);
       expect(config).toEqual(`${tmpNameSync}`);
-      const configValue = await fs.readFileSync(tmpNameSync, 'utf-8');
-      console.log(`configValue: ${configValue}`);
+      const configValue = fs.readFileSync(tmpNameSync, 'utf-8');
       expect(configValue).toEqual(exValue);
     } catch (err) {
-      console.log(err);
+      // eslint-disable-next-line jest/no-conditional-expect
       expect(true).toBe(invalid);
     }
   });

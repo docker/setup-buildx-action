@@ -1,5 +1,6 @@
 import * as os from 'os';
 import * as path from 'path';
+import * as uuid from 'uuid';
 import * as buildx from './buildx';
 import * as context from './context';
 import * as stateHelper from './state-helper';
@@ -28,13 +29,13 @@ async function run(): Promise<void> {
     }
 
     const buildxVersion = await buildx.getVersion();
-    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${require('uuid').v4()}`;
+    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${uuid.v4()}`;
     context.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
     if (inputs.driver !== 'docker') {
       core.startGroup(`Creating a new builder instance`);
-      let createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
+      const createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
       if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
           createArgs.push('--driver-opt', driverOpt);
@@ -58,7 +59,7 @@ async function run(): Promise<void> {
       core.endGroup();
 
       core.startGroup(`Booting builder`);
-      let bootstrapArgs: Array<string> = ['buildx', 'inspect', '--bootstrap'];
+      const bootstrapArgs: Array<string> = ['buildx', 'inspect', '--bootstrap'];
       if (buildx.satisfies(buildxVersion, '>=0.4.0')) {
         bootstrapArgs.push('--builder', builderName);
       }

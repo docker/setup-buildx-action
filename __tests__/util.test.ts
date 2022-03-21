@@ -1,3 +1,4 @@
+import {describe, expect, test} from '@jest/globals';
 import * as util from '../src/util';
 
 describe('isValidUrl', () => {

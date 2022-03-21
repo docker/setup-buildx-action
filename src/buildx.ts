@@ -41,7 +41,7 @@ export async function getConfig(s: string, file: boolean): Promise<string> {
   return configFile;
 }
 
-export async function isAvailable(): Promise<Boolean> {
+export async function isAvailable(): Promise<boolean> {
   return await exec
     .getExecOutput('docker', ['buildx'], {
       ignoreReturnCode: true,
@@ -134,6 +134,7 @@ export async function inspect(name: string): Promise<Builder> {
 }
 
 export async function build(inputBuildRef: string, dockerConfigHome: string): Promise<string> {
+  // eslint-disable-next-line prefer-const
   let [repo, ref] = inputBuildRef.split('#');
   if (ref.length == 0) {
     ref = 'master';
@@ -208,16 +209,9 @@ async function setPlugin(toolPath: string, dockerConfigHome: string): Promise<st
 async function download(version: string): Promise<string> {
   const targetFile: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
   const downloadUrl = util.format('https://github.com/docker/buildx/releases/download/v%s/%s', version, await filename(version));
-  let downloadPath: string;
-
-  try {
-    core.info(`Downloading ${downloadUrl}`);
-    downloadPath = await tc.downloadTool(downloadUrl);
-    core.debug(`Downloaded to ${downloadPath}`);
-  } catch (error) {
-    throw error;
-  }
-
+  core.info(`Downloading ${downloadUrl}`);
+  const downloadPath = await tc.downloadTool(downloadUrl);
+  core.debug(`Downloaded to ${downloadPath}`);
   return await tc.cacheFile(downloadPath, targetFile, 'buildx', version);
 }
 
@@ -233,6 +227,7 @@ async function filename(version: string): Promise<string> {
       break;
     }
     case 'arm': {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const arm_version = (process.config.variables as any).arm_version;
       arch = arm_version ? 'arm-v' + arm_version : 'arm';
       break;

@@ -54,6 +54,6 @@ outputs:
     description: 'Builder node platforms available (comma separated)'
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
   post: 'dist/index.js'

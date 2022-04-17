@@ -32,6 +32,17 @@ describe('isAvailable', () => {
   });
 });
 
+describe('isAvailable standalone', () => {
+  const execSpy = jest.spyOn(exec, 'getExecOutput');
+  buildx.isAvailable(true);
+
+  // eslint-disable-next-line jest/no-standalone-expect
+  expect(execSpy).toHaveBeenCalledWith(`buildx`, [], {
+    silent: true,
+    ignoreReturnCode: true
+  });
+});
+
 describe('getVersion', () => {
   it('valid', async () => {
     const version = await buildx.getVersion();
@@ -75,29 +86,32 @@ describe('build', () => {
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds refs/pull/648/head', async () => {
-    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir);
+    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#refs/pull/648/head', tmpDir, false);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('builds 67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', async () => {
-    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir);
+    const buildxBin = await buildx.build('https://github.com/docker/buildx.git#67bd6f4dc82a9cd96f34133dab3f6f7af803bb14', tmpDir, false);
     expect(fs.existsSync(buildxBin)).toBe(true);
   }, 100000);
 });
 
 describe('install', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-buildx-'));
-
-  it('acquires v0.4.1 version of buildx', async () => {
-    const buildxBin = await buildx.install('v0.4.1', tmpDir);
-    expect(fs.existsSync(buildxBin)).toBe(true);
-  }, 100000);
-
-  it('acquires latest version of buildx', async () => {
-    const buildxBin = await buildx.install('latest', tmpDir);
-    expect(fs.existsSync(buildxBin)).toBe(true);
-  }, 100000);
+  test.each([
+    ['v0.4.1', false],
+    ['latest', false],
+    ['v0.4.1', true],
+    ['latest', true]
+  ])(
+    'acquires %p of buildx (standalone: %p)',
+    async (version, standalone) => {
+      const buildxBin = await buildx.install(version, tmpDir, standalone);
+      expect(fs.existsSync(buildxBin)).toBe(true);
+    },
+    100000
+  );
 });
 
 describe('getConfig', () => {

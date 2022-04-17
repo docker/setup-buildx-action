@@ -41,9 +41,10 @@ export async function getConfig(s: string, file: boolean): Promise<string> {
   return configFile;
 }
 
-export async function isAvailable(): Promise<boolean> {
+export async function isAvailable(standalone?: boolean): Promise<boolean> {
+  const cmd = getCommand([], standalone);
   return await exec
-    .getExecOutput('docker', ['buildx'], {
+    .getExecOutput(cmd.commandLine, cmd.args, {
       ignoreReturnCode: true,
       silent: true
     })
@@ -52,12 +53,17 @@ export async function isAvailable(): Promise<boolean> {
         return false;
       }
       return res.exitCode == 0;
+    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .catch(error => {
+      return false;
     });
 }
 
-export async function getVersion(): Promise<string> {
+export async function getVersion(standalone?: boolean): Promise<string> {
+  const cmd = getCommand(['version'], standalone);
   return await exec
-    .getExecOutput('docker', ['buildx', 'version'], {
+    .getExecOutput(cmd.commandLine, cmd.args, {
       ignoreReturnCode: true,
       silent: true
     })
@@ -81,9 +87,10 @@ export function satisfies(version: string, range: string): boolean {
   return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
 }
 
-export async function inspect(name: string): Promise<Builder> {
+export async function inspect(name: string, standalone?: boolean): Promise<Builder> {
+  const cmd = getCommand(['inspect', name], standalone);
   return await exec
-    .getExecOutput(`docker`, ['buildx', 'inspect', name], {
+    .getExecOutput(cmd.commandLine, cmd.args, {
       ignoreReturnCode: true,
       silent: true
     })
@@ -133,7 +140,7 @@ export async function inspect(name: string): Promise<Builder> {
     });
 }
 
-export async function build(inputBuildRef: string, dockerConfigHome: string): Promise<string> {
+export async function build(inputBuildRef: string, dest: string, standalone: boolean): Promise<string> {
   // eslint-disable-next-line prefer-const
   let [repo, ref] = inputBuildRef.split('#');
   if (ref.length == 0) {
@@ -152,8 +159,27 @@ export async function build(inputBuildRef: string, dockerConfigHome: string): Pr
   toolPath = tc.find('buildx', vspec);
   if (!toolPath) {
     const outFolder = path.join(context.tmpDir(), 'out').split(path.sep).join(path.posix.sep);
+    let buildWithStandalone = false;
+    const standaloneFound = await isAvailable(true);
+    const pluginFound = await isAvailable(false);
+    if (standalone && standaloneFound) {
+      core.debug(`Buildx standalone found, build with it`);
+      buildWithStandalone = true;
+    } else if (!standalone && pluginFound) {
+      core.debug(`Buildx plugin found, build with it`);
+      buildWithStandalone = false;
+    } else if (standaloneFound) {
+      core.debug(`Buildx plugin not found, but standalone found so trying to build with it`);
+      buildWithStandalone = true;
+    } else if (pluginFound) {
+      core.debug(`Buildx standalone not found, but plugin found so trying to build with it`);
+      buildWithStandalone = false;
+    } else {
+      throw new Error(`Neither buildx standalone or plugin have been found to build from ref`);
+    }
+    const buildCmd = getCommand(['build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outFolder}`, inputBuildRef], buildWithStandalone);
     toolPath = await exec
-      .getExecOutput('docker', ['buildx', 'build', '--target', 'binaries', '--build-arg', 'BUILDKIT_CONTEXT_KEEP_GIT_DIR=1', '--output', `type=local,dest=${outFolder}`, inputBuildRef], {
+      .getExecOutput(buildCmd.commandLine, buildCmd.args, {
         ignoreReturnCode: true
       })
       .then(res => {
@@ -164,10 +190,13 @@ export async function build(inputBuildRef: string, dockerConfigHome: string): Pr
       });
   }
 
-  return setPlugin(toolPath, dockerConfigHome);
+  if (standalone) {
+    return setStandalone(toolPath, dest);
+  }
+  return setPlugin(toolPath, dest);
 }
 
-export async function install(inputVersion: string, dockerConfigHome: string): Promise<string> {
+export async function install(inputVersion: string, dest: string, standalone: boolean): Promise<string> {
   const release: github.GitHubRelease | null = await github.getRelease(inputVersion);
   if (!release) {
     throw new Error(`Cannot find buildx ${inputVersion} release`);
@@ -185,10 +214,40 @@ export async function install(inputVersion: string, dockerConfigHome: string): P
     toolPath = await download(version);
   }
 
-  return setPlugin(toolPath, dockerConfigHome);
+  if (standalone) {
+    return setStandalone(toolPath, dest);
+  }
+  return setPlugin(toolPath, dest);
+}
+
+async function setStandalone(toolPath: string, dest: string): Promise<string> {
+  core.info('Standalone mode');
+  const toolBinPath = path.join(toolPath, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
+
+  const binDir = path.join(dest, 'bin');
+  core.debug(`Bin dir is ${binDir}`);
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, {recursive: true});
+  }
+
+  const filename: string = context.osPlat == 'win32' ? 'buildx.exe' : 'buildx';
+  const buildxPath: string = path.join(binDir, filename);
+  core.debug(`Bin path is ${buildxPath}`);
+  fs.copyFileSync(toolBinPath, buildxPath);
+
+  core.info('Fixing perms');
+  fs.chmodSync(buildxPath, '0755');
+
+  core.addPath(binDir);
+  core.info('Added buildx to the path');
+
+  return buildxPath;
 }
 
 async function setPlugin(toolPath: string, dockerConfigHome: string): Promise<string> {
+  core.info('Docker plugin mode');
+  const toolBinPath = path.join(toolPath, context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx');
+
   const pluginsDir: string = path.join(dockerConfigHome, 'cli-plugins');
   core.debug(`Plugins dir is ${pluginsDir}`);
   if (!fs.existsSync(pluginsDir)) {
@@ -198,7 +257,7 @@ async function setPlugin(toolPath: string, dockerConfigHome: string): Promise<st
   const filename: string = context.osPlat == 'win32' ? 'docker-buildx.exe' : 'docker-buildx';
   const pluginPath: string = path.join(pluginsDir, filename);
   core.debug(`Plugin path is ${pluginPath}`);
-  fs.copyFileSync(path.join(toolPath, filename), pluginPath);
+  fs.copyFileSync(toolBinPath, pluginPath);
 
   core.info('Fixing perms');
   fs.chmodSync(pluginPath, '0755');
@@ -268,4 +327,11 @@ export async function getBuildKitVersion(containerID: string): Promise<string> {
       }
       return bkitimage.stdout.trim();
     });
+}
+
+export function getCommand(args: Array<string>, standalone?: boolean) {
+  return {
+    commandLine: standalone ? 'buildx' : 'docker',
+    args: standalone ? args : ['buildx', ...args]
+  };
 }

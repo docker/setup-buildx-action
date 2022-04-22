@@ -197,8 +197,11 @@ Following inputs can be used as `step.with` keys
 | `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
 | `config`           | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
 | `config-inline`    | String  | Same as `config` but inline |
+| `state-dir`        | String  | Path to [BuildKit state volume](https://github.com/docker/buildx/blob/master/docs/reference/buildx_rm.md#-keep-buildkit-state---keep-state) directory |
 
-> `config` and `config-inline` are mutually exclusive.
+> :bulb: `config` and `config-inline` are mutually exclusive.
+
+> :bulb: `state-dir` can only be used with the `docker-container` driver and a builder with a single node.
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

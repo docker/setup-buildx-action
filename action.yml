@@ -38,6 +38,9 @@ inputs:
   config-inline:
     description: 'Inline BuildKit config'
     required: false
+  state-dir:
+    description: 'Path to BuildKit state volume directory'
+    required: false
 
 outputs:
   name:

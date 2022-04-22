@@ -30,6 +30,7 @@ export interface Inputs {
   endpoint: string;
   config: string;
   configInline: string;
+  stateDir: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -42,7 +43,8 @@ export async function getInputs(): Promise<Inputs> {
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
     config: core.getInput('config'),
-    configInline: core.getInput('config-inline')
+    configInline: core.getInput('config-inline'),
+    stateDir: core.getInput('state-dir')
   };
 }
 

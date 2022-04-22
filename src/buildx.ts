@@ -3,11 +3,16 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as util from 'util';
 import * as context from './context';
+import * as docker from './docker';
 import * as git from './git';
 import * as github from './github';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
+import child_process from 'child_process';
+
+const uid = parseInt(child_process.execSync(`id -u`, {encoding: 'utf8'}).trim());
+const gid = parseInt(child_process.execSync(`id -g`, {encoding: 'utf8'}).trim());
 
 export type Builder = {
   name?: string;
@@ -79,6 +84,19 @@ export function parseVersion(stdout: string): string {
 
 export function satisfies(version: string, range: string): boolean {
   return semver.satisfies(version, range) || /^[0-9a-f]{7}$/.exec(version) !== null;
+}
+
+export async function createStateVolume(stateDir: string, nodeName: string): Promise<void> {
+  return await docker.volumeCreate(stateDir, `${nodeName}_state`);
+}
+
+export async function saveStateVolume(dir: string, nodeName: string): Promise<void> {
+  const ctnid = await docker.containerCreate('busybox', `${nodeName}_state:/data`);
+  const outdir = await docker.containerCopy(ctnid, `${ctnid}:/data`);
+  await docker.volumeRemove(`${nodeName}_state`);
+  fs.rmdirSync(dir, {recursive: true});
+  fs.renameSync(outdir, dir);
+  await docker.containerRemove(ctnid);
 }
 
 export async function inspect(name: string): Promise<Builder> {

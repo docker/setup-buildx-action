@@ -16,8 +16,10 @@ async function run(): Promise<void> {
     core.endGroup();
 
     const inputs: context.Inputs = await context.getInputs();
-    const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
+    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${uuid.v4()}`;
+    stateHelper.setStateDir(inputs.stateDir);
 
+    const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
     if (util.isValidUrl(inputs.version)) {
       core.startGroup(`Build and install buildx`);
       await buildx.build(inputs.version, dockerConfigHome);
@@ -29,11 +31,15 @@ async function run(): Promise<void> {
     }
 
     const buildxVersion = await buildx.getVersion();
-    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${uuid.v4()}`;
     context.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
     if (inputs.driver !== 'docker') {
+      if (inputs.stateDir.length > 0) {
+        await core.group(`Creating BuildKit state volume from ${inputs.stateDir}`, async () => {
+          await buildx.createStateVolume(inputs.stateDir, `buildx_buildkit_${builderName}0`);
+        });
+      }
       core.startGroup(`Creating a new builder instance`);
       const createArgs: Array<string> = ['buildx', 'create', '--name', builderName, '--driver', inputs.driver];
       if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
@@ -114,8 +120,12 @@ async function cleanup(): Promise<void> {
 
   if (stateHelper.builderName.length > 0) {
     core.startGroup(`Removing builder`);
+    const rmArgs: Array<string> = ['buildx', 'rm', `${stateHelper.builderName}`];
+    if (stateHelper.stateDir.length > 0) {
+      rmArgs.push('--keep-state');
+    }
     await exec
-      .getExecOutput('docker', ['buildx', 'rm', `${stateHelper.builderName}`], {
+      .getExecOutput('docker', rmArgs, {
         ignoreReturnCode: true
       })
       .then(res => {
@@ -123,6 +133,12 @@ async function cleanup(): Promise<void> {
           core.warning(res.stderr.trim());
         }
       });
+    core.endGroup();
+  }
+
+  if (stateHelper.stateDir.length > 0) {
+    core.startGroup(`Saving state volume`);
+    await buildx.saveStateVolume(stateHelper.stateDir, stateHelper.containerName);
     core.endGroup();
   }
 }

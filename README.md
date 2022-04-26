@@ -24,6 +24,7 @@ ___
   * [BuildKit daemon configuration](#buildkit-daemon-configuration)
     * [Registry mirror](#registry-mirror)
     * [Max parallelism](#max-parallelism)
+  * [Standalone mode](#standalone-mode)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -180,6 +181,33 @@ jobs:
           config: .github/buildkitd.toml
 ```
 
+### Standalone mode
+
+If you don't have the Docker CLI installed on the GitHub Runner, buildx binary
+is invoked directly, instead of calling it as a docker plugin. This can be
+useful if you want to use the `kubernetes` driver in your self-hosted runner:
+
+```yaml
+name: ci
+
+on:
+  push:
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          driver: kubernetes
+      -
+        name: Build
+        run: |
+          buildx build .
+```
+
 ## Customizing
 
 ### inputs
@@ -195,10 +223,10 @@ Following inputs can be used as `step.with` keys
 | `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
 | `use`              | Bool    | Switch to this builder instance (default `true`) |
 | `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
-| `config`           | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
-| `config-inline`    | String  | Same as `config` but inline |
+| `config`¹          | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
+| `config-inline`¹   | String  | Same as `config` but inline |
 
-> `config` and `config-inline` are mutually exclusive.
+> * ¹ `config` and `config-inline` are mutually exclusive
 
 > `CSV` type must be a newline-delimited string
 > ```yaml

@@ -53,7 +53,7 @@ jobs:
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       -
         name: Inspect builder
         run: |
@@ -83,11 +83,11 @@ jobs:
         uses: actions/checkout@v2
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
@@ -109,7 +109,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         id: buildx
         with:
           install: true
@@ -142,7 +142,7 @@ jobs:
     steps:
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         with:
           config-inline: |
             [registry."docker.io"]
@@ -176,7 +176,7 @@ jobs:
     steps:
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         with:
           config: .github/buildkitd.toml
 ```
@@ -199,7 +199,7 @@ jobs:
     steps:
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         with:
           driver: kubernetes
       -
@@ -269,7 +269,7 @@ or you can also enable debugging in the [setup-buildx action step](https://githu
 ```yaml
   -
     name: Set up Docker Buildx
-    uses: docker/setup-buildx-action@v1
+    uses: docker/setup-buildx-action@v2
     with:
       buildkitd-flags: --debug
 ```

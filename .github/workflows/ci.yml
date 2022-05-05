@@ -333,14 +333,32 @@ jobs:
         with:
           context: .
 
-  standalone:
+  standalone-cmd:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        buildx-version:
-          - latest
-          - ""
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Uninstall docker cli
+        run: |
+          sudo apt-get purge -y moby-cli moby-buildx
+      -
+        name: Set up Docker Buildx
+        uses: ./
+      -
+        name: Create Dockerfile
+        run: |
+          cat > ./Dockerfile <<EOL
+          FROM alpine
+          EOL
+      -
+        name: Build
+        run: |
+          buildx build .
+
+  standalone-action:
+    runs-on: ubuntu-latest
     steps:
       -
         name: Checkout
@@ -355,10 +373,16 @@ jobs:
         with:
           version: ${{ matrix.buildx-version }}
       -
-        name: Check available in path
-        if: matrix.standalone
+        name: Create Dockerfile
         run: |
-          buildx version
+          cat > ./Dockerfile <<EOL
+          FROM alpine
+          EOL
+      -
+        name: Build
+        uses: docker/build-push-action@master
+        with:
+          context: .
 
   standalone-install-error:
     runs-on: ubuntu-latest
@@ -385,47 +409,3 @@ jobs:
             echo "::error::Should have failed"
             exit 1
           fi
-
-  standalone-kubernetes:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        name: Uninstall moby
-        run: |
-          sudo apt-get purge -y moby-engine moby-cli moby-buildx
-      -
-        name: Setup k8s cluster
-        run: |
-          set -x
-          sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-          echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubelet kubeadm kubectl
-          sudo swapoff -a
-          sudo kubeadm init --cri-socket /run/containerd/containerd.sock
-          mkdir -p $HOME/.kube/
-          sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-          sudo chown $USER $HOME/.kube/config
-          kubectl taint nodes --all node-role.kubernetes.io/master-
-          kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-          kubectl wait --for=condition=ready --timeout=30s node --all
-          kubectl get nodes -o wide
-      -
-        name: Create Dockerfile
-        run: |
-          cat > ./Dockerfile <<EOL
-          FROM alpine
-          RUN echo hello
-          EOL
-      -
-        name: Set up Docker Buildx
-        uses: ./
-        with:
-          driver: kubernetes
-      -
-        name: Build
-        run: |
-          buildx build .

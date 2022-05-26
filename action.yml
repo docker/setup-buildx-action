@@ -22,7 +22,7 @@ inputs:
     default: '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
     required: false
   install:
-    description: 'Sets up docker build command as an alias to docker buildx'
+    description: 'Sets up docker build command as an alias to docker buildx build'
     default: 'false'
     required: false
   use:

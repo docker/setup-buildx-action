@@ -95,6 +95,8 @@ jobs:
 
 ### Install by default
 
+If you want set up the `docker build` command as an alias to `docker buildx build`:
+
 ```yaml
 name: ci
 

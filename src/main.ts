@@ -63,7 +63,7 @@ async function run(): Promise<void> {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
           createArgs.push('--driver-opt', driverOpt);
         });
-        if (inputs.buildkitdFlags) {
+        if (inputs.driver != 'remote' && inputs.buildkitdFlags) {
           createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
         }
       }
@@ -73,10 +73,12 @@ async function run(): Promise<void> {
       if (inputs.endpoint) {
         createArgs.push(inputs.endpoint);
       }
-      if (inputs.config) {
-        createArgs.push('--config', await buildx.getConfigFile(inputs.config));
-      } else if (inputs.configInline) {
-        createArgs.push('--config', await buildx.getConfigInline(inputs.configInline));
+      if (inputs.driver != 'remote') {
+        if (inputs.config) {
+          createArgs.push('--config', await buildx.getConfigFile(inputs.config));
+        } else if (inputs.configInline) {
+          createArgs.push('--config', await buildx.getConfigInline(inputs.configInline));
+        }
       }
       const createCmd = buildx.getCommand(createArgs, standalone);
       await exec.exec(createCmd.commandLine, createCmd.args);

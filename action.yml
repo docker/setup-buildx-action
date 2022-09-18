@@ -44,14 +44,16 @@ outputs:
     description: 'Builder name'
   driver:
     description: 'Builder driver'
-  endpoint:
-    description: 'Builder node endpoint'
-  status:
-    description: 'Builder node status'
-  flags:
-    description: 'Builder node flags (if applicable)'
   platforms:
-    description: 'Builder node platforms available (comma separated)'
+    description: 'Builder node platforms (preferred or available)'
+  nodes:
+    description: 'Builder nodes metadata'
+  endpoint:
+    description: 'Builder node endpoint (deprecated, use nodes output instead)'
+  status:
+    description: 'Builder node status (deprecated, use nodes output instead)'
+  flags:
+    description: 'Builder node flags (deprecated, use nodes output instead)'
 
 runs:
   using: 'node16'

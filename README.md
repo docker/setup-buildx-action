@@ -29,6 +29,7 @@ ___
   * [outputs](#outputs)
   * [environment variables](#environment-variables)
 * [Notes](#notes)
+  * [`nodes` output](#nodes-output)
   * [BuildKit container logs](#buildkit-container-logs)
 * [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
 
@@ -98,14 +99,12 @@ Following inputs can be used as `step.with` keys
 
 Following outputs are available
 
-| Name          | Type    | Description                           |
-|---------------|---------|---------------------------------------|
-| `name`        | String  | Builder name |
-| `driver`      | String  | Builder driver |
-| `endpoint`    | String  | Builder node endpoint |
-| `status`      | String  | Builder node status |
-| `flags`       | String  | Builder node flags (if applicable) |
-| `platforms`   | String  | Builder node platforms available (comma separated) |
+| Name        | Type   | Description                                     |
+|-------------|--------|-------------------------------------------------|
+| `name`      | String | Builder name                                    |
+| `driver`    | String | Builder driver                                  |
+| `platforms` | String | Builder node platforms (preferred or available) |
+| `nodes`     | JSON   | Builder [nodes metadata](#nodes-output)         |
 
 ### environment variables
 
@@ -116,6 +115,35 @@ The following [official docker environment variables](https://docs.docker.com/en
 | `DOCKER_CONFIG` | String | `~/.docker` | The location of your client configuration files |
 
 ## Notes
+
+### `nodes` output
+
+```json
+[
+  {
+     "name": "builder-3820d274-502c-4498-ae24-d4c32b3023d90",
+     "endpoint": "unix:///var/run/docker.sock",
+     "driver-opts": [
+       "network=host",
+       "image=moby/buildkit:master"
+     ],
+    "status": "running",
+    "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+    "buildkit": "3fab389",
+    "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386"
+  }
+]
+```
+
+| Name              | Type   | Description                |
+|-------------------|--------|----------------------------|
+| `name`            | String | Node name                  |
+| `endpoint`        | String | Node endpoint              |
+| `driver-opts`     | List   | Options for the driver     |
+| `status`          | String | Node status                |
+| `buildkitd-flags` | String | Flags for buildkitd daemon |
+| `buildkit`        | String | BuildKit version           |
+| `platforms`       | String | Platforms available        |
 
 ### BuildKit container logs
 

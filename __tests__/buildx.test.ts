@@ -73,7 +73,7 @@ describe('inspect', () => {
     expect(builder).not.toBeUndefined();
     expect(builder.name).not.toEqual('');
     expect(builder.driver).not.toEqual('');
-    expect(builder.node_platforms).not.toEqual('');
+    expect(builder.nodes).not.toEqual({});
   }, 100000);
 });
 

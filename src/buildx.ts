@@ -12,11 +12,15 @@ import * as tc from '@actions/tool-cache';
 export type Builder = {
   name?: string;
   driver?: string;
-  node_name?: string;
-  node_endpoint?: string;
-  node_status?: string;
-  node_flags?: string;
-  node_platforms?: string;
+  nodes: Node[];
+};
+
+export type Node = {
+  name?: string;
+  endpoint?: string;
+  status?: string;
+  'buildkitd-flags'?: string;
+  platforms?: string;
 };
 
 export async function getConfigInline(s: string): Promise<string> {
@@ -98,43 +102,66 @@ export async function inspect(name: string, standalone?: boolean): Promise<Build
       if (res.stderr.length > 0 && res.exitCode != 0) {
         throw new Error(res.stderr.trim());
       }
-      const builder: Builder = {};
-      itlines: for (const line of res.stdout.trim().split(`\n`)) {
+      const builder: Builder = {
+        nodes: []
+      };
+      let node: Node = {};
+      for (const line of res.stdout.trim().split(`\n`)) {
         const [key, ...rest] = line.split(':');
         const value = rest.map(v => v.trim()).join(':');
         if (key.length == 0 || value.length == 0) {
           continue;
         }
-        switch (key) {
-          case 'Name': {
+        switch (key.toLowerCase()) {
+          case 'name': {
             if (builder.name == undefined) {
               builder.name = value;
             } else {
-              builder.node_name = value;
+              if (Object.keys(node).length > 0) {
+                builder.nodes.push(node);
+                node = {};
+              }
+              node.name = value;
             }
             break;
           }
-          case 'Driver': {
+          case 'driver': {
             builder.driver = value;
             break;
           }
-          case 'Endpoint': {
-            builder.node_endpoint = value;
+          case 'endpoint': {
+            node.endpoint = value;
             break;
           }
-          case 'Status': {
-            builder.node_status = value;
+          case 'status': {
+            node.status = value;
             break;
           }
-          case 'Flags': {
-            builder.node_flags = value;
+          case 'flags': {
+            node['buildkitd-flags'] = value;
             break;
           }
-          case 'Platforms': {
-            builder.node_platforms = value.replace(/\s/g, '');
-            break itlines;
+          case 'platforms': {
+            let platforms: Array<string> = [];
+            // if a preferred platform is being set then use only these
+            // https://docs.docker.com/engine/reference/commandline/buildx_inspect/#get-information-about-a-builder-instance
+            if (value.includes('*')) {
+              for (const platform of value.split(', ')) {
+                if (platform.includes('*')) {
+                  platforms.push(platform.replace('*', ''));
+                }
+              }
+            } else {
+              // otherwise set all platforms available
+              platforms = value.split(', ');
+            }
+            node.platforms = platforms.join(',');
+            break;
           }
         }
+      }
+      if (Object.keys(node).length > 0) {
+        builder.nodes.push(node);
       }
       return builder;
     });

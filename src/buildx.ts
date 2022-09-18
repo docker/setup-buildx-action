@@ -18,8 +18,10 @@ export type Builder = {
 export type Node = {
   name?: string;
   endpoint?: string;
+  'driver-opts'?: Array<string>;
   status?: string;
   'buildkitd-flags'?: string;
+  buildkit?: string;
   platforms?: string;
 };
 
@@ -133,12 +135,20 @@ export async function inspect(name: string, standalone?: boolean): Promise<Build
             node.endpoint = value;
             break;
           }
+          case 'driver options': {
+            node['driver-opts'] = (value.match(/(\w+)="([^"]*)"/g) || []).map(v => v.replace(/^(.*)="(.*)"$/g, '$1=$2'));
+            break;
+          }
           case 'status': {
             node.status = value;
             break;
           }
           case 'flags': {
             node['buildkitd-flags'] = value;
+            break;
+          }
+          case 'buildkit': {
+            node.buildkit = value;
             break;
           }
           case 'platforms': {

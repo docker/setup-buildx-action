@@ -305,9 +305,13 @@ jobs:
           platforms: ${{ matrix.qemu-platforms }}
       -
         name: Set up Docker Buildx
+        id: buildx
         uses: ./
         with:
           version: ${{ matrix.buildx-version }}
+      -
+        name: List builder platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
 
   build-ref:
     runs-on: ubuntu-latest
@@ -416,3 +420,32 @@ jobs:
             echo "::error::Should have failed"
             exit 1
           fi
+
+  append:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Create dummy contexts
+        run: |
+          docker context create ctxbuilder2
+          docker context create ctxbuilder3
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: ./
+        with:
+          append: |
+            - name: builder2
+              endpoint: ctxbuilder2
+              platforms: linux/amd64
+              driver-opts:
+                - image=moby/buildkit:master
+                - network=host
+            - endpoint: ctxbuilder3
+              platforms: linux/arm64
+      -
+        name: List builder platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}

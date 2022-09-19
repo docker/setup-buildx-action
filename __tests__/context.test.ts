@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as context from '../src/context';
+import * as nodes from '../src/nodes';
 
 const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
 jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
@@ -98,6 +99,57 @@ describe('getCreateArgs', () => {
       });
       const inp = await context.getInputs();
       const res = await context.getCreateArgs(inp, '0.9.0');
+      expect(res).toEqual(expected);
+    }
+  );
+});
+
+describe('getAppendArgs', () => {
+  beforeEach(() => {
+    process.env = Object.keys(process.env).reduce((object, key) => {
+      if (!key.startsWith('INPUT_')) {
+        object[key] = process.env[key];
+      }
+      return object;
+    }, {});
+  });
+
+  // prettier-ignore
+  test.each([
+    [
+      0,
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'true'],
+      ]),
+      {
+        "name": "aws_graviton2",
+        "endpoint": "ssh://me@graviton2",
+        "driver-opts": [
+          "image=moby/buildkit:latest"
+        ],
+        "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+        "platforms": "linux/arm64"
+      },
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--append',
+        '--node', 'aws_graviton2',
+        '--driver-opt', 'image=moby/buildkit:latest',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--platform', 'linux/arm64',
+        'ssh://me@graviton2'
+      ]
+    ]
+  ])(
+    '[%d] given %p as inputs, returns %p',
+    async (num: number, inputs: Map<string, string>, node: nodes.Node, expected: Array<string>) => {
+      inputs.forEach((value: string, name: string) => {
+        setInput(name, value);
+      });
+      const inp = await context.getInputs();
+      const res = await context.getAppendArgs(inp, node, '0.9.0');
       expect(res).toEqual(expected);
     }
   );

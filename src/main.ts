@@ -5,6 +5,7 @@ import * as auth from './auth';
 import * as buildx from './buildx';
 import * as context from './context';
 import * as docker from './docker';
+import * as nodes from './nodes';
 import * as stateHelper from './state-helper';
 import * as util from './util';
 import * as core from '@actions/core';
@@ -71,6 +72,21 @@ async function run(): Promise<void> {
       core.endGroup();
     }
 
+    if (inputs.append) {
+      core.startGroup(`Appending node(s) to builder`);
+      let nodeIndex = 1;
+      for (const node of nodes.Parse(inputs.append)) {
+        const authOpts = auth.setCredentials(credsdir, nodeIndex, inputs.driver, node.endpoint || '');
+        if (authOpts.length > 0) {
+          node['driver-opts'] = [...(node['driver-opts'] || []), ...authOpts];
+        }
+        const appendCmd = buildx.getCommand(await context.getAppendArgs(inputs, node, buildxVersion), standalone);
+        await exec.exec(appendCmd.commandLine, appendCmd.args);
+        nodeIndex++;
+      }
+      core.endGroup();
+    }
+
     core.startGroup(`Booting builder`);
     const inspectCmd = buildx.getCommand(await context.getInspectArgs(inputs, buildxVersion), standalone);
     await exec.exec(inspectCmd.commandLine, inspectCmd.args);
@@ -88,9 +104,18 @@ async function run(): Promise<void> {
     core.startGroup(`Inspect builder`);
     const builder = await buildx.inspect(inputs.name, standalone);
     const firstNode = builder.nodes[0];
+    const reducedPlatforms: Array<string> = [];
+    for (const node of builder.nodes) {
+      for (const platform of node.platforms?.split(',') || []) {
+        if (reducedPlatforms.indexOf(platform) > -1) {
+          continue;
+        }
+        reducedPlatforms.push(platform);
+      }
+    }
     core.info(JSON.stringify(builder, undefined, 2));
     core.setOutput('driver', builder.driver);
-    core.setOutput('platforms', firstNode.platforms);
+    core.setOutput('platforms', reducedPlatforms.join(','));
     core.setOutput('nodes', JSON.stringify(builder.nodes, undefined, 2));
     core.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
     core.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version

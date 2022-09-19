@@ -21,6 +21,7 @@ ___
 * [Usage](#usage)
 * [Advanced usage](#advanced-usage)
   * [Authentication support](docs/advanced/auth.md)
+  * [Append additional nodes to the builder](docs/advanced/append-nodes.md)
   * [Install by default](docs/advanced/install-default.md)
   * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
   * [Standalone mode](docs/advanced/standalone.md)
@@ -61,6 +62,7 @@ jobs:
 ## Advanced usage
 
 * [Authentication support](docs/advanced/auth.md)
+* [Append additional nodes to the builder](docs/advanced/append-nodes.md)
 * [Install by default](docs/advanced/install-default.md)
 * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
 * [Standalone mode](docs/advanced/standalone.md)
@@ -82,6 +84,7 @@ Following inputs can be used as `step.with` keys
 | `endpoint`        | String | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                                       |
 | `config`¹         | String | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                                              |
 | `config-inline`¹  | String | Same as `config` but inline                                                                                                                                                                     |
+| `append`          | YAML   | [Append additional nodes](docs/advanced/append-nodes.md) to the builder                                                                                                                         |
 
 > * ¹ `config` and `config-inline` are mutually exclusive
 

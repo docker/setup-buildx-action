@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as uuid from 'uuid';
 import * as auth from './auth';
 import * as buildx from './buildx';
 import * as context from './context';
@@ -54,11 +53,10 @@ async function run(): Promise<void> {
       });
     });
 
-    const builderName: string = inputs.driver == 'docker' ? 'default' : `builder-${uuid.v4()}`;
-    context.setOutput('name', builderName);
-    stateHelper.setBuilderName(builderName);
+    context.setOutput('name', inputs.name);
+    stateHelper.setBuilderName(inputs.name);
 
-    const credsdir = path.join(dockerConfigHome, 'buildx', 'creds', builderName);
+    const credsdir = path.join(dockerConfigHome, 'buildx', 'creds', inputs.name);
     fs.mkdirSync(credsdir, {recursive: true});
     stateHelper.setCredsDir(credsdir);
 
@@ -68,41 +66,15 @@ async function run(): Promise<void> {
       if (authOpts.length > 0) {
         inputs.driverOpts = [...inputs.driverOpts, ...authOpts];
       }
-      const createArgs: Array<string> = ['create', '--name', builderName, '--driver', inputs.driver];
-      if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
-        await context.asyncForEach(inputs.driverOpts, async driverOpt => {
-          createArgs.push('--driver-opt', driverOpt);
-        });
-        if (inputs.driver != 'remote' && inputs.buildkitdFlags) {
-          createArgs.push('--buildkitd-flags', inputs.buildkitdFlags);
-        }
-      }
-      if (inputs.use) {
-        createArgs.push('--use');
-      }
-      if (inputs.endpoint) {
-        createArgs.push(inputs.endpoint);
-      }
-      if (inputs.driver != 'remote') {
-        if (inputs.config) {
-          createArgs.push('--config', await buildx.getConfigFile(inputs.config));
-        } else if (inputs.configInline) {
-          createArgs.push('--config', await buildx.getConfigInline(inputs.configInline));
-        }
-      }
-      const createCmd = buildx.getCommand(createArgs, standalone);
+      const createCmd = buildx.getCommand(await context.getCreateArgs(inputs, buildxVersion), standalone);
       await exec.exec(createCmd.commandLine, createCmd.args);
       core.endGroup();
-
-      core.startGroup(`Booting builder`);
-      const bootstrapArgs: Array<string> = ['inspect', '--bootstrap'];
-      if (buildx.satisfies(buildxVersion, '>=0.4.0')) {
-        bootstrapArgs.push('--builder', builderName);
-      }
-      const bootstrapCmd = buildx.getCommand(bootstrapArgs, standalone);
-      await exec.exec(bootstrapCmd.commandLine, bootstrapCmd.args);
-      core.endGroup();
     }
+
+    core.startGroup(`Booting builder`);
+    const inspectCmd = buildx.getCommand(await context.getInspectArgs(inputs, buildxVersion), standalone);
+    await exec.exec(inspectCmd.commandLine, inspectCmd.args);
+    core.endGroup();
 
     if (inputs.install) {
       if (standalone) {
@@ -114,7 +86,7 @@ async function run(): Promise<void> {
     }
 
     core.startGroup(`Inspect builder`);
-    const builder = await buildx.inspect(builderName, standalone);
+    const builder = await buildx.inspect(inputs.name, standalone);
     const firstNode = builder.nodes[0];
     core.info(JSON.stringify(builder, undefined, 2));
     context.setOutput('driver', builder.driver);

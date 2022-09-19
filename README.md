@@ -8,23 +8,21 @@
 
 GitHub Action to set up Docker [Buildx](https://github.com/docker/buildx).
 
-This action will create and boot a builder that can be used in the following steps of your workflow if you're using
-[buildx](https://github.com/docker/buildx). By default, the `docker-container` [builder driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver)
-will be used to be able to build multi-platform images and export cache thanks to the [BuildKit](https://github.com/moby/buildkit)
-container.
+This action will create and boot a builder that can be used in the following
+steps of your workflow if you're using Buildx or the [`build-push` action](https://github.com/docker/build-push-action/).
+By default, the [`docker-container` driver](https://docs.docker.com/build/building/drivers/docker-container/)
+will be used to be able to build multi-platform images and export cache using
+a [BuildKit](https://github.com/moby/buildkit) container.
 
 ![Screenshot](.github/setup-buildx-action.png)
 
 ___
 
 * [Usage](#usage)
-  * [Quick start](#quick-start)
-  * [With QEMU](#with-qemu)
-  * [Install by default](#install-by-default)
-  * [BuildKit daemon configuration](#buildkit-daemon-configuration)
-    * [Registry mirror](#registry-mirror)
-    * [Max parallelism](#max-parallelism)
-  * [Standalone mode](#standalone-mode)
+* [Advanced usage](#advanced-usage)
+  * [Install by default](docs/advanced/install-default.md)
+  * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
+  * [Standalone mode](docs/advanced/standalone.md)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -35,8 +33,6 @@ ___
 
 ## Usage
 
-### Quick start
-
 ```yaml
 name: ci
 
@@ -51,164 +47,20 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
       -
-        name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      -
-        name: Inspect builder
-        run: |
-          echo "Name:      ${{ steps.buildx.outputs.name }}"
-          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
-          echo "Status:    ${{ steps.buildx.outputs.status }}"
-          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
-          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
-```
-
-### With QEMU
-
-If you want support for more platforms you can use our [setup-qemu](https://github.com/docker/setup-qemu-action) action:
-
-```yaml
-name: ci
-
-on:
-  push:
-
-jobs:
-  buildx:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
+        # Add support for more platforms with QEMU (optional)
+        # https://github.com/docker/setup-qemu-action
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       -
         name: Set up Docker Buildx
-        id: buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
 ```
 
-### Install by default
+## Advanced usage
 
-If you want set up the `docker build` command as an alias to `docker buildx build`:
-
-```yaml
-name: ci
-
-on:
-  push:
-
-jobs:
-  buildx:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        uses: docker/setup-buildx-action@v2
-        id: buildx
-        with:
-          install: true
-      -
-        name: Build
-        run: |
-          docker build . # will run buildx
-```
-
-### BuildKit daemon configuration
-
-You can provide a [BuildKit configuration](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md)
-to your builder if you're using the [`docker-container` driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver)
-(default) with the `config` or `config-inline` inputs:
-
-#### Registry mirror
-
-You can configure a registry mirror using an inline block directly in your
-workflow with the `config-inline` input:
-
-```yaml
-name: ci
-
-on:
-  push:
-
-jobs:
-  buildx:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          config-inline: |
-            [registry."docker.io"]
-              mirrors = ["mirror.gcr.io"]
-```
-
-#### Max parallelism
-
-You can limit the parallelism of the BuildKit solver which is particularly
-useful for low-powered machines.
-
-You can use the `config-inline` input like the
-previous example, or you can use a dedicated BuildKit config file from your
-repo if you want with the `config` input:
-
-```toml
-# .github/buildkitd.toml
-[worker.oci]
-  max-parallelism = 4
-```
-
-```yaml
-name: ci
-
-on:
-  push:
-
-jobs:
-  buildx:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          config: .github/buildkitd.toml
-```
-
-### Standalone mode
-
-If you don't have the Docker CLI installed on the GitHub Runner, buildx binary
-is invoked directly, instead of calling it as a docker plugin. This can be
-useful if you want to use the `kubernetes` driver in your self-hosted runner:
-
-```yaml
-name: ci
-
-on:
-  push:
-
-jobs:
-  buildx:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          driver: kubernetes
-      -
-        name: Build
-        run: |
-          buildx build .
-```
+* [Install by default](docs/advanced/install-default.md)
+* [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
+* [Standalone mode](docs/advanced/standalone.md)
 
 ## Customizing
 
@@ -216,17 +68,17 @@ jobs:
 
 Following inputs can be used as `step.with` keys
 
-| Name               | Type    | Description                       |
-|--------------------|---------|-----------------------------------|
-| `version`          | String  | [buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`) |
-| `driver`           | String  | Sets the [builder driver](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver) to be used (default `docker-container`) |
-| `driver-opts`      | CSV     | List of additional [driver-specific options](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#driver-opt) (eg. `image=moby/buildkit:master`) |
-| `buildkitd-flags`  | String  | [Flags for buildkitd](https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
-| `install`          | Bool    | Sets up `docker build` command as an alias to `docker buildx` (default `false`) |
-| `use`              | Bool    | Switch to this builder instance (default `true`) |
-| `endpoint`         | String  | [Optional address for docker socket](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#description) or context from `docker context ls` |
-| `config`¹          | String  | [BuildKit config file](https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#config) |
-| `config-inline`¹   | String  | Same as `config` but inline |
+| Name              | Type   | Description                                                                                                                                                                                     |
+|-------------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`         | String | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`)                                                                     |
+| `driver`          | String | Sets the [builder driver](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver) to be used (default `docker-container`)                                                   |
+| `driver-opts`     | CSV    | List of additional [driver-specific options](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver-opt) (eg. `image=moby/buildkit:master`)                                 |
+| `buildkitd-flags` | String | [Flags for buildkitd](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
+| `install`         | Bool   | Sets up `docker build` command as an alias to `docker buildx` (default `false`)                                                                                                                 |
+| `use`             | Bool   | Switch to this builder instance (default `true`)                                                                                                                                                |
+| `endpoint`        | String | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                                       |
+| `config`¹         | String | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                                              |
+| `config-inline`¹  | String | Same as `config` but inline                                                                                                                                                                     |
 
 > * ¹ `config` and `config-inline` are mutually exclusive
 
@@ -257,15 +109,15 @@ Following outputs are available
 
 The following [official docker environment variables](https://docs.docker.com/engine/reference/commandline/cli/#environment-variables) are supported:
 
-| Name            | Type    | Default      | Description                                    |
-|-----------------|---------|-------------|-------------------------------------------------|
-| `DOCKER_CONFIG` | String  | `~/.docker` | The location of your client configuration files |
+| Name            | Type   | Default     | Description                                     |
+|-----------------|--------|-------------|-------------------------------------------------|
+| `DOCKER_CONFIG` | String | `~/.docker` | The location of your client configuration files |
 
 ## Notes
 
 ### BuildKit container logs
 
-To display BuildKit container logs (when `docker-container` driver is used) you have to [enable step debug logging](https://docs.github.com/en/actions/managing-workflow-runs/enabling-debug-logging#enabling-step-debug-logging)
+To display BuildKit container logs (when `docker-container` driver is used) you have to [enable step debug logging](https://docs.github.com/en/actions/managing-workflow-runs/enabling-debug-logging#enabling-step-debug-logging),
 or you can also enable debugging in the [setup-buildx action step](https://github.com/docker/setup-buildx-action):
 
 ```yaml

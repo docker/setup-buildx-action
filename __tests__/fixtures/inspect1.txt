@@ -1,0 +1,10 @@
+Name:   builder-5cb467f7-0940-47e1-b94b-d51f54054d62
+Driver: docker-container
+
+Nodes:
+Name:      builder-5cb467f7-0940-47e1-b94b-d51f54054d620
+Endpoint:  unix:///var/run/docker.sock
+Status:    running
+Flags:     --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+Buildkit:  v0.10.4
+Platforms: linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/amd64/v4, linux/arm64, linux/riscv64, linux/386, linux/arm/v7, linux/arm/v6

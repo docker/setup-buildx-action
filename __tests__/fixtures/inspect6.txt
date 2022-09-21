@@ -1,0 +1,9 @@
+Name:   builder-17cfff01-48d9-4c3d-9332-9992e308a510
+Driver: docker-container
+
+Nodes:
+Name:      builder-17cfff01-48d9-4c3d-9332-9992e308a5100
+Endpoint:  unix:///var/run/docker.sock
+Status:    running
+Flags:     --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+Platforms: linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386

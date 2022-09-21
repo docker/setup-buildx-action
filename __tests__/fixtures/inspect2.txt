@@ -1,0 +1,11 @@
+Name:   builder-5f449644-ff29-48af-8344-abb0292d0673
+Driver: docker-container
+
+Nodes:
+Name:           builder-5f449644-ff29-48af-8344-abb0292d06730
+Endpoint:       unix:///var/run/docker.sock
+Driver Options: image="moby/buildkit:latest"
+Status:         running
+Flags:          --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+Buildkit:       v0.10.4
+Platforms:      linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/amd64/v4, linux/386

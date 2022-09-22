@@ -20,6 +20,7 @@ ___
 
 * [Usage](#usage)
 * [Advanced usage](#advanced-usage)
+  * [Authentication support](docs/advanced/auth.md)
   * [Install by default](docs/advanced/install-default.md)
   * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
   * [Standalone mode](docs/advanced/standalone.md)
@@ -58,6 +59,7 @@ jobs:
 
 ## Advanced usage
 
+* [Authentication support](docs/advanced/auth.md)
 * [Install by default](docs/advanced/install-default.md)
 * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
 * [Standalone mode](docs/advanced/standalone.md)

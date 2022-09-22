@@ -1,6 +1,8 @@
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as uuid from 'uuid';
+import * as auth from './auth';
 import * as buildx from './buildx';
 import * as context from './context';
 import * as docker from './docker';
@@ -56,8 +58,16 @@ async function run(): Promise<void> {
     context.setOutput('name', builderName);
     stateHelper.setBuilderName(builderName);
 
+    const credsdir = path.join(dockerConfigHome, 'buildx', 'creds', builderName);
+    fs.mkdirSync(credsdir, {recursive: true});
+    stateHelper.setCredsDir(credsdir);
+
     if (inputs.driver !== 'docker') {
       core.startGroup(`Creating a new builder instance`);
+      const authOpts = auth.setCredentials(credsdir, 0, inputs.driver, inputs.endpoint);
+      if (authOpts.length > 0) {
+        inputs.driverOpts = [...inputs.driverOpts, ...authOpts];
+      }
       const createArgs: Array<string> = ['create', '--name', builderName, '--driver', inputs.driver];
       if (buildx.satisfies(buildxVersion, '>=0.3.0')) {
         await context.asyncForEach(inputs.driverOpts, async driverOpt => {
@@ -155,6 +165,11 @@ async function cleanup(): Promise<void> {
         }
       });
     core.endGroup();
+  }
+
+  if (stateHelper.credsDir.length > 0 && fs.existsSync(stateHelper.credsDir)) {
+    core.info(`Cleaning up credentials`);
+    fs.rmdirSync(stateHelper.credsDir, {recursive: true});
   }
 }
 

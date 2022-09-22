@@ -4,16 +4,13 @@ import * as os from 'os';
 import * as path from 'path';
 import * as context from '../src/context';
 
+const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
 jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
-  const tmpDir = path.join('/tmp/.docker-setup-buildx-jest').split(path.sep).join(path.posix.sep);
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
-  return tmpDir;
+  return tmpdir;
 });
 
 jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
-  return path.join('/tmp/.docker-setup-buildx-jest', '.tmpname-jest').split(path.sep).join(path.posix.sep);
+  return path.join(tmpdir, '.tmpname').split(path.sep).join(path.posix.sep);
 });
 
 describe('getInputList', () => {

@@ -7,18 +7,14 @@ import * as context from '../src/context';
 import * as semver from 'semver';
 import * as exec from '@actions/exec';
 
-const tmpNameSync = path.join('/tmp/.docker-setup-buildx-jest', '.tmpname-jest').split(path.sep).join(path.posix.sep);
-
+const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
 jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
-  const tmpDir = path.join('/tmp/.docker-setup-buildx-jest').split(path.sep).join(path.posix.sep);
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, {recursive: true});
-  }
-  return tmpDir;
+  return tmpdir;
 });
 
+const tmpname = path.join(tmpdir, '.tmpname').split(path.sep).join(path.posix.sep);
 jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
-  return tmpNameSync;
+  return tmpname;
 });
 
 describe('isAvailable', () => {
@@ -136,8 +132,8 @@ describe('getConfig', () => {
         config = await buildx.getConfigInline(val);
       }
       expect(true).toBe(!invalid);
-      expect(config).toEqual(`${tmpNameSync}`);
-      const configValue = fs.readFileSync(tmpNameSync, 'utf-8');
+      expect(config).toEqual(tmpname);
+      const configValue = fs.readFileSync(tmpname, 'utf-8');
       expect(configValue).toEqual(exValue);
     } catch (err) {
       // eslint-disable-next-line jest/no-conditional-expect

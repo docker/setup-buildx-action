@@ -1,4 +1,4 @@
-import {describe, expect, jest, test, beforeEach} from '@jest/globals';
+import {describe, expect, test, beforeEach} from '@jest/globals';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

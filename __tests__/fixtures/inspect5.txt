@@ -1,0 +1,9 @@
+Name:   remote-builder
+Driver: remote
+
+Nodes:
+Name:           aws_graviton2
+Endpoint:       tcp://1.23.45.67:1234
+Driver Options: cert="/home/user/.certs/aws_graviton2/cert.pem" key="/home/user/.certs/aws_graviton2/key.pem" cacert="/home/user/.certs/aws_graviton2/ca.pem"
+Status:         running
+Platforms:      darwin/arm64*, linux/arm64*, linux/arm/v5*, linux/arm/v6*, linux/arm/v7*, windows/arm64*, linux/amd64, linux/amd64/v2, linux/riscv64, linux/ppc64le, linux/s390x, linux/mips64le, linux/mips64

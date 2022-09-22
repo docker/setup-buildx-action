@@ -115,21 +115,26 @@ async function run(): Promise<void> {
 
     core.startGroup(`Inspect builder`);
     const builder = await buildx.inspect(builderName, standalone);
+    const firstNode = builder.nodes[0];
     core.info(JSON.stringify(builder, undefined, 2));
     context.setOutput('driver', builder.driver);
-    context.setOutput('endpoint', builder.node_endpoint);
-    context.setOutput('status', builder.node_status);
-    context.setOutput('flags', builder.node_flags);
-    context.setOutput('platforms', builder.node_platforms);
+    context.setOutput('platforms', firstNode.platforms);
+    context.setOutput('nodes', JSON.stringify(builder.nodes, undefined, 2));
+    context.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
+    context.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
+    context.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
     core.endGroup();
 
-    if (!standalone && inputs.driver == 'docker-container') {
-      stateHelper.setContainerName(`buildx_buildkit_${builder.node_name}`);
+    if (!standalone && builder.driver == 'docker-container') {
+      stateHelper.setContainerName(`buildx_buildkit_${firstNode.name}`);
       core.startGroup(`BuildKit version`);
-      core.info(await buildx.getBuildKitVersion(`buildx_buildkit_${builder.node_name}`));
+      for (const node of builder.nodes) {
+        const bkvers = await buildx.getBuildKitVersion(`buildx_buildkit_${node.name}`);
+        core.info(`${node.name}: ${bkvers}`);
+      }
       core.endGroup();
     }
-    if (core.isDebug() || builder.node_flags?.includes('--debug')) {
+    if (core.isDebug() || firstNode['buildkitd-flags']?.includes('--debug')) {
       stateHelper.setDebug('true');
     }
   } catch (error) {

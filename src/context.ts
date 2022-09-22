@@ -29,6 +29,7 @@ export interface Inputs {
   driver: string;
   driverOpts: string[];
   buildkitdFlags: string;
+  platforms: string[];
   install: boolean;
   use: boolean;
   endpoint: string;
@@ -44,6 +45,7 @@ export async function getInputs(): Promise<Inputs> {
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: await getInputList('driver-opts', true),
     buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+    platforms: await getInputList('platforms'),
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
@@ -66,6 +68,9 @@ export async function getCreateArgs(inputs: Inputs, buildxVersion: string): Prom
     if (inputs.driver != 'remote' && inputs.buildkitdFlags) {
       args.push('--buildkitd-flags', inputs.buildkitdFlags);
     }
+  }
+  if (inputs.platforms.length > 0) {
+    args.push('--platform', inputs.platforms.join(','));
   }
   if (inputs.use) {
     args.push('--use');

@@ -449,3 +449,18 @@ jobs:
       -
         name: List builder platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+
+  platforms:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          platforms: linux/amd64

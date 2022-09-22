@@ -91,6 +91,24 @@ describe('getCreateArgs', () => {
         'tls://foo:1234'
       ]
     ],
+    [
+      4,
+      new Map<string, string>([
+        ['driver', 'remote'],
+        ['platforms', 'linux/arm64,linux/arm/v7'],
+        ['endpoint', 'tls://foo:1234'],
+        ['install', 'false'],
+        ['use', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'remote',
+        '--platform', 'linux/arm64,linux/arm/v7',
+        '--use',
+        'tls://foo:1234'
+      ]
+    ],
   ])(
     '[%d] given %p as inputs, returns %p',
     async (num: number, inputs: Map<string, string>, expected: Array<string>) => {

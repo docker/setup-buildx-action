@@ -53,7 +53,7 @@ async function run(): Promise<void> {
       });
     });
 
-    context.setOutput('name', inputs.name);
+    core.setOutput('name', inputs.name);
     stateHelper.setBuilderName(inputs.name);
 
     const credsdir = path.join(dockerConfigHome, 'buildx', 'creds', inputs.name);
@@ -89,12 +89,12 @@ async function run(): Promise<void> {
     const builder = await buildx.inspect(inputs.name, standalone);
     const firstNode = builder.nodes[0];
     core.info(JSON.stringify(builder, undefined, 2));
-    context.setOutput('driver', builder.driver);
-    context.setOutput('platforms', firstNode.platforms);
-    context.setOutput('nodes', JSON.stringify(builder.nodes, undefined, 2));
-    context.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
-    context.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
-    context.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
+    core.setOutput('driver', builder.driver);
+    core.setOutput('platforms', firstNode.platforms);
+    core.setOutput('nodes', JSON.stringify(builder.nodes, undefined, 2));
+    core.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
+    core.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
+    core.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
     core.endGroup();
 
     if (!standalone && builder.driver == 'docker-container') {

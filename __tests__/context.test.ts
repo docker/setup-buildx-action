@@ -1,7 +1,8 @@
-import {beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as uuid from 'uuid';
 import * as context from '../src/context';
 
 const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
@@ -11,6 +12,95 @@ jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
 
 jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
   return path.join(tmpdir, '.tmpname').split(path.sep).join(path.posix.sep);
+});
+
+jest.mock('uuid');
+jest.spyOn(uuid, 'v4').mockReturnValue('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
+
+describe('getCreateArgs', () => {
+  beforeEach(() => {
+    process.env = Object.keys(process.env).reduce((object, key) => {
+      if (!key.startsWith('INPUT_')) {
+        object[key] = process.env[key];
+      }
+      return object;
+    }, {});
+  });
+
+  // prettier-ignore
+  test.each([
+    [
+      0,
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--use'
+      ]
+    ],
+    [
+      1,
+      new Map<string, string>([
+        ['driver', 'docker'],
+        ['install', 'false'],
+        ['use', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'default',
+        '--driver', 'docker',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--use'
+      ]
+    ],
+    [
+      2,
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--driver-opt', 'image=moby/buildkit:master',
+        '--driver-opt', 'network=host',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
+      ]
+    ],
+    [
+      3,
+      new Map<string, string>([
+        ['driver', 'remote'],
+        ['endpoint', 'tls://foo:1234'],
+        ['install', 'false'],
+        ['use', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'remote',
+        '--use',
+        'tls://foo:1234'
+      ]
+    ],
+  ])(
+    '[%d] given %p as inputs, returns %p',
+    async (num: number, inputs: Map<string, string>, expected: Array<string>) => {
+      inputs.forEach((value: string, name: string) => {
+        setInput(name, value);
+      });
+      const inp = await context.getInputs();
+      const res = await context.getCreateArgs(inp, '0.9.0');
+      expect(res).toEqual(expected);
+    }
+  );
 });
 
 describe('getInputList', () => {

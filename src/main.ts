@@ -146,7 +146,7 @@ async function cleanup(): Promise<void> {
 
   if (stateHelper.credsDir.length > 0 && fs.existsSync(stateHelper.credsDir)) {
     core.info(`Cleaning up credentials`);
-    fs.rmdirSync(stateHelper.credsDir, {recursive: true});
+    fs.rmSync(stateHelper.credsDir, {recursive: true});
   }
 }
 

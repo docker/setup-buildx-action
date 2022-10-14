@@ -41,11 +41,6 @@ the node in the list of nodes:
 * `BUILDER_NODE_<idx>_AUTH_TLS_CERT`
 * `BUILDER_NODE_<idx>_AUTH_TLS_KEY`
 
-> **Note**
-> 
-> The index is always `0` at the moment as we don't support (yet) appending new
-> nodes with this action.
-
 ```yaml
 name: ci
 

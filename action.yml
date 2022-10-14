@@ -32,11 +32,17 @@ inputs:
   endpoint:
     description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
+  platforms:
+    description: 'Fixed platforms for current node. If not empty, values take priority over the detected ones'
+    required: false
   config:
     description: 'BuildKit config file'
     required: false
   config-inline:
     description: 'Inline BuildKit config'
+    required: false
+  append:
+    description: 'Append additional nodes to the builder'
     required: false
 
 outputs:

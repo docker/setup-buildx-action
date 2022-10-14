@@ -3,7 +3,9 @@ import * as os from 'os';
 import path from 'path';
 import * as tmp from 'tmp';
 import * as uuid from 'uuid';
+import {parse} from 'csv-parse/sync';
 import * as buildx from './buildx';
+import * as nodes from './nodes';
 import * as core from '@actions/core';
 
 let _tmpDir: string;
@@ -27,11 +29,13 @@ export interface Inputs {
   driver: string;
   driverOpts: string[];
   buildkitdFlags: string;
+  platforms: string[];
   install: boolean;
   use: boolean;
   endpoint: string;
   config: string;
   configInline: string;
+  append: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -41,11 +45,13 @@ export async function getInputs(): Promise<Inputs> {
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: await getInputList('driver-opts', true),
     buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+    platforms: await getInputList('platforms'),
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
     config: core.getInput('config'),
-    configInline: core.getInput('config-inline')
+    configInline: core.getInput('config-inline'),
+    append: core.getInput('append')
   };
 }
 
@@ -63,6 +69,9 @@ export async function getCreateArgs(inputs: Inputs, buildxVersion: string): Prom
       args.push('--buildkitd-flags', inputs.buildkitdFlags);
     }
   }
+  if (inputs.platforms.length > 0) {
+    args.push('--platform', inputs.platforms.join(','));
+  }
   if (inputs.use) {
     args.push('--use');
   }
@@ -79,6 +88,28 @@ export async function getCreateArgs(inputs: Inputs, buildxVersion: string): Prom
   return args;
 }
 
+export async function getAppendArgs(inputs: Inputs, node: nodes.Node, buildxVersion: string): Promise<Array<string>> {
+  const args: Array<string> = ['create', '--name', inputs.name, '--append'];
+  if (node.name) {
+    args.push('--node', node.name);
+  }
+  if (node['driver-opts'] && buildx.satisfies(buildxVersion, '>=0.3.0')) {
+    await asyncForEach(node['driver-opts'], async driverOpt => {
+      args.push('--driver-opt', driverOpt);
+    });
+    if (inputs.driver != 'remote' && node['buildkitd-flags']) {
+      args.push('--buildkitd-flags', node['buildkitd-flags']);
+    }
+  }
+  if (node.platforms) {
+    args.push('--platform', node.platforms);
+  }
+  if (node.endpoint) {
+    args.push(node.endpoint);
+  }
+  return args;
+}
+
 export async function getInspectArgs(inputs: Inputs, buildxVersion: string): Promise<Array<string>> {
   const args: Array<string> = ['inspect', '--bootstrap'];
   if (buildx.satisfies(buildxVersion, '>=0.4.0')) {
@@ -88,14 +119,33 @@ export async function getInspectArgs(inputs: Inputs, buildxVersion: string): Pro
 }
 
 export async function getInputList(name: string, ignoreComma?: boolean): Promise<string[]> {
+  const res: Array<string> = [];
+
   const items = core.getInput(name);
   if (items == '') {
-    return [];
+    return res;
   }
-  return items
-    .split(/\r?\n/)
-    .filter(x => x)
-    .reduce<string[]>((acc, line) => acc.concat(!ignoreComma ? line.split(',').filter(x => x) : line).map(pat => pat.trim()), []);
+
+  const records = parse(items, {
+    columns: false,
+    relaxQuotes: true,
+    comment: '#',
+    relaxColumnCount: true,
+    skipEmptyLines: true
+  });
+
+  for (const record of records as Array<string[]>) {
+    if (record.length == 1) {
+      res.push(record[0]);
+      continue;
+    } else if (!ignoreComma) {
+      res.push(...record);
+      continue;
+    }
+    res.push(record.join(','));
+  }
+
+  return res.filter(item => item).map(pat => pat.trim());
 }
 
 export const asyncForEach = async (array, callback) => {

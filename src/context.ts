@@ -131,7 +131,8 @@ export async function getInputList(name: string, ignoreComma?: boolean): Promise
     relaxQuotes: true,
     comment: '#',
     relaxColumnCount: true,
-    skipEmptyLines: true
+    skipEmptyLines: true,
+    quote: false
   });
 
   for (const record of records as Array<string[]>) {

@@ -124,6 +124,21 @@ describe('getCreateArgs', () => {
         '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
       ]
     ],
+    [
+      6,
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--platform', 'linux/amd64,linux/arm64,linux/arm/v7'
+      ]
+    ],
   ])(
     '[%d] given %p as inputs, returns %p',
     async (num: number, inputs: Map<string, string>, expected: Array<string>) => {

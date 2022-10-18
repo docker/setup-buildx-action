@@ -109,6 +109,21 @@ describe('getCreateArgs', () => {
         'tls://foo:1234'
       ]
     ],
+    [
+      5,
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--driver-opt', '"env.no_proxy=localhost,127.0.0.1,.mydomain"',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
+      ]
+    ],
   ])(
     '[%d] given %p as inputs, returns %p',
     async (num: number, inputs: Map<string, string>, expected: Array<string>) => {

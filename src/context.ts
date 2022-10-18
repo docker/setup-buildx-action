@@ -45,7 +45,7 @@ export async function getInputs(): Promise<Inputs> {
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: await getInputList('driver-opts', true),
     buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
-    platforms: await getInputList('platforms'),
+    platforms: await getInputList('platforms', false, true),
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
@@ -118,7 +118,7 @@ export async function getInspectArgs(inputs: Inputs, buildxVersion: string): Pro
   return args;
 }
 
-export async function getInputList(name: string, ignoreComma?: boolean): Promise<string[]> {
+export async function getInputList(name: string, ignoreComma?: boolean, escapeQuotes?: boolean): Promise<string[]> {
   const res: Array<string> = [];
 
   const items = core.getInput(name);
@@ -132,7 +132,7 @@ export async function getInputList(name: string, ignoreComma?: boolean): Promise
     comment: '#',
     relaxColumnCount: true,
     skipEmptyLines: true,
-    quote: false
+    quote: escapeQuotes ? `"` : false
   });
 
   for (const record of records as Array<string[]>) {

@@ -27,7 +27,7 @@ ___
 * [Notes](#notes)
   * [`nodes` output](#nodes-output)
   * [BuildKit container logs](#buildkit-container-logs)
-* [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
+* [Contributing](#contributing)
 
 ## Usage
 
@@ -146,18 +146,7 @@ The following [official docker environment variables](https://docs.docker.com/en
 
 See https://docs.docker.com/build/ci/github-actions/configure-builder/#buildkit-container-logs
 
-## Keep up-to-date with GitHub Dependabot
+## Contributing
 
-Since [Dependabot](https://docs.github.com/en/github/administering-a-repository/keeping-your-actions-up-to-date-with-github-dependabot)
-has [native GitHub Actions support](https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#package-ecosystem),
-to enable it on your GitHub repo all you need to do is add the `.github/dependabot.yml` file:
-
-```yaml
-version: 2
-updates:
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-```
+Want to contribute? Awesome! You can find information about contributing to
+this project in the [CONTRIBUTING.md](/.github/CONTRIBUTING.md)

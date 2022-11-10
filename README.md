@@ -19,12 +19,7 @@ a [BuildKit](https://github.com/moby/buildkit) container.
 ___
 
 * [Usage](#usage)
-* [Advanced usage](#advanced-usage)
-  * [Authentication support](docs/advanced/auth.md)
-  * [Append additional nodes to the builder](docs/advanced/append-nodes.md)
-  * [Install by default](docs/advanced/install-default.md)
-  * [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
-  * [Standalone mode](docs/advanced/standalone.md)
+* [Configuring your builder](#configuring-your-builder)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -32,7 +27,7 @@ ___
 * [Notes](#notes)
   * [`nodes` output](#nodes-output)
   * [BuildKit container logs](#buildkit-container-logs)
-* [Keep up-to-date with GitHub Dependabot](#keep-up-to-date-with-github-dependabot)
+* [Contributing](#contributing)
 
 ## Usage
 
@@ -59,13 +54,9 @@ jobs:
         uses: docker/setup-buildx-action@v2
 ```
 
-## Advanced usage
+## Configuring your builder
 
-* [Authentication support](docs/advanced/auth.md)
-* [Append additional nodes to the builder](docs/advanced/append-nodes.md)
-* [Install by default](docs/advanced/install-default.md)
-* [BuildKit daemon configuration](docs/advanced/buildkit-config.md)
-* [Standalone mode](docs/advanced/standalone.md)
+See https://docs.docker.com/build/ci/github-actions/configure-builder/
 
 ## Customizing
 
@@ -153,33 +144,9 @@ The following [official docker environment variables](https://docs.docker.com/en
 
 ### BuildKit container logs
 
-To display BuildKit container logs (when `docker-container` driver is used) you have to [enable step debug logging](https://docs.github.com/en/actions/managing-workflow-runs/enabling-debug-logging#enabling-step-debug-logging),
-or you can also enable debugging in the [setup-buildx action step](https://github.com/docker/setup-buildx-action):
+See https://docs.docker.com/build/ci/github-actions/configure-builder/#buildkit-container-logs
 
-```yaml
-  -
-    name: Set up Docker Buildx
-    uses: docker/setup-buildx-action@v2
-    with:
-      buildkitd-flags: --debug
-```
+## Contributing
 
-Logs will be available at the end of a job:
-
-![BuildKit container logs](.github/buildkit-container-logs.png)
-
-## Keep up-to-date with GitHub Dependabot
-
-Since [Dependabot](https://docs.github.com/en/github/administering-a-repository/keeping-your-actions-up-to-date-with-github-dependabot)
-has [native GitHub Actions support](https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#package-ecosystem),
-to enable it on your GitHub repo all you need to do is add the `.github/dependabot.yml` file:
-
-```yaml
-version: 2
-updates:
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-```
+Want to contribute? Awesome! You can find information about contributing to
+this project in the [CONTRIBUTING.md](/.github/CONTRIBUTING.md)

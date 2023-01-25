@@ -20,6 +20,7 @@ ___
 
 * [Usage](#usage)
 * [Configuring your builder](#configuring-your-builder)
+* [Version pinning](#version-pinning)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
@@ -57,6 +58,33 @@ jobs:
 ## Configuring your builder
 
 See https://docs.docker.com/build/ci/github-actions/configure-builder/
+
+## Version pinning
+
+This action builds images using [Buildx](https://github.com/docker/buildx) and
+[BuildKit](https://github.com/moby/buildkit). By default, the action will
+attempt to use the latest version of Buildx available on the GitHub Runner
+(the build client) and the latest release of BuildKit (the build server).
+
+To pin to a specific version of Buildx, use the `version` input. For example,
+to pin to Buildx v0.10.0:
+
+```yaml
+- name: Set up Docker Buildx
+  uses: docker/setup-buildx-action@v3
+  with:
+    version: v0.10.0
+```
+
+To pin to a specific version of BuildKit, use the `image` option in the
+`driver-opts` input. For example, to pin to BuildKit v0.11.0:
+
+```yaml
+- name: Set up Docker Buildx
+  uses: docker/setup-buildx-action@v3
+  with:
+    driver-opts: image=moby/buildkit:v0.11.0
+```
 
 ## Customizing
 

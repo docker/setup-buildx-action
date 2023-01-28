@@ -50,4 +50,5 @@ target "test" {
   dockerfile = "dev.Dockerfile"
   target = "test-coverage"
   output = ["./coverage"]
+  secret = ["id=GITHUB_TOKEN,env=GITHUB_TOKEN"]
 }

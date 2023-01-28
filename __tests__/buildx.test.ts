@@ -221,7 +221,7 @@ describe('install', () => {
   ])(
     'acquires %p of buildx (standalone: %p)',
     async (version, standalone) => {
-      const buildxBin = await buildx.install(version, tmpDir, standalone);
+      const buildxBin = await buildx.install(version, process.env.GITHUB_TOKEN || '', tmpDir, standalone);
       expect(fs.existsSync(buildxBin)).toBe(true);
     },
     100000

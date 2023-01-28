@@ -44,6 +44,10 @@ inputs:
   append:
     description: 'Append additional nodes to the builder'
     required: false
+  github_token:
+    description: 'The GitHub token used to create an authenticated client for GitHub API'
+    default: ${{ github.token }}
+    required: false
 
 outputs:
   name:

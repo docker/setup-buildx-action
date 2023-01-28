@@ -44,15 +44,6 @@ inputs:
   append:
     description: 'Append additional nodes to the builder'
     required: false
-  github_token:
-    # https://github.com/actions/setup-go/blob/21459d0b7b1d63741429b748885bf5a4974593b4/action.yml#L12-L14
-    description: >
-      Used to verifiy the Git tag exists on docker/buildx repo. Since there's a
-      default, this is typically not supplied by the user. When running this
-      action on github.com, the default value is sufficient. When running on
-      GHES, you can pass a personal access token for github.com if you are
-      experiencing rate limiting.
-    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
 outputs:
   name:

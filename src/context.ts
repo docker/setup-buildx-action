@@ -36,7 +36,6 @@ export interface Inputs {
   config: string;
   configInline: string;
   append: string;
-  githubToken: string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -52,8 +51,7 @@ export async function getInputs(): Promise<Inputs> {
     endpoint: core.getInput('endpoint'),
     config: core.getInput('config'),
     configInline: core.getInput('config-inline'),
-    append: core.getInput('append'),
-    githubToken: core.getInput('github_token')
+    append: core.getInput('append')
   };
 }
 

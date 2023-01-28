@@ -42,7 +42,7 @@ async function run(): Promise<void> {
       core.endGroup();
     } else if (!(await buildx.isAvailable(standalone)) || inputs.version) {
       core.startGroup(`Download and install buildx`);
-      await buildx.install(inputs.version || 'latest', inputs.githubToken, standalone ? context.tmpDir() : dockerConfigHome, standalone);
+      await buildx.install(inputs.version || 'latest', standalone ? context.tmpDir() : dockerConfigHome, standalone);
       core.endGroup();
     }
 

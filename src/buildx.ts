@@ -4,9 +4,9 @@ import * as semver from 'semver';
 import * as util from 'util';
 import * as context from './context';
 import * as git from './git';
-import * as github from './github';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as httpm from '@actions/http-client';
 import * as tc from '@actions/tool-cache';
 
 export type Builder = {
@@ -23,6 +23,29 @@ export type Node = {
   'buildkitd-flags'?: string;
   buildkit?: string;
   platforms?: string;
+};
+
+export interface GitHubRelease {
+  id: number;
+  tag_name: string;
+  html_url: string;
+  assets: Array<string>;
+}
+
+export const getRelease = async (version: string): Promise<GitHubRelease> => {
+  const url = `https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json`;
+  const http: httpm.HttpClient = new httpm.HttpClient('setup-buildx');
+  const resp: httpm.HttpClientResponse = await http.get(url);
+  const body = await resp.readBody();
+  const statusCode = resp.message.statusCode || 500;
+  if (statusCode >= 400) {
+    throw new Error(`Failed to get Buildx release ${version} from ${url} with status code ${statusCode}: ${body}`);
+  }
+  const releases = <Record<string, GitHubRelease>>JSON.parse(body);
+  if (!releases[version]) {
+    throw new Error(`Cannot find Buildx release ${version} in ${url}`);
+  }
+  return releases[version];
 };
 
 export async function getConfigInline(s: string): Promise<string> {
@@ -237,13 +260,8 @@ export async function build(inputBuildRef: string, dest: string, standalone: boo
   return setPlugin(toolPath, dest);
 }
 
-export async function install(inputVersion: string, githubToken: string, dest: string, standalone: boolean): Promise<string> {
-  let release: github.Release;
-  if (inputVersion == 'latest') {
-    release = await github.getLatestRelease(githubToken);
-  } else {
-    release = await github.getReleaseTag(inputVersion, githubToken);
-  }
+export async function install(inputVersion: string, dest: string, standalone: boolean): Promise<string> {
+  const release: GitHubRelease = await getRelease(inputVersion);
   core.debug(`Release ${release.tag_name} found`);
   const version = release.tag_name.replace(/^v+|v+$/g, '');
 

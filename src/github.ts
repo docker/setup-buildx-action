@@ -10,7 +10,9 @@ const [owner, repo] = 'docker/buildx'.split('/');
 export const getReleaseTag = async (tag: string, githubToken: string): Promise<Release> => {
   return (
     await github
-      .getOctokit(githubToken)
+      .getOctokit(githubToken, {
+        baseUrl: 'https://api.github.com'
+      })
       .rest.repos.getReleaseByTag({
         owner,
         repo,
@@ -25,7 +27,9 @@ export const getReleaseTag = async (tag: string, githubToken: string): Promise<R
 export const getLatestRelease = async (githubToken: string): Promise<Release> => {
   return (
     await github
-      .getOctokit(githubToken)
+      .getOctokit(githubToken, {
+        baseUrl: 'https://api.github.com'
+      })
       .rest.repos.getLatestRelease({
         owner,
         repo

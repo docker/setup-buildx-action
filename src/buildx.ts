@@ -237,10 +237,12 @@ export async function build(inputBuildRef: string, dest: string, standalone: boo
   return setPlugin(toolPath, dest);
 }
 
-export async function install(inputVersion: string, dest: string, standalone: boolean): Promise<string> {
-  const release: github.GitHubRelease | null = await github.getRelease(inputVersion);
-  if (!release) {
-    throw new Error(`Cannot find buildx ${inputVersion} release`);
+export async function install(inputVersion: string, githubToken: string, dest: string, standalone: boolean): Promise<string> {
+  let release: github.Release;
+  if (inputVersion == 'latest') {
+    release = await github.getLatestRelease(githubToken);
+  } else {
+    release = await github.getReleaseTag(inputVersion, githubToken);
   }
   core.debug(`Release ${release.tag_name} found`);
   const version = release.tag_name.replace(/^v+|v+$/g, '');

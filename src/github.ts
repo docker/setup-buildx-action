@@ -1,12 +1,37 @@
-import * as httpm from '@actions/http-client';
+import * as github from '@actions/github';
 
-export interface GitHubRelease {
+export interface Release {
   id: number;
   tag_name: string;
 }
 
-export const getRelease = async (version: string): Promise<GitHubRelease | null> => {
-  const url = `https://github.com/docker/buildx/releases/${version}`;
-  const http: httpm.HttpClient = new httpm.HttpClient('setup-buildx');
-  return (await http.getJson<GitHubRelease>(url)).result;
+const [owner, repo] = 'docker/buildx'.split('/');
+
+export const getReleaseTag = async (tag: string, githubToken: string): Promise<Release> => {
+  return (
+    await github
+      .getOctokit(githubToken)
+      .rest.repos.getReleaseByTag({
+        owner,
+        repo,
+        tag
+      })
+      .catch(error => {
+        throw new Error(`Cannot get release ${tag}: ${error}`);
+      })
+  ).data as Release;
+};
+
+export const getLatestRelease = async (githubToken: string): Promise<Release> => {
+  return (
+    await github
+      .getOctokit(githubToken)
+      .rest.repos.getLatestRelease({
+        owner,
+        repo
+      })
+      .catch(error => {
+        throw new Error(`Cannot get latest release: ${error}`);
+      })
+  ).data as Release;
 };

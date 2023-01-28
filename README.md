@@ -72,7 +72,7 @@ to pin to Buildx v0.10.0:
 
 ```yaml
 - name: Set up Docker Buildx
-  uses: docker/setup-buildx-action@v3
+  uses: docker/setup-buildx-action@v2
   with:
     version: v0.10.0
 ```
@@ -82,7 +82,7 @@ To pin to a specific version of BuildKit, use the `image` option in the
 
 ```yaml
 - name: Set up Docker Buildx
-  uses: docker/setup-buildx-action@v3
+  uses: docker/setup-buildx-action@v2
   with:
     driver-opts: image=moby/buildkit:v0.11.0
 ```
@@ -194,7 +194,7 @@ To get a higher rate limit, you can [generate a personal access token on github.
 and pass it as the `github_token` input for the action:
 
 ```yaml
-uses: docker/setup-buildx-action@v3
+uses: docker/setup-buildx-action@v2
 with:
   github_token: ${{ secrets.GH_DOTCOM_TOKEN }}
   version: v0.10.1

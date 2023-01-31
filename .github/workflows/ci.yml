@@ -105,7 +105,7 @@ jobs:
           buildkitd-flags: --debug
       -
         name: Build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le
@@ -251,7 +251,7 @@ jobs:
           config: /tmp/buildkitd.toml
       -
         name: Build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
 
@@ -278,7 +278,7 @@ jobs:
               mirrors = ["mirror.gcr.io"]
       -
         name: Build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
 
@@ -340,7 +340,7 @@ jobs:
           EOL
       -
         name: Build
-        uses: docker/build-push-action@master
+        uses: docker/build-push-action@v4
         with:
           context: .
 
@@ -391,7 +391,7 @@ jobs:
           EOL
       -
         name: Build
-        uses: docker/build-push-action@master
+        uses: docker/build-push-action@v4
         with:
           context: .
 

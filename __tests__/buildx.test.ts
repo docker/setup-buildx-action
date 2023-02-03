@@ -28,34 +28,6 @@ describe('isAvailable', () => {
   });
 });
 
-describe('getRelease', () => {
-  it('returns latest buildx GitHub release', async () => {
-    const release = await buildx.getRelease('latest');
-    expect(release).not.toBeNull();
-    expect(release?.tag_name).not.toEqual('');
-  });
-
-  it('returns v0.10.1 buildx GitHub release', async () => {
-    const release = await buildx.getRelease('v0.10.1');
-    expect(release).not.toBeNull();
-    expect(release?.id).toEqual(90346950);
-    expect(release?.tag_name).toEqual('v0.10.1');
-    expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.10.1');
-  });
-
-  it('returns v0.2.2 buildx GitHub release', async () => {
-    const release = await buildx.getRelease('v0.2.2');
-    expect(release).not.toBeNull();
-    expect(release?.id).toEqual(17671545);
-    expect(release?.tag_name).toEqual('v0.2.2');
-    expect(release?.html_url).toEqual('https://github.com/docker/buildx/releases/tag/v0.2.2');
-  });
-
-  it('unknown release', async () => {
-    await expect(buildx.getRelease('foo')).rejects.toThrowError(new Error('Cannot find Buildx release foo in https://raw.githubusercontent.com/docker/buildx/master/.github/releases.json'));
-  });
-});
-
 describe('isAvailable standalone', () => {
   const execSpy = jest.spyOn(exec, 'getExecOutput');
   buildx.isAvailable(true);

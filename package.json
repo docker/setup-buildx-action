@@ -31,6 +31,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/http-client": "^2.0.1",
     "@actions/tool-cache": "^2.0.1",
+    "@docker/actions-toolkit": "^0.1.0-beta.4",
     "csv-parse": "^5.3.3",
     "js-yaml": "^4.1.0",
     "semver": "^7.3.7",

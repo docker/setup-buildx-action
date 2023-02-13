@@ -80,7 +80,7 @@ jobs:
       -
         name: Dump context
         if: always()
-        uses: crazy-max/ghaction-dump-context@v1
+        uses: crazy-max/ghaction-dump-context@v2
 
   debug:
     runs-on: ubuntu-latest

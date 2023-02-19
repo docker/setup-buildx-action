@@ -1,182 +1,189 @@
 import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import * as auth from './auth';
-import * as buildx from './buildx';
-import * as context from './context';
-import * as docker from './docker';
-import * as nodes from './nodes';
-import * as stateHelper from './state-helper';
-import * as util from './util';
+import * as yaml from 'js-yaml';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as actionsToolkit from '@docker/actions-toolkit';
+import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
+import {Docker} from '@docker/actions-toolkit/lib/docker';
+import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
+import {Util} from '@docker/actions-toolkit/lib/util';
+import {Node} from '@docker/actions-toolkit/lib/types/builder';
 
-async function run(): Promise<void> {
-  try {
+import * as context from './context';
+import * as stateHelper from './state-helper';
+
+actionsToolkit.run(
+  // main
+  async () => {
     const inputs: context.Inputs = await context.getInputs();
-    const dockerConfigHome: string = process.env.DOCKER_CONFIG || path.join(os.homedir(), '.docker');
+    const toolkit = new Toolkit();
 
-    // standalone if docker cli not available
-    const standalone = !(await docker.isAvailable());
+    const standalone = await toolkit.buildx.isStandalone();
     stateHelper.setStandalone(standalone);
 
-    core.startGroup(`Docker info`);
-    if (standalone) {
-      core.info(`Docker info skipped in standalone mode`);
-    } else {
-      await exec.exec('docker', ['version'], {
-        failOnStdErr: false
-      });
-      await exec.exec('docker', ['info'], {
-        failOnStdErr: false
-      });
-    }
-    core.endGroup();
+    await core.group(`Docker info`, async () => {
+      try {
+        await Docker.printVersion();
+        await Docker.printInfo();
+      } catch (e) {
+        core.info(e.message);
+      }
+    });
 
-    if (util.isValidUrl(inputs.version)) {
+    let toolPath;
+    if (Util.isValidUrl(inputs.version)) {
       if (standalone) {
         throw new Error(`Cannot build from source without the Docker CLI`);
       }
-      core.startGroup(`Build and install buildx`);
-      await buildx.build(inputs.version, dockerConfigHome, standalone);
-      core.endGroup();
-    } else if (!(await buildx.isAvailable(standalone)) || inputs.version) {
-      core.startGroup(`Download and install buildx`);
-      await buildx.install(inputs.version || 'latest', standalone ? context.tmpDir() : dockerConfigHome, standalone);
-      core.endGroup();
+      await core.group(`Build buildx from source`, async () => {
+        toolPath = await toolkit.buildxInstall.build(inputs.version);
+      });
+    } else if (!(await toolkit.buildx.isAvailable()) || inputs.version) {
+      await core.group(`Download buildx from GitHub Releases`, async () => {
+        toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest');
+      });
+    }
+    if (toolPath) {
+      await core.group(`Install buildx`, async () => {
+        if (standalone) {
+          await toolkit.buildxInstall.installStandalone(toolPath);
+        } else {
+          await toolkit.buildxInstall.installPlugin(toolPath);
+        }
+      });
     }
 
-    const buildxVersion = await buildx.getVersion(standalone);
     await core.group(`Buildx version`, async () => {
-      const versionCmd = buildx.getCommand(['version'], standalone);
-      await exec.exec(versionCmd.commandLine, versionCmd.args, {
-        failOnStdErr: false
-      });
+      await toolkit.buildx.printVersion();
     });
 
     core.setOutput('name', inputs.name);
     stateHelper.setBuilderName(inputs.name);
 
-    const credsdir = path.join(dockerConfigHome, 'buildx', 'creds', inputs.name);
-    fs.mkdirSync(credsdir, {recursive: true});
-    stateHelper.setCredsDir(credsdir);
+    fs.mkdirSync(Buildx.certsDir, {recursive: true});
+    stateHelper.setCertsDir(Buildx.certsDir);
 
     if (inputs.driver !== 'docker') {
-      core.startGroup(`Creating a new builder instance`);
-      const authOpts = auth.setCredentials(credsdir, 0, inputs.driver, inputs.endpoint);
-      if (authOpts.length > 0) {
-        inputs.driverOpts = [...inputs.driverOpts, ...authOpts];
-      }
-      const createCmd = buildx.getCommand(await context.getCreateArgs(inputs, buildxVersion), standalone);
-      await exec.exec(createCmd.commandLine, createCmd.args);
-      core.endGroup();
+      await core.group(`Creating a new builder instance`, async () => {
+        const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
+          cacert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CACERT`],
+          cert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CERT`],
+          key: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_KEY`]
+        });
+        if (certsDriverOpts.length > 0) {
+          inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
+        }
+        const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
+        await exec.exec(createCmd.command, createCmd.args);
+      });
     }
 
     if (inputs.append) {
-      core.startGroup(`Appending node(s) to builder`);
-      let nodeIndex = 1;
-      for (const node of nodes.Parse(inputs.append)) {
-        const authOpts = auth.setCredentials(credsdir, nodeIndex, inputs.driver, node.endpoint || '');
-        if (authOpts.length > 0) {
-          node['driver-opts'] = [...(node['driver-opts'] || []), ...authOpts];
+      await core.group(`Appending node(s) to builder`, async () => {
+        let nodeIndex = 1;
+        const nodes = yaml.load(inputs.append) as Node[];
+        for (const node of nodes) {
+          const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, `${node.endpoint}`, {
+            cacert: process.env[`${context.builderNodeEnvPrefix}_${nodeIndex}_AUTH_TLS_CACERT`],
+            cert: process.env[`${context.builderNodeEnvPrefix}_${nodeIndex}_AUTH_TLS_CERT`],
+            key: process.env[`${context.builderNodeEnvPrefix}_${nodeIndex}_AUTH_TLS_KEY`]
+          });
+          if (certsDriverOpts.length > 0) {
+            node['driver-opts'] = [...(node['driver-opts'] || []), ...certsDriverOpts];
+          }
+          const appendCmd = await toolkit.buildx.getCommand(await context.getAppendArgs(inputs, node, toolkit));
+          await exec.exec(appendCmd.command, appendCmd.args);
+          nodeIndex++;
         }
-        const appendCmd = buildx.getCommand(await context.getAppendArgs(inputs, node, buildxVersion), standalone);
-        await exec.exec(appendCmd.commandLine, appendCmd.args);
-        nodeIndex++;
-      }
-      core.endGroup();
+      });
     }
 
-    core.startGroup(`Booting builder`);
-    const inspectCmd = buildx.getCommand(await context.getInspectArgs(inputs, buildxVersion), standalone);
-    await exec.exec(inspectCmd.commandLine, inspectCmd.args);
-    core.endGroup();
+    await core.group(`Booting builder`, async () => {
+      const inspectCmd = await toolkit.buildx.getCommand(await context.getInspectArgs(inputs, toolkit));
+      await exec.exec(inspectCmd.command, inspectCmd.args);
+    });
 
     if (inputs.install) {
       if (standalone) {
         throw new Error(`Cannot set buildx as default builder without the Docker CLI`);
       }
-      core.startGroup(`Setting buildx as default builder`);
-      await exec.exec('docker', ['buildx', 'install']);
-      core.endGroup();
+      await core.group(`Setting buildx as default builder`, async () => {
+        const installCmd = await toolkit.buildx.getCommand(['install']);
+        await exec.exec(installCmd.command, installCmd.args);
+      });
     }
 
-    core.startGroup(`Inspect builder`);
-    const builder = await buildx.inspect(inputs.name, standalone);
-    const firstNode = builder.nodes[0];
-    const reducedPlatforms: Array<string> = [];
-    for (const node of builder.nodes) {
-      for (const platform of node.platforms?.split(',') || []) {
-        if (reducedPlatforms.indexOf(platform) > -1) {
-          continue;
+    const builderInspect = await toolkit.builder.inspect(inputs.name);
+    const firstNode = builderInspect.nodes[0];
+
+    await core.group(`Inspect builder`, async () => {
+      const reducedPlatforms: Array<string> = [];
+      for (const node of builderInspect.nodes) {
+        for (const platform of node.platforms?.split(',') || []) {
+          if (reducedPlatforms.indexOf(platform) > -1) {
+            continue;
+          }
+          reducedPlatforms.push(platform);
         }
-        reducedPlatforms.push(platform);
       }
-    }
-    core.info(JSON.stringify(builder, undefined, 2));
-    core.setOutput('driver', builder.driver);
-    core.setOutput('platforms', reducedPlatforms.join(','));
-    core.setOutput('nodes', JSON.stringify(builder.nodes, undefined, 2));
-    core.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
-    core.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
-    core.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
-    core.endGroup();
+      core.info(JSON.stringify(builderInspect, undefined, 2));
+      core.setOutput('driver', builderInspect.driver);
+      core.setOutput('platforms', reducedPlatforms.join(','));
+      core.setOutput('nodes', JSON.stringify(builderInspect.nodes, undefined, 2));
+      core.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
+      core.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
+      core.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
+    });
 
-    if (!standalone && builder.driver == 'docker-container') {
-      stateHelper.setContainerName(`buildx_buildkit_${firstNode.name}`);
-      core.startGroup(`BuildKit version`);
-      for (const node of builder.nodes) {
-        const bkvers = await buildx.getBuildKitVersion(`buildx_buildkit_${node.name}`);
-        core.info(`${node.name}: ${bkvers}`);
-      }
-      core.endGroup();
+    if (!standalone && builderInspect.driver == 'docker-container') {
+      stateHelper.setContainerName(`${Buildx.containerNamePrefix}${firstNode.name}`);
+      await core.group(`BuildKit version`, async () => {
+        for (const node of builderInspect.nodes) {
+          const buildkitVersion = await toolkit.buildkit.getVersion(node);
+          core.info(`${node.name}: ${buildkitVersion}`);
+        }
+      });
     }
     if (core.isDebug() || firstNode['buildkitd-flags']?.includes('--debug')) {
       stateHelper.setDebug('true');
     }
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-async function cleanup(): Promise<void> {
-  if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
-    core.startGroup(`BuildKit container logs`);
-    await exec
-      .getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
-        ignoreReturnCode: true
-      })
-      .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.warning(res.stderr.trim());
-        }
+  },
+  // post
+  async () => {
+    if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
+      await core.group(`BuildKit container logs`, async () => {
+        await exec
+          .getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
+            ignoreReturnCode: true
+          })
+          .then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              core.warning(res.stderr.trim());
+            }
+          });
       });
-    core.endGroup();
-  }
+    }
 
-  if (stateHelper.builderName.length > 0) {
-    core.startGroup(`Removing builder`);
-    const rmCmd = buildx.getCommand(['rm', stateHelper.builderName], /true/i.test(stateHelper.standalone));
-    await exec
-      .getExecOutput(rmCmd.commandLine, rmCmd.args, {
-        ignoreReturnCode: true
-      })
-      .then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          core.warning(res.stderr.trim());
-        }
+    if (stateHelper.builderName.length > 0) {
+      await core.group(`Removing builder`, async () => {
+        const buildx = new Buildx({standalone: /true/i.test(stateHelper.standalone)});
+        const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
+        await exec
+          .getExecOutput(rmCmd.command, rmCmd.args, {
+            ignoreReturnCode: true
+          })
+          .then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              core.warning(res.stderr.trim());
+            }
+          });
       });
-    core.endGroup();
-  }
+    }
 
-  if (stateHelper.credsDir.length > 0 && fs.existsSync(stateHelper.credsDir)) {
-    core.info(`Cleaning up credentials`);
-    fs.rmSync(stateHelper.credsDir, {recursive: true});
+    if (stateHelper.certsDir.length > 0 && fs.existsSync(stateHelper.certsDir)) {
+      await core.group(`Cleaning up certificates`, async () => {
+        fs.rmSync(stateHelper.certsDir, {recursive: true});
+      });
+    }
   }
-}
-
-if (!stateHelper.IsPost) {
-  run();
-} else {
-  cleanup();
-}
+);

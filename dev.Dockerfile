@@ -71,6 +71,7 @@ ENV RUNNER_TOOL_CACHE=/tmp/github_tool_cache
 RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
   --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
+  --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
   --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
   yarn run test --coverageDirectory=/tmp/coverage
 

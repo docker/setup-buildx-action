@@ -100,6 +100,7 @@ The following inputs can be used as `step.with` keys:
 | `append`                     | YAML     |                    | [Append additional nodes](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder) to the builder                          |
 | `cache-binary`               | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
 | `cleanup`                    | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
+| `name`                       | String   | Default Docker Context | Name of the builder to create or use. If a builder with this name already exists, it will be used instead of creating a new one.                                              |
 
 > [!IMPORTANT]
 > If you set the `buildkitd-flags` input, the default flags (`--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host`)

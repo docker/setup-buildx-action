@@ -115,6 +115,7 @@ actionsToolkit.run(
         });
       }
     }
+    stateHelper.setKeepState(inputs.keepState);
 
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {
@@ -249,7 +250,7 @@ actionsToolkit.run(
         const buildx = new Buildx({standalone: stateHelper.standalone});
         const builder = new Builder({buildx: buildx});
         if (await builder.exists(stateHelper.builderName)) {
-          const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
+          const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName, ...(stateHelper.keepState ? ['--keep-state'] : [])]);
           await Exec.getExecOutput(rmCmd.command, rmCmd.args, {
             ignoreReturnCode: true
           }).then(res => {

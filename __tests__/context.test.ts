@@ -56,6 +56,7 @@ describe('getCreateArgs', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       [
         'create',
@@ -74,6 +75,7 @@ describe('getCreateArgs', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       [
         'create',
@@ -92,6 +94,7 @@ describe('getCreateArgs', () => {
         ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       [
         'create',
@@ -112,6 +115,7 @@ describe('getCreateArgs', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       [
         'create',
@@ -132,6 +136,7 @@ describe('getCreateArgs', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       [
         'create',
@@ -151,6 +156,7 @@ describe('getCreateArgs', () => {
         ['driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -169,6 +175,7 @@ describe('getCreateArgs', () => {
         ['platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -187,6 +194,7 @@ describe('getCreateArgs', () => {
         ['driver', 'unknown'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -203,6 +211,7 @@ describe('getCreateArgs', () => {
         ['buildkitd-config', path.join(fixturesDir, 'buildkitd.toml')],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -221,6 +230,7 @@ describe('getCreateArgs', () => {
         ['buildkitd-config-inline', 'debug = true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -240,6 +250,7 @@ describe('getCreateArgs', () => {
         ['buildkitd-flags', '--allow-insecure-entitlement network.host'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false'],
       ]),
       [
         'create',
@@ -247,7 +258,45 @@ describe('getCreateArgs', () => {
         '--driver', 'cloud',
         '--buildkitd-flags', '--allow-insecure-entitlement network.host',
       ]
-    ]
+    ],
+    [
+      11,
+      'v0.10.3',
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cleanup', 'true'],
+        ['cache-binary', 'true'],
+        ['keep-state', 'false'],
+        ['name', 'test-builder-name'],
+      ]),
+      [
+        'create',
+        '--name', 'test-builder-name',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--use'
+      ]
+    ],
+    [
+      12,
+      'v0.10.3',
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cleanup', 'true'],
+        ['cache-binary', 'true'],
+        ['keep-state', 'true'],
+        ['name', 'test-builder-name'],
+      ]),
+      [
+        'create',
+        '--name', 'test-builder-name',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--use',
+      ]
+    ],
   ])(
     '[%d] given buildx %s and %p as inputs, returns %p',
     async (num: number, buildxVersion: string, inputs: Map<string, string>, expected: Array<string>) => {
@@ -285,6 +334,7 @@ describe('getAppendArgs', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       {
         "name": "aws_graviton2",
@@ -343,6 +393,7 @@ describe('getVersion', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       ''
     ],
@@ -354,7 +405,8 @@ describe('getVersion', () => {
         ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
-        ['cleanup', 'true']
+        ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'latest'
     ],
@@ -366,7 +418,8 @@ describe('getVersion', () => {
         ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
-        ['cleanup', 'true']
+        ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'edge'
     ],
@@ -378,7 +431,8 @@ describe('getVersion', () => {
         ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
-        ['cleanup', 'true']
+        ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'v0.19.2'
     ],
@@ -391,7 +445,8 @@ describe('getVersion', () => {
         ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
-        ['cleanup', 'true']
+        ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'cloud:latest'
     ],
@@ -404,7 +459,8 @@ describe('getVersion', () => {
         ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
-        ['cleanup', 'true']
+        ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'cloud:edge'
     ],
@@ -417,6 +473,7 @@ describe('getVersion', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'cloud:latest'
     ],
@@ -430,6 +487,7 @@ describe('getVersion', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'cloud:v0.11.2-desktop.2'
     ],
@@ -442,6 +500,7 @@ describe('getVersion', () => {
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
+        ['keep-state', 'false']
       ]),
       'cloud:v0.11.2-desktop.2'
     ],

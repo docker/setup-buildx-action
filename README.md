@@ -20,14 +20,12 @@ ___
 
 * [Usage](#usage)
 * [Configuring your builder](#configuring-your-builder)
-* [Version pinning](#version-pinning)
 * [Customizing](#customizing)
   * [inputs](#inputs)
   * [outputs](#outputs)
   * [environment variables](#environment-variables)
 * [Notes](#notes)
   * [`nodes` output](#nodes-output)
-  * [BuildKit container logs](#buildkit-container-logs)
 * [Contributing](#contributing)
 
 ## Usage
@@ -57,34 +55,17 @@ jobs:
 
 ## Configuring your builder
 
-See https://docs.docker.com/build/ci/github-actions/configure-builder/
-
-## Version pinning
-
-This action builds images using [Buildx](https://github.com/docker/buildx) and
-[BuildKit](https://github.com/moby/buildkit). By default, the action will
-attempt to use the latest version of Buildx available on the GitHub Runner
-(the build client) and the latest release of BuildKit (the build server).
-
-To pin to a specific version of Buildx, use the `version` input. For example,
-to pin to Buildx v0.10.0:
-
-```yaml
-- name: Set up Docker Buildx
-  uses: docker/setup-buildx-action@v2
-  with:
-    version: v0.10.0
-```
-
-To pin to a specific version of BuildKit, use the `image` option in the
-`driver-opts` input. For example, to pin to BuildKit v0.11.0:
-
-```yaml
-- name: Set up Docker Buildx
-  uses: docker/setup-buildx-action@v2
-  with:
-    driver-opts: image=moby/buildkit:v0.11.0
-```
+* [Version pinning](https://docs.docker.com/build/ci/github-actions/configure-builder/#version-pinning): Pin to a specific Buildx or BuildKit version
+* [BuildKit container logs](https://docs.docker.com/build/ci/github-actions/configure-builder/#buildkit-container-logs): Enable BuildKit container logs for debugging purposes
+* [BuildKit Daemon configuration](https://docs.docker.com/build/ci/github-actions/configure-builder/#buildkit-daemon-configuration)
+  * [Registry mirror](https://docs.docker.com/build/ci/github-actions/configure-builder/#registry-mirror): Configure a registry mirror for your builds
+  * [Max parallelism](https://docs.docker.com/build/ci/github-actions/configure-builder/#max-parallelism): Configure the maximum parallelism for your builds
+* [Append additional nodes to the builder](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder): Create additional nodes for your builder
+* [Authentication for remote builders](https://docs.docker.com/build/ci/github-actions/configure-builder/#authentication-for-remote-builders)
+  * [SSH authentication](https://docs.docker.com/build/ci/github-actions/configure-builder/#ssh-authentication): Authenticate to a remote builder using SSH
+  * [TLS authentication](https://docs.docker.com/build/ci/github-actions/configure-builder/#tls-authentication): Authenticate to a remote builder using TLS
+* [Standalone mode](https://docs.docker.com/build/ci/github-actions/configure-builder/#standalone-mode): Use Buildx as a standalone binary (without the Docker CLI)
+* [Isolated builders](https://docs.docker.com/build/ci/github-actions/configure-builder/#isolated-builders): Create isolated builders for your builds
 
 ## Customizing
 
@@ -169,10 +150,6 @@ The following [official docker environment variables](https://docs.docker.com/en
 | `buildkitd-flags` | String | Flags for buildkitd daemon |
 | `buildkit`        | String | BuildKit version           |
 | `platforms`       | String | Platforms available        |
-
-### BuildKit container logs
-
-See https://docs.docker.com/build/ci/github-actions/configure-builder/#buildkit-container-logs
 
 ## Contributing
 

@@ -1,5 +1,6 @@
 import * as uuid from 'uuid';
 import * as core from '@actions/core';
+import {Docker} from '@docker/actions-toolkit/lib/docker';
 import {Util} from '@docker/actions-toolkit/lib/util';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';
@@ -24,7 +25,7 @@ export interface Inputs {
 export async function getInputs(): Promise<Inputs> {
   return {
     version: core.getInput('version'),
-    name: getBuilderName(core.getInput('driver') || 'docker-container'),
+    name: await getBuilderName(core.getInput('driver') || 'docker-container'),
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: Util.getInputList('driver-opts', {ignoreComma: true, quote: false}),
     buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
@@ -38,8 +39,8 @@ export async function getInputs(): Promise<Inputs> {
   };
 }
 
-export function getBuilderName(driver: string): string {
-  return driver == 'docker' ? 'default' : `builder-${uuid.v4()}`;
+export async function getBuilderName(driver: string): Promise<string> {
+  return driver == 'docker' ? await Docker.context() : `builder-${uuid.v4()}`;
 }
 
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {

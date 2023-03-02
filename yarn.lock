@@ -39,6 +39,11 @@
   resolved "https://registry.yarnpkg.com/@actions/io/-/io-1.1.1.tgz#4a157406309e212ab27ed3ae30e8c1d641686a66"
   integrity sha512-Qi4JoKXjmE0O67wAOH6y0n26QXhMKMFo7GD/4IXNVcrtLjUlGjGuVys6pQgwF3ArfGTQu0XpqaNr0YhED2RaRA==
 
+"@actions/io@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@actions/io/-/io-1.1.2.tgz#766ac09674a289ce0f1550ffe0a6eac9261a8ea9"
+  integrity sha512-d+RwPlMp+2qmBfeLYPLXuSRykDIFEwdTA0MMxzS9kh4kvP1ftrc/9fzy6pX6qAjthdXruHQ6/6kjT/DNo5ALuw==
+
 "@actions/tool-cache@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@actions/tool-cache/-/tool-cache-2.0.1.tgz#8a649b9c07838d9d750c9864814e66a7660ab720"
@@ -558,17 +563,18 @@
   dependencies:
     "@cspotcode/source-map-consumer" "0.8.0"
 
-"@docker/actions-toolkit@^0.1.0-beta.4":
-  version "0.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@docker/actions-toolkit/-/actions-toolkit-0.1.0-beta.4.tgz#a0b62c299e4efed9baac4ead454b1e5eda06092a"
-  integrity sha512-pIKuGxKH+41+bjHctEDi15Ub2KxT6z2MFKCDA9KwUL0gCUjsUS/N2xIXGZUNKCfVCRTvWLQPttPxzoQxnlndog==
+"@docker/actions-toolkit@^0.1.0-beta.15":
+  version "0.1.0-beta.15"
+  resolved "https://registry.yarnpkg.com/@docker/actions-toolkit/-/actions-toolkit-0.1.0-beta.15.tgz#46d9f4b1582f19ce3cb68cf272fbee335e693212"
+  integrity sha512-YdOHXz+r1fkoYYA5tR+Ji6jiqw5wU7gYsL8ISW+mQicm6f4Ckw4PNNADEZR+X8paEc+96Xl5Osr2tKmM3mOZOA==
   dependencies:
     "@actions/core" "^1.10.0"
     "@actions/exec" "^1.1.1"
     "@actions/github" "^5.1.1"
     "@actions/http-client" "^2.0.1"
+    "@actions/io" "^1.1.2"
     "@actions/tool-cache" "^2.0.1"
-    csv-parse "^5.3.4"
+    csv-parse "^5.3.5"
     jwt-decode "^3.1.2"
     semver "^7.3.8"
     tmp "^0.2.1"
@@ -1041,20 +1047,10 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.4.4.tgz#5d9b63132df54d8909fce1c3f8ca260fdd693e17"
   integrity sha512-ReVR2rLTV1kvtlWFyuot+d1pkpG2Fw/XKE3PDAdj57rbM97ttSp9JZ2UsP+2EHTylra9cUf6JA7tGwW1INzUrA==
 
-"@types/semver@^7.3.9":
-  version "7.3.9"
-  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.9.tgz#152c6c20a7688c30b967ec1841d31ace569863fc"
-  integrity sha512-L/TMpyURfBkf+o/526Zb6kd/tchUP3iBDEPjqjb+U2MAJhVRxxrmr2fwpe08E7QsV7YLcpq0tUaQ9O9x97ZIxQ==
-
 "@types/stack-utils@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.0.tgz#7036640b4e21cc2f259ae826ce843d277dad8cff"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
-
-"@types/tmp@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.2.3.tgz#908bfb113419fd6a42273674c00994d40902c165"
-  integrity sha512-dDZH/tXzwjutnuk4UacGgFRwV+JSLaXL1ikvidfJprkb7L9Nx1njcRHHmi3Dsvt7pgqqTEeucQuOrWHPFgzVHA==
 
 "@types/yargs-parser@*":
   version "20.2.0"
@@ -1566,10 +1562,10 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-csv-parse@^5.3.4:
-  version "5.3.4"
-  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-5.3.4.tgz#f1f34457091dabd8b447528f741b7e0f080191d1"
-  integrity sha512-f2E4NzkIX4bVIx5Ff2gKT1BlVwyFQ+2iFy+QrqgUXaFLUo7vSzN6XQ8LV5V/T/p/9g7mJdtYHKLkwG5PiG82fg==
+csv-parse@^5.3.5:
+  version "5.3.5"
+  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-5.3.5.tgz#9924bbba9f7056122f06b7af18edc1a7f022ce99"
+  integrity sha512-8O5KTIRtwmtD3+EVfW6BCgbwZqJbhTYsQZry12F1TP5RUp0sD9tp1UnCWic3n0mLOhzeocYaCZNYxOGSg3dmmQ==
 
 data-urls@^2.0.0:
   version "2.0.0"
@@ -1664,11 +1660,6 @@ domexception@^2.0.1:
   integrity sha512-yxJ2mFy/sibVQlu5qHjOkf9J3K6zgmCxgJ94u2EdvDOV09H+32LtRswEcUsmUWN72pVLOEnTSRaIVVzVQgS0dg==
   dependencies:
     webidl-conversions "^5.0.0"
-
-dotenv@^16.0.0:
-  version "16.0.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.0.tgz#c619001253be89ebb638d027b609c75c26e47411"
-  integrity sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==
 
 electron-to-chromium@^1.3.723:
   version "1.3.755"
@@ -3212,7 +3203,7 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-semver@7.x, semver@^7.3.2, semver@^7.3.5, semver@^7.3.7:
+semver@7.x, semver@^7.3.2, semver@^7.3.5:
   version "7.3.7"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.7.tgz#12c5b649afdbf9049707796e22a4028814ce523f"
   integrity sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==

@@ -1,19 +1,9 @@
-import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import {beforeEach, describe, expect, jest, test} from '@jest/globals';
 import * as uuid from 'uuid';
+import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
+import {Node} from '@docker/actions-toolkit/lib/types/builder';
+
 import * as context from '../src/context';
-import * as nodes from '../src/nodes';
-
-const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-setup-buildx-')).split(path.sep).join(path.posix.sep);
-jest.spyOn(context, 'tmpDir').mockImplementation((): string => {
-  return tmpdir;
-});
-
-jest.spyOn(context, 'tmpNameSync').mockImplementation((): string => {
-  return path.join(tmpdir, '.tmpname').split(path.sep).join(path.posix.sep);
-});
 
 jest.mock('uuid');
 jest.spyOn(uuid, 'v4').mockReturnValue('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
@@ -146,7 +136,7 @@ describe('getCreateArgs', () => {
         setInput(name, value);
       });
       const inp = await context.getInputs();
-      const res = await context.getCreateArgs(inp, '0.9.0');
+      const res = await context.getCreateArgs(inp, new Toolkit());
       expect(res).toEqual(expected);
     }
   );
@@ -192,84 +182,15 @@ describe('getAppendArgs', () => {
     ]
   ])(
     '[%d] given %p as inputs, returns %p',
-    async (num: number, inputs: Map<string, string>, node: nodes.Node, expected: Array<string>) => {
+    async (num: number, inputs: Map<string, string>, node: Node, expected: Array<string>) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);
       });
       const inp = await context.getInputs();
-      const res = await context.getAppendArgs(inp, node, '0.9.0');
+      const res = await context.getAppendArgs(inp, node, new Toolkit());
       expect(res).toEqual(expected);
     }
   );
-});
-
-describe('getInputList', () => {
-  it('handles single line correctly', async () => {
-    await setInput('foo', 'bar');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar']);
-  });
-
-  it('handles multiple lines correctly', async () => {
-    setInput('foo', 'bar\nbaz');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz']);
-  });
-
-  it('remove empty lines correctly', async () => {
-    setInput('foo', 'bar\n\nbaz');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz']);
-  });
-
-  it('handles comma correctly', async () => {
-    setInput('foo', 'bar,baz');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz']);
-  });
-
-  it('remove empty result correctly', async () => {
-    setInput('foo', 'bar,baz,');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz']);
-  });
-
-  it('handles different new lines correctly', async () => {
-    setInput('foo', 'bar\r\nbaz');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz']);
-  });
-
-  it('handles different new lines and comma correctly', async () => {
-    setInput('foo', 'bar\r\nbaz,bat');
-    const res = await context.getInputList('foo');
-    expect(res).toEqual(['bar', 'baz', 'bat']);
-  });
-
-  it('handles multiple lines and ignoring comma correctly', async () => {
-    setInput('driver-opts', 'image=moby/buildkit:master\nnetwork=host');
-    const res = await context.getInputList('driver-opts', true);
-    expect(res).toEqual(['image=moby/buildkit:master', 'network=host']);
-  });
-
-  it('handles different new lines and ignoring comma correctly', async () => {
-    setInput('driver-opts', 'image=moby/buildkit:master\r\nnetwork=host');
-    const res = await context.getInputList('driver-opts', true);
-    expect(res).toEqual(['image=moby/buildkit:master', 'network=host']);
-  });
-});
-
-describe('asyncForEach', () => {
-  it('executes async tasks sequentially', async () => {
-    const testValues = [1, 2, 3, 4, 5];
-    const results: number[] = [];
-
-    await context.asyncForEach(testValues, async value => {
-      results.push(value);
-    });
-
-    expect(results).toEqual(testValues);
-  });
 });
 
 // See: https://github.com/actions/toolkit/blob/master/packages/core/src/core.ts#L67

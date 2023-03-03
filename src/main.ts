@@ -60,6 +60,7 @@ actionsToolkit.run(
 
     core.setOutput('name', inputs.name);
     stateHelper.setBuilderName(inputs.name);
+    stateHelper.setBuilderDriver(inputs.driver);
 
     fs.mkdirSync(Buildx.certsDir, {recursive: true});
     stateHelper.setCertsDir(Buildx.certsDir);
@@ -169,7 +170,7 @@ actionsToolkit.run(
       return;
     }
 
-    if (stateHelper.builderName.length > 0) {
+    if (stateHelper.builderDriver != 'docker' && stateHelper.builderName.length > 0) {
       await core.group(`Removing builder`, async () => {
         const buildx = new Buildx({standalone: stateHelper.standalone});
         const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);

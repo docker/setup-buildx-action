@@ -16,8 +16,9 @@ actionsToolkit.run(
   // main
   async () => {
     const inputs: context.Inputs = await context.getInputs();
-    const toolkit = new Toolkit();
+    stateHelper.setCleanup(inputs.cleanup);
 
+    const toolkit = new Toolkit();
     const standalone = await toolkit.buildx.isStandalone();
     stateHelper.setStandalone(standalone);
 
@@ -164,9 +165,13 @@ actionsToolkit.run(
       });
     }
 
+    if (!stateHelper.cleanup) {
+      return;
+    }
+
     if (stateHelper.builderName.length > 0) {
       await core.group(`Removing builder`, async () => {
-        const buildx = new Buildx({standalone: /true/i.test(stateHelper.standalone)});
+        const buildx = new Buildx({standalone: stateHelper.standalone});
         const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
         await exec
           .getExecOutput(rmCmd.command, rmCmd.args, {

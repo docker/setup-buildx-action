@@ -85,19 +85,20 @@ Following inputs can be used as `step.with` keys:
 > platforms: linux/amd64,linux/arm64
 > ```
 
-| Name              | Type     | Description                                                                                                                                                                                     |
-|-------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `version`         | String   | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`)                                                                     |
-| `driver`          | String   | Sets the [builder driver](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver) to be used (default `docker-container`)                                                   |
-| `driver-opts`     | List     | List of additional [driver-specific options](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver-opt) (eg. `image=moby/buildkit:master`)                                 |
-| `buildkitd-flags` | String   | [Flags for buildkitd](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags) daemon (since [buildx v0.3.0](https://github.com/docker/buildx/releases/tag/v0.3.0)) |
-| `install`         | Bool     | Sets up `docker build` command as an alias to `docker buildx` (default `false`)                                                                                                                 |
-| `use`             | Bool     | Switch to this builder instance (default `true`)                                                                                                                                                |
-| `endpoint`        | String   | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                                       |
-| `platforms`       | List/CSV | Fixed [platforms](https://docs.docker.com/engine/reference/commandline/buildx_create/#platform) for current node. If not empty, values take priority over the detected ones.                    |
-| `config`¹         | String   | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                                              |
-| `config-inline`¹  | String   | Same as `config` but inline                                                                                                                                                                     |
-| `append`          | YAML     | [Append additional nodes](docs/advanced/append-nodes.md) to the builder                                                                                                                         |
+| Name              | Type     | Default            | Description                                                                                                                                                                  |
+|-------------------|----------|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`         | String   |                    | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`)                                                  |
+| `driver`          | String   | `docker-container` | Sets the [builder driver](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver) to be used                                                             |
+| `driver-opts`     | List     |                    | List of additional [driver-specific options](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver-opt) (eg. `image=moby/buildkit:master`)              |
+| `buildkitd-flags` | String   |                    | [Flags for buildkitd](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags) daemon                                                            |
+| `install`         | Bool     | `false`            | Sets up `docker build` command as an alias to `docker buildx`                                                                                                                |
+| `use`             | Bool     | `true`             | Switch to this builder instance                                                                                                                                              |
+| `endpoint`        | String   |                    | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                    |
+| `platforms`       | List/CSV |                    | Fixed [platforms](https://docs.docker.com/engine/reference/commandline/buildx_create/#platform) for current node. If not empty, values take priority over the detected ones. |
+| `config`¹         | String   |                    | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                           |
+| `config-inline`¹  | String   |                    | Same as `config` but inline                                                                                                                                                  |
+| `append`          | YAML     |                    | [Append additional nodes](docs/advanced/append-nodes.md) to the builder                                                                                                      |
+| `cleanup`         | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
 
 > * ¹ `config` and `config-inline` are mutually exclusive
 

@@ -80,7 +80,7 @@ Following inputs can be used as `step.with` keys:
 >   network=host
 > ```
 
-> `CSV` type must be a newline-delimited string
+> `CSV` type must be a comma-delimited string
 > ```yaml
 > platforms: linux/amd64,linux/arm64
 > ```

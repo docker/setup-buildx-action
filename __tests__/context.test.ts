@@ -1,5 +1,6 @@
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
 import * as uuid from 'uuid';
+import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
 import {Docker} from '@docker/actions-toolkit/lib/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';
@@ -27,9 +28,11 @@ describe('getCreateArgs', () => {
   test.each([
     [
       0,
+      'v0.10.3',
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'true'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -41,10 +44,12 @@ describe('getCreateArgs', () => {
     ],
     [
       1,
+      'v0.10.3',
       new Map<string, string>([
         ['driver', 'docker'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -56,10 +61,12 @@ describe('getCreateArgs', () => {
     ],
     [
       2,
+      'v0.10.3',
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -72,11 +79,13 @@ describe('getCreateArgs', () => {
     ],
     [
       3,
+      'v0.10.3',
       new Map<string, string>([
         ['driver', 'remote'],
         ['endpoint', 'tls://foo:1234'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -88,12 +97,14 @@ describe('getCreateArgs', () => {
     ],
     [
       4,
+      'v0.10.3',
       new Map<string, string>([
         ['driver', 'remote'],
         ['platforms', 'linux/arm64,linux/arm/v7'],
         ['endpoint', 'tls://foo:1234'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -106,10 +117,12 @@ describe('getCreateArgs', () => {
     ],
     [
       5,
+      'v0.10.3',
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -121,10 +134,12 @@ describe('getCreateArgs', () => {
     ],
     [
       6,
+      'v0.10.3',
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'false'],
         ['platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"'],
+        ['cleanup', 'true'],
       ]),
       [
         'create',
@@ -133,15 +148,19 @@ describe('getCreateArgs', () => {
         '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
         '--platform', 'linux/amd64,linux/arm64,linux/arm/v7'
       ]
-    ],
+    ]
   ])(
-    '[%d] given %p as inputs, returns %p',
-    async (num: number, inputs: Map<string, string>, expected: Array<string>) => {
+    '[%d] given buildx %s and %p as inputs, returns %p',
+    async (num: number, buildxVersion: string, inputs: Map<string, string>, expected: Array<string>) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);
       });
+      const toolkit = new Toolkit();
+      jest.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+        return buildxVersion;
+      });
       const inp = await context.getInputs();
-      const res = await context.getCreateArgs(inp, new Toolkit());
+      const res = await context.getCreateArgs(inp, toolkit);
       expect(res).toEqual(expected);
     }
   );
@@ -161,9 +180,11 @@ describe('getAppendArgs', () => {
   test.each([
     [
       0,
+      'v0.10.3',
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'true'],
+        ['cleanup', 'true'],
       ]),
       {
         "name": "aws_graviton2",
@@ -186,13 +207,17 @@ describe('getAppendArgs', () => {
       ]
     ]
   ])(
-    '[%d] given %p as inputs, returns %p',
-    async (num: number, inputs: Map<string, string>, node: Node, expected: Array<string>) => {
+    '[%d] given buildx %s and %p as inputs, returns %p',
+    async (num: number, buildxVersion: string, inputs: Map<string, string>, node: Node, expected: Array<string>) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);
       });
+      const toolkit = new Toolkit();
+      jest.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+        return buildxVersion;
+      });
       const inp = await context.getInputs();
-      const res = await context.getAppendArgs(inp, node, new Toolkit());
+      const res = await context.getAppendArgs(inp, node, toolkit);
       expect(res).toEqual(expected);
     }
   );

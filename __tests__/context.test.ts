@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
 import * as uuid from 'uuid';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
-import {Docker} from '@docker/actions-toolkit/lib/docker';
+import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';
 

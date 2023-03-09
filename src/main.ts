@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as actionsToolkit from '@docker/actions-toolkit';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
-import {Docker} from '@docker/actions-toolkit/lib/docker';
+import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Util} from '@docker/actions-toolkit/lib/util';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';

@@ -1,6 +1,6 @@
 import * as uuid from 'uuid';
 import * as core from '@actions/core';
-import {Docker} from '@docker/actions-toolkit/lib/docker';
+import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Util} from '@docker/actions-toolkit/lib/util';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';

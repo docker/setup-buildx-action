@@ -4,6 +4,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as actionsToolkit from '@docker/actions-toolkit';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
+import {Builder} from '@docker/actions-toolkit/lib/buildx/builder';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Util} from '@docker/actions-toolkit/lib/util';
@@ -173,16 +174,21 @@ actionsToolkit.run(
     if (stateHelper.builderDriver != 'docker' && stateHelper.builderName.length > 0) {
       await core.group(`Removing builder`, async () => {
         const buildx = new Buildx({standalone: stateHelper.standalone});
-        const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
-        await exec
-          .getExecOutput(rmCmd.command, rmCmd.args, {
-            ignoreReturnCode: true
-          })
-          .then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.warning(res.stderr.trim());
-            }
-          });
+        const builder = new Builder({buildx: buildx});
+        if (await builder.exists(stateHelper.builderName)) {
+          const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
+          await exec
+            .getExecOutput(rmCmd.command, rmCmd.args, {
+              ignoreReturnCode: true
+            })
+            .then(res => {
+              if (res.stderr.length > 0 && res.exitCode != 0) {
+                core.warning(res.stderr.trim());
+              }
+            });
+        } else {
+          core.info(`${stateHelper.builderName} does not exist`);
+        }
       });
     }
 

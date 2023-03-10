@@ -78,6 +78,8 @@ export async function getAppendArgs(inputs: Inputs, node: Node, toolkit: Toolkit
   const args: Array<string> = ['create', '--name', inputs.name, '--append'];
   if (node.name) {
     args.push('--node', node.name);
+  } else if (inputs.driver == 'kubernetes' && (await toolkit.buildx.versionSatisfies('<0.11.0'))) {
+    args.push('--node', `node-${uuid.v4()}`);
   }
   if (node['driver-opts'] && (await toolkit.buildx.versionSatisfies('>=0.3.0'))) {
     await Util.asyncForEach(node['driver-opts'], async driverOpt => {

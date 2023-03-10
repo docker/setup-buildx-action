@@ -496,3 +496,53 @@ jobs:
         uses: ./
         with:
           cleanup: ${{ matrix.cleanup }}
+
+  k3s:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - v0.11.0-rc1
+          - v0.10.5
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install k3s
+        uses: crazy-max/.github/.github/actions/install-k3s@605d30d5ae97f6680578ace4b56645af79343e60
+        with:
+          version: "v1.21.2-k3s1"
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          driver: kubernetes
+          platforms: linux/amd64
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
+            qemu.install=true
+          append: |
+            - platforms: linux/arm64
+              driver-opts:
+                - image=moby/buildkit:buildx-stable-1
+                - qemu.install=true
+            - platforms: linux/s390x
+              driver-opts:
+                - image=moby/buildkit:buildx-stable-1
+                - qemu.install=true
+      -
+        name: Create Dockerfile
+        run: |
+          cat > ./Dockerfile <<EOL
+          FROM alpine
+          RUN uname -a
+          EOL
+      -
+        name: Build
+        uses: docker/build-push-action@master
+        with:
+          context: .

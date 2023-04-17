@@ -33,7 +33,7 @@ actionsToolkit.run(
     });
 
     let toolPath;
-    if (Util.isValidUrl(inputs.version)) {
+    if (Util.isValidRef(inputs.version)) {
       if (standalone) {
         throw new Error(`Cannot build from source without the Docker CLI`);
       }

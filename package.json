@@ -29,7 +29,7 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
-    "@docker/actions-toolkit": "^0.4.0",
+    "@docker/actions-toolkit": "^0.5.0",
     "js-yaml": "^4.1.0",
     "uuid": "^9.0.0"
   },

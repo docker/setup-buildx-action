@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: setup-buildx-action
+  description: |
+    GitHub Action to set up Docker Buildx
+  annotations:
+    github.com/project-slug: Tradeshift/setup-buildx-action
+  tags:
+    - github-action
+    - nodejs
+    - fork
+spec:
+  type: library
+  owner: sre
+  lifecycle: production

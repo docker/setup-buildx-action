@@ -51,7 +51,7 @@ export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<A
     await Util.asyncForEach(inputs.driverOpts, async driverOpt => {
       args.push('--driver-opt', driverOpt);
     });
-    if (inputs.driver != 'remote' && inputs.buildkitdFlags) {
+    if (driverSupportsFlags(inputs.driver) && inputs.buildkitdFlags) {
       args.push('--buildkitd-flags', inputs.buildkitdFlags);
     }
   }
@@ -61,7 +61,7 @@ export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<A
   if (inputs.use) {
     args.push('--use');
   }
-  if (inputs.driver != 'remote') {
+  if (driverSupportsFlags(inputs.driver)) {
     if (inputs.config) {
       args.push('--config', toolkit.buildkit.config.resolveFromFile(inputs.config));
     } else if (inputs.configInline) {
@@ -85,7 +85,7 @@ export async function getAppendArgs(inputs: Inputs, node: Node, toolkit: Toolkit
     await Util.asyncForEach(node['driver-opts'], async driverOpt => {
       args.push('--driver-opt', driverOpt);
     });
-    if (inputs.driver != 'remote' && node['buildkitd-flags']) {
+    if (driverSupportsFlags(inputs.driver) && node['buildkitd-flags']) {
       args.push('--buildkitd-flags', node['buildkitd-flags']);
     }
   }
@@ -104,4 +104,8 @@ export async function getInspectArgs(inputs: Inputs, toolkit: Toolkit): Promise<
     args.push('--builder', inputs.name);
   }
   return args;
+}
+
+function driverSupportsFlags(driver: string): boolean {
+  return driver == '' || driver == 'docker-container' || driver == 'docker' || driver == 'kubernetes';
 }

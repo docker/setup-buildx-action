@@ -32,19 +32,32 @@ actionsToolkit.run(
       }
     });
 
-    let toolPath;
-    if (Util.isValidRef(inputs.version)) {
+    let toolPath = '';
+    let downloadFailed = false;
+    if (!(await toolkit.buildx.isAvailable()) || inputs.version) {
+      try {
+        await core.group(`Download buildx from GitHub Releases`, async () => {
+          toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest');
+        });
+      } catch (e) {
+        core.info(`Download buildx failed: ${e}`);
+        downloadFailed = true;
+      }
+    }
+
+    if (!toolPath && Util.isValidRef(inputs.version)) {
+      if (downloadFailed) {
+        core.info(`After failed download, falling back to building from source`);
+      }
+
       if (standalone) {
         throw new Error(`Cannot build from source without the Docker CLI`);
       }
       await core.group(`Build buildx from source`, async () => {
         toolPath = await toolkit.buildxInstall.build(inputs.version);
       });
-    } else if (!(await toolkit.buildx.isAvailable()) || inputs.version) {
-      await core.group(`Download buildx from GitHub Releases`, async () => {
-        toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest');
-      });
     }
+
     if (toolPath) {
       await core.group(`Install buildx`, async () => {
         if (standalone) {

@@ -121,7 +121,7 @@ The following [official docker environment variables](https://docs.docker.com/en
 |-----------------|--------|-------------|-------------------------------------------------|
 | `DOCKER_CONFIG` | String | `~/.docker` | The location of your client configuration files |
 
-## Notes
+## Nodes
 
 ### `nodes` output
 

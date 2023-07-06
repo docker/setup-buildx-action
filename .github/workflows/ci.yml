@@ -285,8 +285,7 @@ jobs:
       fail-fast: false
       matrix:
         buildx-version:
-          - latest
-          - v0.4.1
+          - v0.9.1
           - ""
         qemu-platforms:
           - all
@@ -503,7 +502,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - v0.11.0-rc1
+          - v0.11.0
           - v0.10.5
     steps:
       -

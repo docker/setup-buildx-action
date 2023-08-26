@@ -18,9 +18,11 @@ jobs:
       fail-fast: false
       matrix:
         buildx-version:
-          - latest
-          - v0.4.1
           - ""
+          - "latest"
+          - "v0.4.1"
+          - "lab:latest"
+          - "lab:v0.11.2-desktop.2"
     steps:
       -
         name: Checkout

@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG NODE_VERSION=16
-ARG DOCKER_VERSION=20.10.13
-ARG BUILDX_VERSION=0.8.1
+ARG NODE_VERSION=20
 
 FROM node:${NODE_VERSION}-alpine AS base
 RUN apk add --no-cache cpio findutils git
@@ -62,18 +60,12 @@ RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
   yarn run lint
 
-FROM docker:${DOCKER_VERSION} as docker
-FROM docker/buildx-bin:${BUILDX_VERSION} as buildx
-
 FROM deps AS test
 ENV RUNNER_TEMP=/tmp/github_runner
 ENV RUNNER_TOOL_CACHE=/tmp/github_tool_cache
 RUN --mount=type=bind,target=.,rw \
   --mount=type=cache,target=/src/node_modules \
-  --mount=type=bind,from=docker,source=/usr/local/bin/docker,target=/usr/bin/docker \
-  --mount=type=bind,from=buildx,source=/buildx,target=/usr/bin/buildx \
-  --mount=type=bind,from=buildx,source=/buildx,target=/usr/libexec/docker/cli-plugins/docker-buildx \
-  yarn run test --coverageDirectory=/tmp/coverage
+  yarn run test --coverage --coverageDirectory=/tmp/coverage
 
 FROM scratch AS test-coverage
 COPY --from=test /tmp/coverage /

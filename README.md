@@ -42,15 +42,15 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         # Add support for more platforms with QEMU (optional)
         # https://github.com/docker/setup-qemu-action
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 ```
 
 ## Configuring your builder
@@ -71,7 +71,7 @@ jobs:
 
 ### inputs
 
-Following inputs can be used as `step.with` keys:
+The following inputs can be used as `step.with` keys:
 
 > `List` type is a newline-delimited string
 > ```yaml
@@ -104,14 +104,14 @@ Following inputs can be used as `step.with` keys:
 
 ### outputs
 
-Following outputs are available
+The following outputs are available:
 
-| Name        | Type   | Description                                     |
-|-------------|--------|-------------------------------------------------|
-| `name`      | String | Builder name                                    |
-| `driver`    | String | Builder driver                                  |
-| `platforms` | String | Builder node platforms (preferred or available) |
-| `nodes`     | JSON   | Builder [nodes metadata](#nodes-output)         |
+| Name        | Type   | Description                                         |
+|-------------|--------|-----------------------------------------------------|
+| `name`      | String | Builder name                                        |
+| `driver`    | String | Builder driver                                      |
+| `platforms` | String | Builder node platforms (preferred and/or available) |
+| `nodes`     | JSON   | Builder [nodes metadata](#nodes-output)             |
 
 ### environment variables
 

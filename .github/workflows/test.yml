@@ -23,7 +23,7 @@ jobs:
         uses: ./
       -
         name: Test
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         with:
           targets: test
       -

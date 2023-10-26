@@ -29,7 +29,7 @@
     "@actions/exec": "^1.1.1",
     "@docker/actions-toolkit": "^0.13.0",
     "js-yaml": "^4.1.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.5.9",

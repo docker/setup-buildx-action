@@ -563,3 +563,22 @@ jobs:
         uses: docker/build-push-action@master
         with:
           context: .
+
+  cacheBinary:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cache:
+          - true
+          - false
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          version: v0.11.2
+          cache-binary: ${{ matrix.cache }}

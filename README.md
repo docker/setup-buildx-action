@@ -98,6 +98,7 @@ The following inputs can be used as `step.with` keys:
 | `config`¹         | String   |                    | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                           |
 | `config-inline`¹  | String   |                    | Same as `config` but inline                                                                                                                                                  |
 | `append`          | YAML     |                    | [Append additional nodes](docs/advanced/append-nodes.md) to the builder                                                                                                      |
+| `cache-binary`    | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
 | `cleanup`         | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
 
 > * ¹ `config` and `config-inline` are mutually exclusive

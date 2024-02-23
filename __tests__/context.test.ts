@@ -32,6 +32,7 @@ describe('getCreateArgs', () => {
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'true'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -49,6 +50,7 @@ describe('getCreateArgs', () => {
         ['driver', 'docker'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -66,6 +68,7 @@ describe('getCreateArgs', () => {
         ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -85,6 +88,7 @@ describe('getCreateArgs', () => {
         ['endpoint', 'tls://foo:1234'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -104,6 +108,7 @@ describe('getCreateArgs', () => {
         ['endpoint', 'tls://foo:1234'],
         ['install', 'false'],
         ['use', 'true'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -122,6 +127,7 @@ describe('getCreateArgs', () => {
         ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -139,6 +145,7 @@ describe('getCreateArgs', () => {
         ['install', 'false'],
         ['use', 'false'],
         ['platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -156,6 +163,7 @@ describe('getCreateArgs', () => {
         ['install', 'false'],
         ['use', 'false'],
         ['driver', 'unknown'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       [
@@ -199,6 +207,7 @@ describe('getAppendArgs', () => {
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'true'],
+        ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
       {

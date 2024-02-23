@@ -38,11 +38,11 @@ actionsToolkit.run(
         throw new Error(`Cannot build from source without the Docker CLI`);
       }
       await core.group(`Build buildx from source`, async () => {
-        toolPath = await toolkit.buildxInstall.build(inputs.version);
+        toolPath = await toolkit.buildxInstall.build(inputs.version, !inputs.cacheBinary);
       });
     } else if (!(await toolkit.buildx.isAvailable()) || inputs.version) {
       await core.group(`Download buildx from GitHub Releases`, async () => {
-        toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest');
+        toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest', !inputs.cacheBinary);
       });
     }
     if (toolPath) {

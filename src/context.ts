@@ -20,6 +20,7 @@ export interface Inputs {
   config: string;
   configInline: string;
   append: string;
+  cacheBinary: boolean;
   cleanup: boolean;
 }
 
@@ -37,6 +38,7 @@ export async function getInputs(): Promise<Inputs> {
     config: core.getInput('config'),
     configInline: core.getInput('config-inline'),
     append: core.getInput('append'),
+    cacheBinary: core.getBooleanInput('cache-binary'),
     cleanup: core.getBooleanInput('cleanup')
   };
 }

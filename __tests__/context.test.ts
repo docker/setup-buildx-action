@@ -1,11 +1,30 @@
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as uuid from 'uuid';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
+import {Context} from '@docker/actions-toolkit/lib/context';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';
 
 import * as context from '../src/context';
+
+const fixturesDir = path.join(__dirname, 'fixtures');
+// prettier-ignore
+const tmpDir = path.join(process.env.TEMP || '/tmp', 'setup-buildx-jest');
+const tmpName = path.join(tmpDir, '.tmpname-jest');
+
+jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, {recursive: true});
+  }
+  return tmpDir;
+});
+
+jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+  return tmpName;
+});
 
 jest.mock('uuid');
 jest.spyOn(uuid, 'v4').mockReturnValue('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
@@ -170,6 +189,42 @@ describe('getCreateArgs', () => {
         'create',
         '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
         '--driver', 'unknown',
+      ]
+    ],
+    [
+      8,
+      'v0.10.3',
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['buildkitd-config', path.join(fixturesDir, 'buildkitd.toml')],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--config', tmpName,
+      ]
+    ],
+    [
+      9,
+      'v0.10.3',
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['buildkitd-config-inline', 'debug = true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'docker-container',
+        '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+        '--config', tmpName,
       ]
     ]
   ])(

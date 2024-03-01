@@ -85,23 +85,23 @@ The following inputs can be used as `step.with` keys:
 > platforms: linux/amd64,linux/arm64
 > ```
 
-| Name              | Type     | Default            | Description                                                                                                                                                                  |
-|-------------------|----------|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `version`         | String   |                    | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`)                                                  |
-| `driver`          | String   | `docker-container` | Sets the [builder driver](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver) to be used                                                             |
-| `driver-opts`     | List     |                    | List of additional [driver-specific options](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver-opt) (eg. `image=moby/buildkit:master`)              |
-| `buildkitd-flags` | String   |                    | [Flags for buildkitd](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags) daemon                                                            |
-| `install`         | Bool     | `false`            | Sets up `docker build` command as an alias to `docker buildx`                                                                                                                |
-| `use`             | Bool     | `true`             | Switch to this builder instance                                                                                                                                              |
-| `endpoint`        | String   |                    | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                    |
-| `platforms`       | List/CSV |                    | Fixed [platforms](https://docs.docker.com/engine/reference/commandline/buildx_create/#platform) for current node. If not empty, values take priority over the detected ones. |
-| `config`¹         | String   |                    | [BuildKit config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                           |
-| `config-inline`¹  | String   |                    | Same as `config` but inline                                                                                                                                                  |
-| `append`          | YAML     |                    | [Append additional nodes](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder) to the builder                          |
-| `cache-binary`    | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
-| `cleanup`         | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
+| Name                         | Type     | Default            | Description                                                                                                                                                                  |
+|------------------------------|----------|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`                    | String   |                    | [Buildx](https://github.com/docker/buildx) version. (eg. `v0.3.0`, `latest`, `https://github.com/docker/buildx.git#master`)                                                  |
+| `driver`                     | String   | `docker-container` | Sets the [builder driver](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver) to be used                                                             |
+| `driver-opts`                | List     |                    | List of additional [driver-specific options](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver-opt) (eg. `image=moby/buildkit:master`)              |
+| `buildkitd-flags`            | String   |                    | [BuildKit daemon flags](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags)                                                                 |
+| `buildkitd-config` \*        | String   |                    | [BuildKit daemon config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                    |
+| `buildkitd-config-inline` \* | String   |                    | Same as `buildkitd-config` but inline                                                                                                                                        |
+| `install`                    | Bool     | `false`            | Sets up `docker build` command as an alias to `docker buildx`                                                                                                                |
+| `use`                        | Bool     | `true`             | Switch to this builder instance                                                                                                                                              |
+| `endpoint`                   | String   |                    | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                    |
+| `platforms`                  | List/CSV |                    | Fixed [platforms](https://docs.docker.com/engine/reference/commandline/buildx_create/#platform) for current node. If not empty, values take priority over the detected ones. |
+| `append`                     | YAML     |                    | [Append additional nodes](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder) to the builder                          |
+| `cache-binary`               | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
+| `cleanup`                    | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
 
-> * ¹ `config` and `config-inline` are mutually exclusive
+_\* `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive_
 
 ### outputs
 

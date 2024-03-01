@@ -251,7 +251,7 @@ jobs:
         uses: ./
         with:
           buildkitd-flags: --debug
-          config: /tmp/buildkitd.toml
+          buildkitd-config: /tmp/buildkitd.toml
       -
         name: Build
         uses: docker/build-push-action@v5
@@ -275,7 +275,7 @@ jobs:
         uses: ./
         with:
           buildkitd-flags: --debug
-          config-inline: |
+          buildkitd-config-inline: |
             debug = true
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
@@ -564,7 +564,7 @@ jobs:
         with:
           context: .
 
-  cacheBinary:
+  cache-binary:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -13,12 +13,12 @@ export interface Inputs {
   driver: string;
   driverOpts: string[];
   buildkitdFlags: string;
+  buildkitdConfig: string;
+  buildkitdConfigInline: string;
   platforms: string[];
   install: boolean;
   use: boolean;
   endpoint: string;
-  config: string;
-  configInline: string;
   append: string;
   cacheBinary: boolean;
   cleanup: boolean;
@@ -35,8 +35,8 @@ export async function getInputs(): Promise<Inputs> {
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
     endpoint: core.getInput('endpoint'),
-    config: core.getInput('config'),
-    configInline: core.getInput('config-inline'),
+    buildkitdConfig: core.getInput('buildkitd-config') || core.getInput('config'),
+    buildkitdConfigInline: core.getInput('buildkitd-config-inline') || core.getInput('config-inline'),
     append: core.getInput('append'),
     cacheBinary: core.getBooleanInput('cache-binary'),
     cleanup: core.getBooleanInput('cleanup')
@@ -64,10 +64,10 @@ export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<A
     args.push('--use');
   }
   if (driverSupportsFlags(inputs.driver)) {
-    if (inputs.config) {
-      args.push('--config', toolkit.buildkit.config.resolveFromFile(inputs.config));
-    } else if (inputs.configInline) {
-      args.push('--config', toolkit.buildkit.config.resolveFromString(inputs.configInline));
+    if (inputs.buildkitdConfig) {
+      args.push('--config', toolkit.buildkit.config.resolveFromFile(inputs.buildkitdConfig));
+    } else if (inputs.buildkitdConfigInline) {
+      args.push('--config', toolkit.buildkit.config.resolveFromString(inputs.buildkitdConfigInline));
     }
   }
   if (inputs.endpoint) {

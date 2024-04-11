@@ -76,7 +76,7 @@ The following inputs can be used as `step.with` keys:
 > `List` type is a newline-delimited string
 > ```yaml
 > driver-opts: |
->   image=moby/buildkit:master
+>   image=docker.io/moby/buildkit:master
 >   network=host
 > ```
 
@@ -133,7 +133,7 @@ The following [official docker environment variables](https://docs.docker.com/en
      "endpoint": "unix:///var/run/docker.sock",
      "driver-opts": [
        "network=host",
-       "image=moby/buildkit:master"
+       "image=docker.io/moby/buildkit:master"
      ],
     "status": "running",
     "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",

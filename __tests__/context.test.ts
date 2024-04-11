@@ -86,7 +86,7 @@ describe('getCreateArgs', () => {
       new Map<string, string>([
         ['install', 'false'],
         ['use', 'false'],
-        ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
+        ['driver-opts', 'image=docker.io/moby/buildkit:master\nnetwork=host'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
       ]),
@@ -94,7 +94,7 @@ describe('getCreateArgs', () => {
         'create',
         '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
         '--driver', 'docker-container',
-        '--driver-opt', 'image=moby/buildkit:master',
+        '--driver-opt', 'image=docker.io/moby/buildkit:master',
         '--driver-opt', 'network=host',
         '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
       ]
@@ -269,7 +269,7 @@ describe('getAppendArgs', () => {
         "name": "aws_graviton2",
         "endpoint": "ssh://me@graviton2",
         "driver-opts": [
-          "image=moby/buildkit:latest"
+          "image=docker.io/moby/buildkit:latest"
         ],
         "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
         "platforms": "linux/arm64"
@@ -279,7 +279,7 @@ describe('getAppendArgs', () => {
         '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
         '--append',
         '--node', 'aws_graviton2',
-        '--driver-opt', 'image=moby/buildkit:latest',
+        '--driver-opt', 'image=docker.io/moby/buildkit:latest',
         '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
         '--platform', 'linux/arm64',
         'ssh://me@graviton2'

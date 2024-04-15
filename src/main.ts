@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as actionsToolkit from '@docker/actions-toolkit';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
 import {Builder} from '@docker/actions-toolkit/lib/buildx/builder';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
+import {Exec} from '@docker/actions-toolkit/lib/exec';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Util} from '@docker/actions-toolkit/lib/util';
 import {Node} from '@docker/actions-toolkit/lib/types/builder';
@@ -77,7 +77,13 @@ actionsToolkit.run(
           inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
         }
         const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
-        await exec.exec(createCmd.command, createCmd.args);
+        await Exec.getExecOutput(createCmd.command, createCmd.args, {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+          }
+        });
       });
     }
 
@@ -95,7 +101,13 @@ actionsToolkit.run(
             node['driver-opts'] = [...(node['driver-opts'] || []), ...certsDriverOpts];
           }
           const appendCmd = await toolkit.buildx.getCommand(await context.getAppendArgs(inputs, node, toolkit));
-          await exec.exec(appendCmd.command, appendCmd.args);
+          await Exec.getExecOutput(appendCmd.command, appendCmd.args, {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              throw new Error(`Failed to append node ${node.name}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+            }
+          });
           nodeIndex++;
         }
       });
@@ -103,7 +115,13 @@ actionsToolkit.run(
 
     await core.group(`Booting builder`, async () => {
       const inspectCmd = await toolkit.buildx.getCommand(await context.getInspectArgs(inputs, toolkit));
-      await exec.exec(inspectCmd.command, inspectCmd.args);
+      await Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
+        ignoreReturnCode: true
+      }).then(res => {
+        if (res.stderr.length > 0 && res.exitCode != 0) {
+          throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+        }
+      });
     });
 
     if (inputs.install) {
@@ -112,7 +130,13 @@ actionsToolkit.run(
       }
       await core.group(`Setting buildx as default builder`, async () => {
         const installCmd = await toolkit.buildx.getCommand(['install']);
-        await exec.exec(installCmd.command, installCmd.args);
+        await Exec.getExecOutput(installCmd.command, installCmd.args, {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+          }
+        });
       });
     }
 
@@ -155,15 +179,13 @@ actionsToolkit.run(
   async () => {
     if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
       await core.group(`BuildKit container logs`, async () => {
-        await exec
-          .getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
-            ignoreReturnCode: true
-          })
-          .then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.warning(res.stderr.trim());
-            }
-          });
+        await Exec.getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.warning(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+          }
+        });
       });
     }
 
@@ -177,15 +199,13 @@ actionsToolkit.run(
         const builder = new Builder({buildx: buildx});
         if (await builder.exists(stateHelper.builderName)) {
           const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
-          await exec
-            .getExecOutput(rmCmd.command, rmCmd.args, {
-              ignoreReturnCode: true
-            })
-            .then(res => {
-              if (res.stderr.length > 0 && res.exitCode != 0) {
-                core.warning(res.stderr.trim());
-              }
-            });
+          await Exec.getExecOutput(rmCmd.command, rmCmd.args, {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              core.warning(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+            }
+          });
         } else {
           core.info(`${stateHelper.builderName} does not exist`);
         }

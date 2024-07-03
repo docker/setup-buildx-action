@@ -2,13 +2,15 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as core from '@actions/core';
 import * as actionsToolkit from '@docker/actions-toolkit';
+
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
 import {Builder} from '@docker/actions-toolkit/lib/buildx/builder';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Exec} from '@docker/actions-toolkit/lib/exec';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Util} from '@docker/actions-toolkit/lib/util';
-import {Node} from '@docker/actions-toolkit/lib/types/builder';
+
+import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
 
 import * as context from './context';
 import * as stateHelper from './state-helper';

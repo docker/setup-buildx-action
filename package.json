@@ -31,6 +31,7 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.12.12",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.9.0",

@@ -181,7 +181,7 @@ actionsToolkit.run(
   async () => {
     if (stateHelper.IsDebug && stateHelper.containerName.length > 0) {
       await core.group(`BuildKit container logs`, async () => {
-        await Exec.getExecOutput('docker', ['logs', `${stateHelper.containerName}`], {
+        await Docker.getExecOutput(['logs', `${stateHelper.containerName}`], {
           ignoreReturnCode: true
         }).then(res => {
           if (res.stderr.length > 0 && res.exitCode != 0) {

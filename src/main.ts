@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import * as uuid from 'uuid';
 import * as core from '@actions/core';
 import * as actionsToolkit from '@docker/actions-toolkit';
 
@@ -67,6 +68,33 @@ actionsToolkit.run(
 
     fs.mkdirSync(Buildx.certsDir, {recursive: true});
     stateHelper.setCertsDir(Buildx.certsDir);
+
+    // if the default context has TLS data loaded and endpoint is not set, then
+    // we create a temporary docker context only if driver is docker-container
+    // https://github.com/docker/buildx/blob/b96ad59f64d40873e4959336d294b648bb3937fe/builder/builder.go#L489
+    // https://github.com/docker/setup-buildx-action/issues/105
+    if (!standalone && inputs.driver == 'docker-container' && (await Docker.context()) == 'default' && inputs.endpoint.length == 0) {
+      const contextInfo = await Docker.contextInspect('default');
+      core.debug(`context info: ${JSON.stringify(contextInfo, undefined, 2)}`);
+      const hasTLSData = Object.keys(contextInfo.Endpoints).length > 0 && Object.values(contextInfo.Endpoints)[0].TLSData;
+      const hasTLSMaterial = Object.keys(contextInfo.TLSMaterial).length > 0 && Object.values(contextInfo.TLSMaterial)[0].length > 0;
+      if (hasTLSData || hasTLSMaterial) {
+        const tmpDockerContext = `buildx-${uuid.v4()}`;
+        await core.group(`Creating temp docker context (TLS data loaded in default one)`, async () => {
+          await Docker.getExecOutput(['context', 'create', tmpDockerContext], {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              core.warning(`cannot create docker context ${tmpDockerContext}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+            } else {
+              core.info(`Setting builder endpoint to ${tmpDockerContext} context`);
+              inputs.endpoint = tmpDockerContext;
+              stateHelper.setTmpDockerContext(tmpDockerContext);
+            }
+          });
+        });
+      }
+    }
 
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {
@@ -211,6 +239,18 @@ actionsToolkit.run(
         } else {
           core.info(`${stateHelper.builderName} does not exist`);
         }
+      });
+    }
+
+    if (stateHelper.tmpDockerContext) {
+      await core.group(`Removing temp docker context`, async () => {
+        await Exec.getExecOutput('docker', ['context', 'rm', '-f', stateHelper.tmpDockerContext], {
+          ignoreReturnCode: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.warning(`${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+          }
+        });
       });
     }
 

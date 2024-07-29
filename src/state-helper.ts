@@ -6,6 +6,7 @@ export const builderName = process.env['STATE_builderName'] || '';
 export const builderDriver = process.env['STATE_builderDriver'] || '';
 export const containerName = process.env['STATE_containerName'] || '';
 export const certsDir = process.env['STATE_certsDir'] || '';
+export const tmpDockerContext = process.env['STATE_tmpDockerContext'] || '';
 export const cleanup = /true/i.test(process.env['STATE_cleanup'] || '');
 
 export function setDebug(debug: string) {
@@ -30,6 +31,10 @@ export function setContainerName(containerName: string) {
 
 export function setCertsDir(certsDir: string) {
   core.saveState('certsDir', certsDir);
+}
+
+export function setTmpDockerContext(tmpDockerContext: string) {
+  core.saveState('tmpDockerContext', tmpDockerContext);
 }
 
 export function setCleanup(cleanup: boolean) {

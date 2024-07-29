@@ -52,7 +52,7 @@ inputs:
     description: 'Cleanup temp files and remove builder at the end of a job'
     default: 'true'
     required: false
-  # deprecated inputs
+  # TODO: remove deprecated config and config-inline inputs
   config:
     description: 'BuildKit daemon config file'
     deprecationMessage: 'Use buildkitd-config instead'

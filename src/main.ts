@@ -12,6 +12,7 @@ import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Util} from '@docker/actions-toolkit/lib/util';
 
 import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
+import {ContextInfo} from '@docker/actions-toolkit/lib/types/docker/docker';
 
 import * as context from './context';
 import * as stateHelper from './state-helper';
@@ -74,18 +75,36 @@ actionsToolkit.run(
     // https://github.com/docker/buildx/blob/b96ad59f64d40873e4959336d294b648bb3937fe/builder/builder.go#L489
     // https://github.com/docker/setup-buildx-action/issues/105
     if (!standalone && inputs.driver == 'docker-container' && (await Docker.context()) == 'default' && inputs.endpoint.length == 0) {
-      const contextInfo = await Docker.contextInspect('default');
-      core.debug(`context info: ${JSON.stringify(contextInfo, undefined, 2)}`);
-      const hasTLSData = Object.keys(contextInfo.Endpoints).length > 0 && Object.values(contextInfo.Endpoints)[0].TLSData;
-      const hasTLSMaterial = Object.keys(contextInfo.TLSMaterial).length > 0 && Object.values(contextInfo.TLSMaterial)[0].length > 0;
-      if (hasTLSData || hasTLSMaterial) {
+      let defaultContextWithTLS: boolean = false;
+      await core.group(`Inspecting default docker context`, async () => {
+        await Docker.getExecOutput(['context', 'inspect', '--format=json', 'default'], {
+          ignoreReturnCode: true,
+          silent: true
+        }).then(res => {
+          if (res.stderr.length > 0 && res.exitCode != 0) {
+            core.info(`Cannot inspect default docker context: ${res.stderr.trim()}`);
+          } else {
+            try {
+              const contextInfo = (<Array<ContextInfo>>JSON.parse(res.stdout.trim()))[0];
+              core.info(JSON.stringify(JSON.parse(res.stdout.trim()), undefined, 2));
+              const hasTLSData = Object.keys(contextInfo.Endpoints).length > 0 && Object.values(contextInfo.Endpoints)[0].TLSData !== undefined;
+              const hasTLSMaterial = Object.keys(contextInfo.TLSMaterial).length > 0 && Object.values(contextInfo.TLSMaterial)[0].length > 0;
+              defaultContextWithTLS = hasTLSData || hasTLSMaterial;
+            } catch (e) {
+              core.info(`Unable to parse default docker context info: ${e}`);
+              core.info(res.stdout.trim());
+            }
+          }
+        });
+      });
+      if (defaultContextWithTLS) {
         const tmpDockerContext = `buildx-${uuid.v4()}`;
         await core.group(`Creating temp docker context (TLS data loaded in default one)`, async () => {
           await Docker.getExecOutput(['context', 'create', tmpDockerContext], {
             ignoreReturnCode: true
           }).then(res => {
             if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.warning(`cannot create docker context ${tmpDockerContext}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+              core.warning(`Cannot create docker context ${tmpDockerContext}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
             } else {
               core.info(`Setting builder endpoint to ${tmpDockerContext} context`);
               inputs.endpoint = tmpDockerContext;

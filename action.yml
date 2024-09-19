@@ -53,6 +53,13 @@ inputs:
     default: 'true'
     required: false
   # TODO: remove deprecated config and config-inline inputs
+  keep-state:
+    description: 'Keep state on cleanup'
+    default: 'false'
+    required: false
+  name:
+    description: 'Builder name use use when creating the builder. If not specified, one will be generated. Specifying a name enables reusing a buildkit volume in persistent self-hosted runners.'
+    required: false
   config:
     description: 'BuildKit daemon config file'
     deprecationMessage: 'Use buildkitd-config instead'

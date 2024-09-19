@@ -100,6 +100,8 @@ The following inputs can be used as `step.with` keys:
 | `append`                     | YAML     |                    | [Append additional nodes](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder) to the builder                          |
 | `cache-binary`               | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
 | `cleanup`                    | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
+| `keep-state`                 | Bool     | `false`            | Keep volume state on cleanup                                                                                                                                                 |
+| `name`                       | String   | `false`            | Builder name use use when creating the builder. If not specified, one will be generated.                                                                                     |
 
 _\* `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive_
 

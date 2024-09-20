@@ -100,8 +100,8 @@ The following inputs can be used as `step.with` keys:
 | `append`                     | YAML     |                    | [Append additional nodes](https://docs.docker.com/build/ci/github-actions/configure-builder/#append-additional-nodes-to-the-builder) to the builder                          |
 | `cache-binary`               | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
 | `cleanup`                    | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
-| `keep-state`                 | Bool     | `false`            | Keep volume state on cleanup                                                                                                                                                 |
-| `name`                       | String   | `false`            | Builder name use use when creating the builder. If not specified, one will be generated.                                                                                     |
+| `keep-state`                 | Bool     | `false`            | Retain the Docker volume. Note that this functionality is exclusive to self-hosted runners. To reuse a volume, you must assign a specific name to the builder.               |
+| `name`                       | String   | `false`            | Providing a name allows for volume reuse on self-hosted runners. If a builder name is not specified, one will be automatically generated.                                    |
 
 _\* `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive_
 

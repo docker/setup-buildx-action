@@ -1,7 +1,7 @@
 # https://help.github.com/en/articles/metadata-syntax-for-github-actions
 name: 'Docker Setup Buildx with state'
 description: 'Set up Docker Buildx'
-author: 'tobiaszuercher'
+author: 'docker'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -54,11 +54,11 @@ inputs:
     required: false
   # TODO: remove deprecated config and config-inline inputs
   keep-state:
-    description: 'Keep state on cleanup. This only works on self-hosted runners. In order to reuse a buildkit volume, you need to specify a name for the builder.'
+    description: 'Retain the Docker volume. Note that this functionality is exclusive to self-hosted runners. To reuse a volume, you must assign a specific name to the builder.'
     default: 'false'
     required: false
   name:
-    description: 'Builder name to use when creating the builder. If not specified, one will be generated. Specifying a name enables reusing a buildkit volume in persistent self-hosted runners.'
+    description: 'Providing a name allows for volume reuse on self-hosted runners. If a builder name is not specified, one will be automatically generated.'
     required: false
   config:
     description: 'BuildKit daemon config file'

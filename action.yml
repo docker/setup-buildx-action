@@ -54,11 +54,11 @@ inputs:
     required: false
   # TODO: remove deprecated config and config-inline inputs
   keep-state:
-    description: 'Keep state on cleanup'
+    description: 'Keep state on cleanup. This only works on self-hosted runners. In order to reuse a buildkit volume, you need to specify a name for the builder.'
     default: 'false'
     required: false
   name:
-    description: 'Builder name use use when creating the builder. If not specified, one will be generated. Specifying a name enables reusing a buildkit volume in persistent self-hosted runners.'
+    description: 'Builder name to use when creating the builder. If not specified, one will be generated. Specifying a name enables reusing a buildkit volume in persistent self-hosted runners.'
     required: false
   config:
     description: 'BuildKit daemon config file'

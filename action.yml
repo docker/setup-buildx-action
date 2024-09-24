@@ -1,5 +1,5 @@
 # https://help.github.com/en/articles/metadata-syntax-for-github-actions
-name: 'Docker Setup Buildx with state'
+name: 'Docker Setup Buildx'
 description: 'Set up Docker Buildx'
 author: 'docker'
 branding:

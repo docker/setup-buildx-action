@@ -8,6 +8,7 @@ import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
 import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
 
 export const builderNodeEnvPrefix = 'BUILDER_NODE';
+const defaultBuildkitdFlags = '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host';
 
 export interface Inputs {
   version: string;
@@ -32,7 +33,7 @@ export async function getInputs(): Promise<Inputs> {
     name: await getBuilderName(core.getInput('driver') || 'docker-container'),
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: Util.getInputList('driver-opts', {ignoreComma: true, quote: false}),
-    buildkitdFlags: core.getInput('buildkitd-flags') || '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
+    buildkitdFlags: core.getInput('buildkitd-flags'),
     platforms: Util.getInputList('platforms'),
     install: core.getBooleanInput('install'),
     use: core.getBooleanInput('use'),
@@ -52,11 +53,13 @@ export async function getBuilderName(driver: string): Promise<string> {
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {
   const args: Array<string> = ['create', '--name', inputs.name, '--driver', inputs.driver];
   if (await toolkit.buildx.versionSatisfies('>=0.3.0')) {
-    await Util.asyncForEach(inputs.driverOpts, async driverOpt => {
+    await Util.asyncForEach(inputs.driverOpts, async (driverOpt: string) => {
       args.push('--driver-opt', driverOpt);
     });
-    if (driverSupportsFlags(inputs.driver) && inputs.buildkitdFlags) {
+    if (inputs.buildkitdFlags) {
       args.push('--buildkitd-flags', inputs.buildkitdFlags);
+    } else if (driverSupportsBuildkitdFlags(inputs.driver)) {
+      args.push('--buildkitd-flags', defaultBuildkitdFlags);
     }
   }
   if (inputs.platforms.length > 0) {
@@ -65,12 +68,10 @@ export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<A
   if (inputs.use) {
     args.push('--use');
   }
-  if (driverSupportsFlags(inputs.driver)) {
-    if (inputs.buildkitdConfig) {
-      args.push('--config', toolkit.buildkit.config.resolveFromFile(inputs.buildkitdConfig));
-    } else if (inputs.buildkitdConfigInline) {
-      args.push('--config', toolkit.buildkit.config.resolveFromString(inputs.buildkitdConfigInline));
-    }
+  if (inputs.buildkitdConfig) {
+    args.push('--config', toolkit.buildkit.config.resolveFromFile(inputs.buildkitdConfig));
+  } else if (inputs.buildkitdConfigInline) {
+    args.push('--config', toolkit.buildkit.config.resolveFromString(inputs.buildkitdConfigInline));
   }
   if (inputs.endpoint) {
     args.push(inputs.endpoint);
@@ -86,11 +87,13 @@ export async function getAppendArgs(inputs: Inputs, node: Node, toolkit: Toolkit
     args.push('--node', `node-${uuid.v4()}`);
   }
   if (node['driver-opts'] && (await toolkit.buildx.versionSatisfies('>=0.3.0'))) {
-    await Util.asyncForEach(node['driver-opts'], async driverOpt => {
+    await Util.asyncForEach(node['driver-opts'], async (driverOpt: string) => {
       args.push('--driver-opt', driverOpt);
     });
-    if (driverSupportsFlags(inputs.driver) && node['buildkitd-flags']) {
+    if (node['buildkitd-flags']) {
       args.push('--buildkitd-flags', node['buildkitd-flags']);
+    } else if (driverSupportsBuildkitdFlags(inputs.driver)) {
+      args.push('--buildkitd-flags', defaultBuildkitdFlags);
     }
   }
   if (node.platforms) {
@@ -110,6 +113,6 @@ export async function getInspectArgs(inputs: Inputs, toolkit: Toolkit): Promise<
   return args;
 }
 
-function driverSupportsFlags(driver: string): boolean {
+function driverSupportsBuildkitdFlags(driver: string): boolean {
   return driver == '' || driver == 'docker-container' || driver == 'docker' || driver == 'kubernetes';
 }

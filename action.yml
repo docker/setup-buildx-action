@@ -19,7 +19,6 @@ inputs:
     required: false
   buildkitd-flags:
     description: 'BuildKit daemon flags'
-    default: '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host'
     required: false
   buildkitd-config:
     description: 'BuildKit daemon config file'

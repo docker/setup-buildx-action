@@ -101,7 +101,13 @@ The following inputs can be used as `step.with` keys:
 | `cache-binary`               | Bool     | `true`             | Cache buildx binary to GitHub Actions cache backend                                                                                                                          |
 | `cleanup`                    | Bool     | `true`             | Cleanup temp files and remove builder at the end of a job                                                                                                                    |
 
-_\* `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive_
+> [!IMPORTANT]
+> If you set the `buildkitd-flags` input, the default flags (`--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host`)
+> will be reset. If you want to retain the default behavior, make sure to
+> include these flags in your custom `buildkitd-flags` value.
+
+> [!NOTE]
+> `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive.
 
 ### outputs
 

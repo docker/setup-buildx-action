@@ -226,6 +226,24 @@ describe('getCreateArgs', () => {
         '--buildkitd-flags', '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host',
         '--config', tmpName,
       ]
+    ],
+    [
+      10,
+      'v0.10.3',
+      new Map<string, string>([
+        ['install', 'false'],
+        ['use', 'false'],
+        ['driver', 'cloud'],
+        ['buildkitd-flags', '--allow-insecure-entitlement network.host'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      [
+        'create',
+        '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        '--driver', 'cloud',
+        '--buildkitd-flags', '--allow-insecure-entitlement network.host',
+      ]
     ]
   ])(
     '[%d] given buildx %s and %p as inputs, returns %p',

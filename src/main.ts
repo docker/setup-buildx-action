@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as core from '@actions/core';

@@ -1,4 +1,5 @@
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';

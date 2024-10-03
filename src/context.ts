@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import * as core from '@actions/core';
 
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';

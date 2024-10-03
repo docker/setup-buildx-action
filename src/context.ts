@@ -1,4 +1,3 @@
-import * as uuid from 'uuid';
 import * as core from '@actions/core';
 
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
@@ -47,7 +46,7 @@ export async function getInputs(): Promise<Inputs> {
 }
 
 export async function getBuilderName(driver: string): Promise<string> {
-  return driver == 'docker' ? await Docker.context() : `builder-${uuid.v4()}`;
+  return driver == 'docker' ? await Docker.context() : `builder-${crypto.randomUUID()}`;
 }
 
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {
@@ -84,7 +83,7 @@ export async function getAppendArgs(inputs: Inputs, node: Node, toolkit: Toolkit
   if (node.name) {
     args.push('--node', node.name);
   } else if (inputs.driver == 'kubernetes' && (await toolkit.buildx.versionSatisfies('<0.11.0'))) {
-    args.push('--node', `node-${uuid.v4()}`);
+    args.push('--node', `node-${crypto.randomUUID()}`);
   }
   if (node['driver-opts'] && (await toolkit.buildx.versionSatisfies('>=0.3.0'))) {
     await Util.asyncForEach(node['driver-opts'], async (driverOpt: string) => {

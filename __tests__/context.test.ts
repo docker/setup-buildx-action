@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, jest, test} from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as uuid from 'uuid';
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
 import {Context} from '@docker/actions-toolkit/lib/context';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
@@ -25,7 +26,8 @@ jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
-jest.spyOn(crypto, 'randomUUID').mockReturnValue('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
+jest.mock('uuid');
+jest.spyOn(uuid, 'v4').mockReturnValue('9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
 
 jest.spyOn(Docker, 'context').mockImplementation((): Promise<string> => {
   return Promise.resolve('default');

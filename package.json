@@ -27,8 +27,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@docker/actions-toolkit": "^0.39.0",
-    "js-yaml": "^4.1.0",
-    "uuid": "^10.0.0"
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

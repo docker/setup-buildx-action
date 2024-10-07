@@ -1,6 +1,6 @@
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import * as uuid from 'uuid';
 import * as core from '@actions/core';
 import * as actionsToolkit from '@docker/actions-toolkit';
 
@@ -98,7 +98,7 @@ actionsToolkit.run(
         });
       });
       if (defaultContextWithTLS) {
-        const tmpDockerContext = `buildx-${uuid.v4()}`;
+        const tmpDockerContext = `buildx-${crypto.randomUUID()}`;
         await core.group(`Creating temp docker context (TLS data loaded in default one)`, async () => {
           await Docker.getExecOutput(['context', 'create', tmpDockerContext], {
             ignoreReturnCode: true

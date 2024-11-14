@@ -26,7 +26,7 @@
   "packageManager": "yarn@3.6.3",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@docker/actions-toolkit": "^0.39.0",
+    "@docker/actions-toolkit": "^0.44.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

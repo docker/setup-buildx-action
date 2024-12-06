@@ -156,9 +156,9 @@ jobs:
       fail-fast: false
       matrix:
         driver-opts:
-          - image=moby/buildkit:latest
+          - image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:latest
           - |
-            image=moby/buildkit:master
+            image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:latest
             network=host
     steps:
       -
@@ -456,7 +456,7 @@ jobs:
               endpoint: ctxbuilder2
               platforms: linux/amd64
               driver-opts:
-                - image=moby/buildkit:master
+                - image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:latest
                 - network=host
             - endpoint: ctxbuilder3
               platforms: linux/arm64
@@ -540,16 +540,16 @@ jobs:
           driver: kubernetes
           platforms: linux/amd64
           driver-opts: |
-            image=moby/buildkit:buildx-stable-1
+            image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:buildx-stable-1
             qemu.install=true
           append: |
             - platforms: linux/arm64
               driver-opts:
-                - image=moby/buildkit:buildx-stable-1
+                - image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:buildx-stable-1
                 - qemu.install=true
             - platforms: linux/s390x
               driver-opts:
-                - image=moby/buildkit:buildx-stable-1
+                - image=315120000506.dkr.ecr.us-east-1.amazonaws.com/hotmart/third-party/setup-buildx-action:buildx-stable-1
                 - qemu.install=true
       -
         name: Create Dockerfile

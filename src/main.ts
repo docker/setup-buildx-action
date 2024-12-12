@@ -22,6 +22,7 @@ actionsToolkit.run(
   async () => {
     const inputs: context.Inputs = await context.getInputs();
     stateHelper.setCleanup(inputs.cleanup);
+    const version = context.getVersion(inputs);
 
     const toolkit = new Toolkit();
     const standalone = await toolkit.buildx.isStandalone();
@@ -37,16 +38,16 @@ actionsToolkit.run(
     });
 
     let toolPath;
-    if (Util.isValidRef(inputs.version)) {
+    if (Util.isValidRef(version)) {
       if (standalone) {
         throw new Error(`Cannot build from source without the Docker CLI`);
       }
       await core.group(`Build buildx from source`, async () => {
-        toolPath = await toolkit.buildxInstall.build(inputs.version, !inputs.cacheBinary);
+        toolPath = await toolkit.buildxInstall.build(version, !inputs.cacheBinary);
       });
-    } else if (!(await toolkit.buildx.isAvailable()) || inputs.version) {
+    } else if (!(await toolkit.buildx.isAvailable()) || version) {
       await core.group(`Download buildx from GitHub Releases`, async () => {
-        toolPath = await toolkit.buildxInstall.download(inputs.version || 'latest', !inputs.cacheBinary);
+        toolPath = await toolkit.buildxInstall.download(version || 'latest', !inputs.cacheBinary);
       });
     }
     if (toolPath) {

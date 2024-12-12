@@ -116,3 +116,17 @@ export async function getInspectArgs(inputs: Inputs, toolkit: Toolkit): Promise<
 function driverSupportsBuildkitdFlags(driver: string): boolean {
   return driver == '' || driver == 'docker-container' || driver == 'docker' || driver == 'kubernetes';
 }
+
+export function getVersion(inputs: Inputs): string {
+  const version = inputs.version;
+  if (inputs.driver === 'cloud') {
+    if (!version || version === 'latest') {
+      return 'cloud:latest';
+    }
+    if (version.startsWith('cloud:') || version.startsWith('lab:')) {
+      return version;
+    }
+    return `cloud:${version}`;
+  }
+  return version;
+}

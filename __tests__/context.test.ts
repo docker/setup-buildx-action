@@ -323,6 +323,140 @@ describe('getAppendArgs', () => {
   );
 });
 
+describe('getVersion', () => {
+  beforeEach(() => {
+    process.env = Object.keys(process.env).reduce((object, key) => {
+      if (!key.startsWith('INPUT_')) {
+        object[key] = process.env[key];
+      }
+      return object;
+    }, {});
+  });
+
+  // prettier-ignore
+  test.each([
+    [
+      0,
+      new Map<string, string>([
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      ''
+    ],
+    [
+      1,
+      new Map<string, string>([
+        ['version', 'latest'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true']
+      ]),
+      'latest'
+    ],
+    [
+      2,
+      new Map<string, string>([
+        ['version', 'edge'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true']
+      ]),
+      'edge'
+    ],
+    [
+      3,
+      new Map<string, string>([
+        ['version', 'v0.19.2'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true']
+      ]),
+      'v0.19.2'
+    ],
+    [
+      4,
+      new Map<string, string>([
+        ['version', 'latest'],
+        ['driver', 'cloud'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true']
+      ]),
+      'cloud:latest'
+    ],
+    [
+      5,
+      new Map<string, string>([
+        ['version', 'edge'],
+        ['driver', 'cloud'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true']
+      ]),
+      'cloud:edge'
+    ],
+    [
+      6,
+      new Map<string, string>([
+        ['driver', 'cloud'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      'cloud:latest'
+    ],
+    [
+      7,
+      new Map<string, string>([
+        ['version', 'cloud:v0.11.2-desktop.2'],
+        ['driver', 'cloud'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      'cloud:v0.11.2-desktop.2'
+    ],
+    [
+      8,
+      new Map<string, string>([
+        ['version', 'cloud:v0.11.2-desktop.2'],
+        // defaults
+        ['install', 'false'],
+        ['use', 'true'],
+        ['cache-binary', 'true'],
+        ['cleanup', 'true'],
+      ]),
+      'cloud:v0.11.2-desktop.2'
+    ],
+  ])(
+    '[%d] given %p as inputs, returns version %p',
+    async (num: number, inputs: Map<string, string>, expected: string) => {
+      inputs.forEach((value: string, name: string) => {
+        setInput(name, value);
+      });
+      const inp = await context.getInputs();
+      expect(context.getVersion(inp)).toEqual(expected);
+    }
+  );
+});
+
 // See: https://github.com/actions/toolkit/blob/master/packages/core/src/core.ts#L67
 function getInputName(name: string): string {
   return `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;

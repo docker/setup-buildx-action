@@ -1089,9 +1089,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docker/actions-toolkit@npm:^0.48.0":
-  version: 0.48.0
-  resolution: "@docker/actions-toolkit@npm:0.48.0"
+"@docker/actions-toolkit@npm:^0.49.0":
+  version: 0.49.0
+  resolution: "@docker/actions-toolkit@npm:0.49.0"
   dependencies:
     "@actions/artifact": ^2.1.11
     "@actions/cache": ^3.3.0
@@ -1114,7 +1114,7 @@ __metadata:
     semver: ^7.6.3
     tar-stream: ^3.1.7
     tmp: ^0.2.3
-  checksum: 273eefbb19fd9e098d889cdaa2fbe0ff5a9b0d12d2f941dc4b6914240ee78d2d63db4fa0c39850585e9db1d69d2553ec9d3b935627d0fe1d8ab2ad2f3a84c0a5
+  checksum: 5e945601180002f129f095bba2d7d938b5ca69e87631d5e96a0d3b2254a8b034ab4bafbf7582ea82995e39610ad00fd68b34ab5875b9b314690328f714ad79d0
   languageName: node
   linkType: hard
 
@@ -3179,7 +3179,7 @@ __metadata:
   resolution: "docker-setup-buildx@workspace:."
   dependencies:
     "@actions/core": ^1.11.1
-    "@docker/actions-toolkit": ^0.48.0
+    "@docker/actions-toolkit": ^0.49.0
     "@types/js-yaml": ^4.0.9
     "@types/node": ^20.12.12
     "@types/uuid": ^10.0.0

@@ -33,9 +33,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/cache@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@actions/cache@npm:4.0.0"
+"@actions/cache@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@actions/cache@npm:4.0.1"
   dependencies:
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.0.1
@@ -47,8 +47,7 @@ __metadata:
     "@azure/storage-blob": ^12.13.0
     "@protobuf-ts/plugin": ^2.9.4
     semver: ^6.3.1
-    twirp-ts: ^2.5.0
-  checksum: 8ab819a67b578a5ce6de984f4ef8420066f8270e1f9db053700f4a8f084d0bbe4f911114f7088a95a987372ea63078550355d99849412152dd0efdf688bf9144
+  checksum: ca2cc59c8682817788f387bdb83279e1924dece32cb5a0789b0d57837c317caf35a90ec240f7671798ca3bf620a72085ddbdc86ef1c309a79e4b8efe73074bae
   languageName: node
   linkType: hard
 
@@ -1090,12 +1089,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docker/actions-toolkit@npm:^0.54.0":
-  version: 0.54.0
-  resolution: "@docker/actions-toolkit@npm:0.54.0"
+"@docker/actions-toolkit@npm:^0.55.0":
+  version: 0.55.0
+  resolution: "@docker/actions-toolkit@npm:0.55.0"
   dependencies:
     "@actions/artifact": ^2.2.1
-    "@actions/cache": ^4.0.0
+    "@actions/cache": ^4.0.1
     "@actions/core": ^1.11.1
     "@actions/exec": ^1.1.1
     "@actions/github": ^6.0.0
@@ -1115,7 +1114,7 @@ __metadata:
     semver: ^7.7.1
     tar-stream: ^3.1.7
     tmp: ^0.2.3
-  checksum: 1a01a61eb8526a89cd0289b2b5e7dbfcf9979f0a51b04ac3b99844ac3261d77fc609c3385844e15027a4f99c27fe833e24f7839fb0d67200a59205738eae31fa
+  checksum: 1d596fa95e26273d8974f9d3310018b0a0bdc5e1994c8e088a148b17298ec6bf398ed2a257b9c6eee221a095168d05ea81ce3f0b5d6fd422550dce4100529408
   languageName: node
   linkType: hard
 
@@ -3180,7 +3179,7 @@ __metadata:
   resolution: "docker-setup-buildx@workspace:."
   dependencies:
     "@actions/core": ^1.11.1
-    "@docker/actions-toolkit": ^0.54.0
+    "@docker/actions-toolkit": ^0.55.0
     "@types/js-yaml": ^4.0.9
     "@types/node": ^20.12.12
     "@types/uuid": ^10.0.0

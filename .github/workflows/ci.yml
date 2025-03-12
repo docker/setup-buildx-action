@@ -516,7 +516,7 @@ jobs:
           cleanup: ${{ matrix.cleanup }}
 
   k3s:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -529,9 +529,7 @@ jobs:
         uses: actions/checkout@v4
       -
         name: Install k3s
-        uses: crazy-max/.github/.github/actions/install-k3s@605d30d5ae97f6680578ace4b56645af79343e60
-        with:
-          version: "v1.21.2-k3s1"
+        uses: crazy-max/.github/.github/actions/install-k3s@f5cb4a109b7a3b466a2ac293ef4bb13f1571acd7
       -
         name: Set up Docker Buildx
         id: buildx

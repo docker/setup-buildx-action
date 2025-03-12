@@ -581,3 +581,24 @@ jobs:
         with:
           version: v0.11.2
           cache-binary: ${{ matrix.cache }}
+
+  windows-error:
+    runs-on: windows-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        continue-on-error: true
+        uses: ./
+      -
+        name: Check
+        run: |
+          echo "${{ toJson(steps.buildx) }}"
+          if [ "${{ steps.buildx.outcome }}" != "failure" ] || [ "${{ steps.buildx.conclusion }}" != "success" ]; then
+            echo "::error::Should have failed"
+            exit 1
+          fi
+        shell: bash

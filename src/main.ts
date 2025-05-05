@@ -209,19 +209,35 @@ actionsToolkit.run(
       try {
         await retryWithBackoff(
           async () => {
-            const res = await Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
-              ignoreReturnCode: true
+            // Create a promise that will timeout after 15 seconds
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(() => {
+                reject(new Error('Timeout exceeded while waiting for buildkit to initialize'));
+              }, 15000); // 15 second timeout
             });
             
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
-            }
-            return res;
+            // Create the actual command execution promise
+            const execPromise = Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
+              ignoreReturnCode: true
+            }).then(res => {
+              if (res.stderr.length > 0 && res.exitCode != 0) {
+                throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+              }
+              return res;
+            });
+            
+            // Race the timeout against the actual command
+            // If the command takes too long, we'll get the timeout error instead
+            return Promise.race([execPromise, timeoutPromise]);
           },
           5,  // maxRetries - retry up to 5 times for buildkit initialization
           1000,  // initialDelay - start with 1 second
           15000,  // maxDelay - cap at 15 seconds
-          isBuildkitSocketError  // only retry on buildkit socket errors
+          (error) => {
+            // Retry on buildkit socket errors or timeouts
+            return isBuildkitSocketError(error) || 
+                   error.message.includes('Timeout exceeded while waiting for buildkit');
+          }
         );
       } catch (error) {
         // Log the warning but continue - this matches current behavior where builds still succeed

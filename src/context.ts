@@ -25,12 +25,13 @@ export interface Inputs {
   append: string;
   cacheBinary: boolean;
   cleanup: boolean;
+  keepState: boolean;
 }
 
 export async function getInputs(): Promise<Inputs> {
   return {
     version: core.getInput('version'),
-    name: await getBuilderName(core.getInput('driver') || 'docker-container'),
+    name: await getBuilderName(core.getInput('name'), core.getInput('driver') || 'docker-container'),
     driver: core.getInput('driver') || 'docker-container',
     driverOpts: Util.getInputList('driver-opts', {ignoreComma: true, quote: false}),
     buildkitdFlags: core.getInput('buildkitd-flags'),
@@ -42,12 +43,16 @@ export async function getInputs(): Promise<Inputs> {
     buildkitdConfigInline: core.getInput('buildkitd-config-inline') || core.getInput('config-inline'),
     append: core.getInput('append'),
     cacheBinary: core.getBooleanInput('cache-binary'),
-    cleanup: core.getBooleanInput('cleanup')
+    cleanup: core.getBooleanInput('cleanup'),
+    keepState: core.getBooleanInput('keep-state')
   };
 }
 
-export async function getBuilderName(driver: string): Promise<string> {
-  return driver == 'docker' ? await Docker.context() : `builder-${crypto.randomUUID()}`;
+export async function getBuilderName(name: string, driver: string): Promise<string> {
+  if (driver == 'docker') {
+    return await Docker.context();
+  }
+  return name || `builder-${crypto.randomUUID()}`;
 }
 
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {

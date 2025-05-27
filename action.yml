@@ -50,6 +50,12 @@ inputs:
   cleanup:
     description: 'Cleanup temp files and remove builder at the end of a job'
     default: 'true'
+  keep-state:
+    description: 'Keep BuildKit state on cleanup. This is only useful on persistent self-hosted runners.'
+    default: 'false'
+    required: false
+  name:
+    description: 'Builder name set when creating the builder. If not specified, one will be generated.'
     required: false
   # TODO: remove deprecated config and config-inline inputs
   config:

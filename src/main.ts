@@ -48,15 +48,6 @@ async function retryWithBackoff<T>(
   }
 }
 
-/**
- * Check if an error is a buildkit socket connection error
- */
-function isBuildkitSocketError(error: Error): boolean {
-  return error.message.includes('/run/buildkit/buildkitd.sock') || 
-         error.message.includes('failed to list workers') ||
-         error.message.includes('connection error');
-}
-
 actionsToolkit.run(
   // main
   async () => {
@@ -230,14 +221,9 @@ actionsToolkit.run(
             // If the command takes too long, we'll get the timeout error instead
             return Promise.race([execPromise, timeoutPromise]);
           },
-          5,  // maxRetries - retry up to 5 times for buildkit initialization
+          3,  // maxRetries - retry up to 3 times for buildkit initialization
           1000,  // initialDelay - start with 1 second
-          15000,  // maxDelay - cap at 15 seconds
-          (error) => {
-            // Retry on buildkit socket errors or timeouts
-            return isBuildkitSocketError(error) || 
-                   error.message.includes('Timeout exceeded while waiting for buildkit');
-          }
+          15000  // maxDelay - cap at 15 seconds
         );
       } catch (error) {
         // Log the warning but continue - this matches current behavior where builds still succeed

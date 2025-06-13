@@ -124,22 +124,26 @@ actionsToolkit.run(
 
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {
-        const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
-          cacert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CACERT`],
-          cert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CERT`],
-          key: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_KEY`]
-        });
-        if (certsDriverOpts.length > 0) {
-          inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
-        }
-        const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
-        await Exec.getExecOutput(createCmd.command, createCmd.args, {
-          ignoreReturnCode: true
-        }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+        if (await toolkit.builder.exists(inputs.name)) {
+          core.info(`Builder ${inputs.name} already exists, skipping creation`);
+        } else {
+          const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
+            cacert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CACERT`],
+            cert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CERT`],
+            key: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_KEY`]
+          });
+          if (certsDriverOpts.length > 0) {
+            inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
           }
-        });
+          const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
+          await Exec.getExecOutput(createCmd.command, createCmd.args, {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+            }
+          });
+        }
       });
     }
 

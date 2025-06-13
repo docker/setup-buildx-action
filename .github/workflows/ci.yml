@@ -603,3 +603,44 @@ jobs:
             exit 1
           fi
         shell: bash
+
+  keep-state:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          name: foo
+          keep-state: true
+      -
+        name: Set up Docker Buildx
+        uses: ./
+        with:
+          name: foo
+
+  keep-state-error:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        continue-on-error: true
+        uses: ./
+        with:
+          driver: docker
+          keep-state: true
+      -
+        name: Check
+        run: |
+          echo "${{ toJson(steps.buildx) }}"
+          if [ "${{ steps.buildx.outcome }}" != "failure" ] || [ "${{ steps.buildx.conclusion }}" != "success" ]; then
+            echo "::error::Should have failed"
+            exit 1
+          fi

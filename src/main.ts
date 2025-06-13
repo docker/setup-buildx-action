@@ -28,6 +28,12 @@ actionsToolkit.run(
     const standalone = await toolkit.buildx.isStandalone();
     stateHelper.setStandalone(standalone);
 
+    if (inputs.keepState && inputs.driver !== 'docker-container') {
+      // https://docs.docker.com/reference/cli/docker/buildx/rm/#keep-state
+      throw new Error(`Cannot use keep-state with ${inputs.driver} driver`);
+    }
+    stateHelper.setKeepState(inputs.keepState);
+
     await core.group(`Docker info`, async () => {
       try {
         await Docker.printVersion();
@@ -118,22 +124,26 @@ actionsToolkit.run(
 
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {
-        const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
-          cacert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CACERT`],
-          cert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CERT`],
-          key: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_KEY`]
-        });
-        if (certsDriverOpts.length > 0) {
-          inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
-        }
-        const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
-        await Exec.getExecOutput(createCmd.command, createCmd.args, {
-          ignoreReturnCode: true
-        }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+        if (await toolkit.builder.exists(inputs.name)) {
+          core.info(`Builder ${inputs.name} already exists, skipping creation`);
+        } else {
+          const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
+            cacert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CACERT`],
+            cert: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_CERT`],
+            key: process.env[`${context.builderNodeEnvPrefix}_0_AUTH_TLS_KEY`]
+          });
+          if (certsDriverOpts.length > 0) {
+            inputs.driverOpts = [...inputs.driverOpts, ...certsDriverOpts];
           }
-        });
+          const createCmd = await toolkit.buildx.getCommand(await context.getCreateArgs(inputs, toolkit));
+          await Exec.getExecOutput(createCmd.command, createCmd.args, {
+            ignoreReturnCode: true
+          }).then(res => {
+            if (res.stderr.length > 0 && res.exitCode != 0) {
+              throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+            }
+          });
+        }
       });
     }
 
@@ -249,7 +259,7 @@ actionsToolkit.run(
         const buildx = new Buildx({standalone: stateHelper.standalone});
         const builder = new Builder({buildx: buildx});
         if (await builder.exists(stateHelper.builderName)) {
-          const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName]);
+          const rmCmd = await buildx.getCommand(['rm', stateHelper.builderName, ...(stateHelper.keepState ? ['--keep-state'] : [])]);
           await Exec.getExecOutput(rmCmd.command, rmCmd.args, {
             ignoreReturnCode: true
           }).then(res => {

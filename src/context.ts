@@ -42,17 +42,14 @@ export async function getInputs(): Promise<Inputs> {
     buildkitdConfig: core.getInput('buildkitd-config') || core.getInput('config'),
     buildkitdConfigInline: core.getInput('buildkitd-config-inline') || core.getInput('config-inline'),
     append: core.getInput('append'),
+    keepState: core.getBooleanInput('keep-state'),
     cacheBinary: core.getBooleanInput('cache-binary'),
-    cleanup: core.getBooleanInput('cleanup'),
-    keepState: core.getBooleanInput('keep-state')
+    cleanup: core.getBooleanInput('cleanup')
   };
 }
 
 export async function getBuilderName(name: string, driver: string): Promise<string> {
-  if (driver == 'docker') {
-    return await Docker.context();
-  }
-  return name || `builder-${crypto.randomUUID()}`;
+  return driver == 'docker' ? await Docker.context() : name || `builder-${crypto.randomUUID()}`;
 }
 
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {

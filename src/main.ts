@@ -28,6 +28,12 @@ actionsToolkit.run(
     const standalone = await toolkit.buildx.isStandalone();
     stateHelper.setStandalone(standalone);
 
+    if (inputs.keepState && inputs.driver !== 'docker-container') {
+      // https://docs.docker.com/reference/cli/docker/buildx/rm/#keep-state
+      throw new Error(`Cannot use keep-state with ${inputs.driver} driver`);
+    }
+    stateHelper.setKeepState(inputs.keepState);
+
     await core.group(`Docker info`, async () => {
       try {
         await Docker.printVersion();
@@ -115,7 +121,6 @@ actionsToolkit.run(
         });
       }
     }
-    stateHelper.setKeepState(inputs.keepState);
 
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {

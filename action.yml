@@ -34,6 +34,9 @@ inputs:
     description: 'Switch to this builder instance'
     default: 'true'
     required: false
+  name:
+    description: 'Name of the builder. If not specified, one will be generated or if it already exists, it will be used instead of creating a new one.'
+    required: false
   endpoint:
     description: 'Optional address for docker socket or context from `docker context ls`'
     required: false
@@ -43,6 +46,10 @@ inputs:
   append:
     description: 'Append additional nodes to the builder'
     required: false
+  keep-state:
+    description: 'Keep BuildKit state on cleanup. This is only useful on persistent self-hosted runners.'
+    default: 'false'
+    required: false
   cache-binary:
     description: 'Cache buildx binary to GitHub Actions cache backend'
     default: 'true'
@@ -50,12 +57,6 @@ inputs:
   cleanup:
     description: 'Cleanup temp files and remove builder at the end of a job'
     default: 'true'
-  keep-state:
-    description: 'Keep BuildKit state on cleanup. This is only useful on persistent self-hosted runners.'
-    default: 'false'
-    required: false
-  name:
-    description: 'Builder name set when creating the builder. If not specified, one will be generated.'
     required: false
   # TODO: remove deprecated config and config-inline inputs
   config:

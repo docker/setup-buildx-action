@@ -621,6 +621,7 @@ jobs:
         uses: ./
         with:
           name: foo
+          keep-state: true
 
   keep-state-error:
     runs-on: ubuntu-latest

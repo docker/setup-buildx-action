@@ -522,6 +522,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - latest
           - v0.11.0
           - v0.10.5
     steps:
@@ -530,7 +531,7 @@ jobs:
         uses: actions/checkout@v4
       -
         name: Install k3s
-        uses: crazy-max/.github/.github/actions/install-k3s@f5cb4a109b7a3b466a2ac293ef4bb13f1571acd7
+        uses: crazy-max/.github/.github/actions/install-k3s@a94383ec9e125b23907fb6fcebf7ff87964595e5
       -
         name: Set up Docker Buildx
         id: buildx

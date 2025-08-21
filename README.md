@@ -42,7 +42,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       -
         # Add support for more platforms with QEMU (optional)
         # https://github.com/docker/setup-qemu-action

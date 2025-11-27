@@ -115,22 +115,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le
 
-  install:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v6
-      -
-        name: Set up Docker Buildx
-        uses: ./
-        with:
-          install: true
-      -
-        name: Check cmd
-        run: |
-          docker build --help
-
   use:
     runs-on: ubuntu-latest
     strategy:

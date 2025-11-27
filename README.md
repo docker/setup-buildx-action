@@ -94,7 +94,7 @@ The following inputs can be used as `step.with` keys:
 | `buildkitd-flags`            | String   |                    | [BuildKit daemon flags](https://docs.docker.com/engine/reference/commandline/buildx_create/#buildkitd-flags)                                                                |
 | `buildkitd-config` \*        | String   |                    | [BuildKit daemon config file](https://docs.docker.com/engine/reference/commandline/buildx_create/#config)                                                                   |
 | `buildkitd-config-inline` \* | String   |                    | Same as `buildkitd-config` but inline                                                                                                                                       |
-| `install`                    | Bool     | `false`            | Sets up `docker build` command as an alias to `docker buildx`                                                                                                               |
+| `install` \*                 | Bool     | `false`            | Sets up `docker build` command as an alias to `docker buildx`                                                                                                               |
 | `use`                        | Bool     | `true`             | Switch to this builder instance                                                                                                                                             |
 | `endpoint`                   | String   |                    | [Optional address for docker socket](https://docs.docker.com/engine/reference/commandline/buildx_create/#description) or context from `docker context ls`                   |
 | `platforms`                  | List/CSV |                    | Fixed [platforms](https://docs.docker.com/engine/reference/commandline/buildx_create/#platform) for current node. If not empty, values take priority over the detected ones |
@@ -110,6 +110,14 @@ The following inputs can be used as `step.with` keys:
 
 > [!NOTE]
 > `buildkitd-config` and `buildkitd-config-inline` are mutually exclusive.
+
+> [!NOTE]
+> `install` input is deprecated and will be removed in a future release. This
+>  input is not necessary when building with our actions like
+> `docker/build-push-action` or `docker/bake-action`. If you are still building
+> with the `docker build` command then you can set the `BUILDX_BUILDER`
+> environment variable, or you can just directly invoke the
+> `docker buildx build` command: https://github.com/docker/setup-buildx-action/pull/455
 
 ### outputs
 

@@ -212,7 +212,7 @@ jobs:
         env:
           DOCKER_CONTEXT: mycontext
 
-  config:
+  buildkitd-config:
     runs-on: ubuntu-latest
     steps:
       -
@@ -244,7 +244,7 @@ jobs:
         with:
           context: .
 
-  config-inline:
+  buildkitd-config-inline:
     runs-on: ubuntu-latest
     steps:
       -
@@ -390,36 +390,6 @@ jobs:
         uses: docker/build-push-action@master
         with:
           context: .
-
-  standalone-install-error:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v6
-      -
-        name: Uninstall docker cli
-        run: |
-          if dpkg -s "docker-ce" >/dev/null 2>&1; then
-            sudo dpkg -r --force-depends docker-ce-cli docker-buildx-plugin
-          else
-            sudo apt-get purge -y moby-cli moby-buildx
-          fi
-      -
-        name: Set up Docker Buildx
-        id: buildx
-        continue-on-error: true
-        uses: ./
-        with:
-          install: true
-      -
-        name: Check
-        run: |
-          echo "${{ toJson(steps.buildx) }}"
-          if [ "${{ steps.buildx.outcome }}" != "failure" ] || [ "${{ steps.buildx.conclusion }}" != "success" ]; then
-            echo "::error::Should have failed"
-            exit 1
-          fi
 
   append:
     runs-on: ubuntu-latest

@@ -184,23 +184,6 @@ actionsToolkit.run(
       });
     });
 
-    if (inputs.install) {
-      if (standalone) {
-        throw new Error(`Cannot set buildx as default builder without the Docker CLI`);
-      }
-      await core.group(`Setting buildx as default builder`, async () => {
-        stateHelper.setBuildxIsDefaultBuilder(true);
-        const installCmd = await toolkit.buildx.getCommand(['install']);
-        await Exec.getExecOutput(installCmd.command, installCmd.args, {
-          ignoreReturnCode: true
-        }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
-          }
-        });
-      });
-    }
-
     const builderInspect = await toolkit.builder.inspect(inputs.name);
     const firstNode = builderInspect.nodes[0];
 
@@ -218,9 +201,6 @@ actionsToolkit.run(
       core.setOutput('driver', builderInspect.driver);
       core.setOutput('platforms', reducedPlatforms.join(','));
       core.setOutput('nodes', JSON.stringify(builderInspect.nodes, undefined, 2));
-      core.setOutput('endpoint', firstNode.endpoint); // TODO: deprecated, to be removed in a later version
-      core.setOutput('status', firstNode.status); // TODO: deprecated, to be removed in a later version
-      core.setOutput('flags', firstNode['buildkitd-flags']); // TODO: deprecated, to be removed in a later version
     });
 
     if (!standalone && builderInspect.driver == 'docker-container') {
@@ -288,18 +268,6 @@ actionsToolkit.run(
     if (stateHelper.certsDir.length > 0 && fs.existsSync(stateHelper.certsDir)) {
       await core.group(`Cleaning up certificates`, async () => {
         fs.rmSync(stateHelper.certsDir, {recursive: true});
-      });
-    }
-
-    if (stateHelper.buildxIsDefaultBuilder) {
-      await core.group(`Restoring default builder`, async () => {
-        await Exec.getExecOutput('docker', ['buildx', 'uninstall'], {
-          ignoreReturnCode: true
-        }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.warning(`${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
-          }
-        });
       });
     }
   }

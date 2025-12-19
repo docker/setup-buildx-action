@@ -54,20 +54,6 @@ inputs:
     description: 'Cleanup temp files and remove builder at the end of a job'
     default: 'true'
     required: false
-  # TODO: remove deprecated config, config-inline and install inputs
-  config:
-    description: 'BuildKit daemon config file'
-    deprecationMessage: 'Use buildkitd-config instead'
-    required: false
-  config-inline:
-    description: 'Inline BuildKit daemon config'
-    deprecationMessage: 'Use buildkitd-config-inline instead'
-    required: false
-  install:
-    description: 'Sets up docker build command as an alias to docker buildx build'
-    deprecationMessage: '"docker buildx install" command is deprecated and will be removed in a future release, use BUILDX_BUILDER environment variable instead'
-    default: 'false'
-    required: false
 
 outputs:
   name:

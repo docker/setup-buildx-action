@@ -52,7 +52,6 @@ describe('getCreateArgs', () => {
       0,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -71,7 +70,6 @@ describe('getCreateArgs', () => {
       'v0.10.3',
       new Map<string, string>([
         ['driver', 'docker'],
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -89,7 +87,6 @@ describe('getCreateArgs', () => {
       2,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', 'image=moby/buildkit:master\nnetwork=host'],
         ['cache-binary', 'true'],
@@ -111,7 +108,6 @@ describe('getCreateArgs', () => {
       new Map<string, string>([
         ['driver', 'remote'],
         ['endpoint', 'tls://foo:1234'],
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -132,7 +128,6 @@ describe('getCreateArgs', () => {
         ['driver', 'remote'],
         ['platforms', 'linux/arm64,linux/arm/v7'],
         ['endpoint', 'tls://foo:1234'],
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -151,7 +146,6 @@ describe('getCreateArgs', () => {
       5,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['driver-opts', `"env.no_proxy=localhost,127.0.0.1,.mydomain"`],
         ['cache-binary', 'true'],
@@ -170,7 +164,6 @@ describe('getCreateArgs', () => {
       6,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['platforms', 'linux/amd64\n"linux/arm64,linux/arm/v7"'],
         ['cache-binary', 'true'],
@@ -189,7 +182,6 @@ describe('getCreateArgs', () => {
       7,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['driver', 'unknown'],
         ['cache-binary', 'true'],
@@ -206,7 +198,6 @@ describe('getCreateArgs', () => {
       8,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['buildkitd-config', path.join(fixturesDir, 'buildkitd.toml')],
         ['cache-binary', 'true'],
@@ -225,7 +216,6 @@ describe('getCreateArgs', () => {
       9,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['buildkitd-config-inline', 'debug = true'],
         ['cache-binary', 'true'],
@@ -244,7 +234,6 @@ describe('getCreateArgs', () => {
       10,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'false'],
         ['driver', 'cloud'],
         ['buildkitd-flags', '--allow-insecure-entitlement network.host'],
@@ -263,7 +252,6 @@ describe('getCreateArgs', () => {
       11,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'true'],
         ['cleanup', 'true'],
         ['cache-binary', 'true'],
@@ -282,7 +270,6 @@ describe('getCreateArgs', () => {
       12,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'true'],
         ['cleanup', 'true'],
         ['cache-binary', 'true'],
@@ -330,7 +317,6 @@ describe('getAppendArgs', () => {
       0,
       'v0.10.3',
       new Map<string, string>([
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -389,7 +375,6 @@ describe('getVersion', () => {
       0,
       new Map<string, string>([
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -402,7 +387,6 @@ describe('getVersion', () => {
       new Map<string, string>([
         ['version', 'latest'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -415,7 +399,6 @@ describe('getVersion', () => {
       new Map<string, string>([
         ['version', 'edge'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -428,7 +411,6 @@ describe('getVersion', () => {
       new Map<string, string>([
         ['version', 'v0.19.2'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -442,7 +424,6 @@ describe('getVersion', () => {
         ['version', 'latest'],
         ['driver', 'cloud'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -456,7 +437,6 @@ describe('getVersion', () => {
         ['version', 'edge'],
         ['driver', 'cloud'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -469,7 +449,6 @@ describe('getVersion', () => {
       new Map<string, string>([
         ['driver', 'cloud'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -483,7 +462,6 @@ describe('getVersion', () => {
         ['version', 'cloud:v0.11.2-desktop.2'],
         ['driver', 'cloud'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],
@@ -496,7 +474,6 @@ describe('getVersion', () => {
       new Map<string, string>([
         ['version', 'cloud:v0.11.2-desktop.2'],
         // defaults
-        ['install', 'false'],
         ['use', 'true'],
         ['cache-binary', 'true'],
         ['cleanup', 'true'],

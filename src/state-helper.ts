@@ -8,7 +8,6 @@ export const containerName = process.env['STATE_containerName'] || '';
 export const certsDir = process.env['STATE_certsDir'] || '';
 export const tmpDockerContext = process.env['STATE_tmpDockerContext'] || '';
 export const cleanup = /true/i.test(process.env['STATE_cleanup'] || '');
-export const buildxIsDefaultBuilder = /true/i.test(process.env['STATE_buildxIsDefaultBuilder'] || '');
 export const keepState = /true/i.test(process.env['STATE_keepState'] || '');
 
 export function setDebug(debug: string) {
@@ -41,10 +40,6 @@ export function setTmpDockerContext(tmpDockerContext: string) {
 
 export function setCleanup(cleanup: boolean) {
   core.saveState('cleanup', cleanup);
-}
-
-export function setBuildxIsDefaultBuilder(buildxIsDefaultBuilder: boolean) {
-  core.saveState('buildxIsDefaultBuilder', buildxIsDefaultBuilder);
 }
 
 export function setKeepState(keepState: boolean) {

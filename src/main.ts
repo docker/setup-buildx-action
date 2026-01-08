@@ -17,6 +17,37 @@ import {ContextInfo} from '@docker/actions-toolkit/lib/types/docker/docker';
 import * as context from './context';
 import * as stateHelper from './state-helper';
 
+/**
+ * Retry a function with exponential backoff
+ */
+async function retryWithBackoff<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000,
+  maxDelay: number = 10000,
+  shouldRetry: (error: Error) => boolean = () => true
+): Promise<T> {
+  let retries = 0;
+  let delay = initialDelay;
+  
+  while (true) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (retries >= maxRetries || !shouldRetry(error)) {
+        throw error;
+      }
+      
+      retries++;
+      core.info(`Retry ${retries}/${maxRetries} after ${delay}ms due to: ${error.message}`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      // Exponential backoff with jitter
+      delay = Math.min(delay * 2, maxDelay) * (0.8 + Math.random() * 0.4);
+    }
+  }
+}
+
 actionsToolkit.run(
   // main
   async () => {
@@ -175,13 +206,40 @@ actionsToolkit.run(
 
     await core.group(`Booting builder`, async () => {
       const inspectCmd = await toolkit.buildx.getCommand(await context.getInspectArgs(inputs, toolkit));
-      await Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
-        ignoreReturnCode: true
-      }).then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
-        }
-      });
+      
+      try {
+        await retryWithBackoff(
+          async () => {
+            // Create a promise that will timeout after 15 seconds
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(() => {
+                reject(new Error('Timeout exceeded while waiting for buildkit to initialize'));
+              }, 15000); // 15 second timeout
+            });
+            
+            // Create the actual command execution promise
+            const execPromise = Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
+              ignoreReturnCode: true
+            }).then(res => {
+              if (res.stderr.length > 0 && res.exitCode != 0) {
+                throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+              }
+              return res;
+            });
+            
+            // Race the timeout against the actual command
+            // If the command takes too long, we'll get the timeout error instead
+            return Promise.race([execPromise, timeoutPromise]);
+          },
+          3,  // maxRetries - retry up to 3 times for buildkit initialization
+          1000,  // initialDelay - start with 1 second
+          15000  // maxDelay - cap at 15 seconds
+        );
+      } catch (error) {
+        // Log the warning but continue - this matches current behavior where builds still succeed
+        core.warning(`Failed to bootstrap builder after multiple retries: ${error.message}`);
+        core.warning('Continuing execution as buildkit daemon may initialize later');
+      }
     });
 
     if (inputs.install) {

@@ -3569,7 +3569,7 @@ __metadata:
     eslint-plugin-jest: "npm:^29.5.0"
     eslint-plugin-prettier: "npm:^5.5.4"
     jest: "npm:^30.2.0"
-    js-yaml: "npm:^4.1.0"
+    js-yaml: "npm:^4.1.1"
     prettier: "npm:^3.7.4"
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.9.2"

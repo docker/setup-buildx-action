@@ -1,0 +1,13 @@
+# Let assume we have all other envvars like DOCKER_USER, GITHUB_TOKEN already set,
+# The below command will (re)build `actions-runner-controller:controller1` and `actions-runner:runner1`,
+# load those into kind nodes, and then rerun kubectl or helm to install/upgrade the controller,
+# and finally upgrade the runner deployment to use the new runner image.
+#
+# As helm 3 and kubectl is unable to recreate a pod when no tag change,
+# you either need to bump VERSION and RUNNER_TAG on each run,
+# or manually run `kubectl delete pod $POD` on respective pods for changes to actually take effect.
+
+# Makefile
+VERSION=controller1 \
+  RUNNER_TAG=runner1 \
+  make acceptance/pull acceptance/kind docker-buildx acceptance/load acceptance/deploy

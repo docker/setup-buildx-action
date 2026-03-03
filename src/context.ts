@@ -1,11 +1,11 @@
 import * as crypto from 'crypto';
 import * as core from '@actions/core';
 
-import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
-import {Util} from '@docker/actions-toolkit/lib/util';
-import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
+import {Docker} from '@docker/actions-toolkit/lib/docker/docker.js';
+import {Util} from '@docker/actions-toolkit/lib/util.js';
+import {Toolkit} from '@docker/actions-toolkit/lib/toolkit.js';
 
-import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
+import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder.js';
 
 export const builderNodeEnvPrefix = 'BUILDER_NODE';
 const defaultBuildkitdFlags = '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host';

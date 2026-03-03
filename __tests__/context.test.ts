@@ -1,38 +1,40 @@
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
+import {beforeEach, describe, expect, test, vi} from 'vitest';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
+
 import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
 import {Context} from '@docker/actions-toolkit/lib/context';
 import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
 import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
+
 import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
 
 import * as context from '../src/context';
 
 const fixturesDir = path.join(__dirname, 'fixtures');
-// prettier-ignore
-const tmpDir = path.join(process.env.TEMP || '/tmp', 'setup-buildx-jest');
-const tmpName = path.join(tmpDir, '.tmpname-jest');
+const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'context-'));
+const tmpName = path.join(tmpDir, '.tmpname-vi');
 
-jest.spyOn(Context, 'tmpDir').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpDir').mockImplementation((): string => {
   if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir, {recursive: true});
   }
   return tmpDir;
 });
 
-jest.spyOn(Context, 'tmpName').mockImplementation((): string => {
+vi.spyOn(Context, 'tmpName').mockImplementation((): string => {
   return tmpName;
 });
 
-jest.mock('crypto', () => {
+vi.mock('crypto', async () => {
   return {
-    ...(jest.requireActual('crypto') as object),
-    randomUUID: jest.fn(() => '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d')
+    ...(await vi.importActual('crypto')),
+    randomUUID: vi.fn(() => '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d')
   };
 });
 
-jest.spyOn(Docker, 'context').mockImplementation((): Promise<string> => {
+vi.spyOn(Docker, 'context').mockImplementation((): Promise<string> => {
   return Promise.resolve('default');
 });
 
@@ -298,13 +300,13 @@ describe('getCreateArgs', () => {
       ]
     ],
   ])(
-    '[%d] given buildx %s and %p as inputs, returns %p',
+    '[%d] given buildx %o and %o as inputs, returns %o',
     async (num: number, buildxVersion: string, inputs: Map<string, string>, expected: Array<string>) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);
       });
       const toolkit = new Toolkit();
-      jest.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
         return buildxVersion;
       });
       const inp = await context.getInputs();
@@ -357,13 +359,13 @@ describe('getAppendArgs', () => {
       ]
     ]
   ])(
-    '[%d] given buildx %s and %p as inputs, returns %p',
+    '[%d] given buildx %o and %o as inputs, returns %o',
     async (num: number, buildxVersion: string, inputs: Map<string, string>, node: Node, expected: Array<string>) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);
       });
       const toolkit = new Toolkit();
-      jest.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
         return buildxVersion;
       });
       const inp = await context.getInputs();
@@ -505,7 +507,7 @@ describe('getVersion', () => {
       'cloud:v0.11.2-desktop.2'
     ],
   ])(
-    '[%d] given %p as inputs, returns version %p',
+    '[%d] given %o as inputs, returns version %o',
     async (num: number, inputs: Map<string, string>, expected: string) => {
       inputs.forEach((value: string, name: string) => {
         setInput(name, value);

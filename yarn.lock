@@ -2204,7 +2204,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-prettier: "npm:^5.5.5"
     globals: "npm:^17.3.0"
-    js-yaml: "npm:^4.1.0"
+    js-yaml: "npm:^4.1.1"
     prettier: "npm:^3.8.1"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"

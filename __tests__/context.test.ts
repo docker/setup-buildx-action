@@ -3,14 +3,14 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx';
-import {Context} from '@docker/actions-toolkit/lib/context';
-import {Docker} from '@docker/actions-toolkit/lib/docker/docker';
-import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
+import {Buildx} from '@docker/actions-toolkit/lib/buildx/buildx.js';
+import {Context} from '@docker/actions-toolkit/lib/context.js';
+import {Docker} from '@docker/actions-toolkit/lib/docker/docker.js';
+import {Toolkit} from '@docker/actions-toolkit/lib/toolkit.js';
 
-import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder';
+import {Node} from '@docker/actions-toolkit/lib/types/buildx/builder.js';
 
-import * as context from '../src/context';
+import * as context from '../src/context.js';
 
 const fixturesDir = path.join(__dirname, 'fixtures');
 const tmpDir = fs.mkdtempSync(path.join(process.env.TEMP || os.tmpdir(), 'context-'));

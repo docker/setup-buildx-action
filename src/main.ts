@@ -53,7 +53,10 @@ actionsToolkit.run(
       });
     } else if (!(await toolkit.buildx.isAvailable()) || version) {
       await core.group(`Download buildx from GitHub Releases`, async () => {
-        toolPath = await toolkit.buildxInstall.download(version || 'latest', !inputs.cacheBinary);
+        toolPath = await toolkit.buildxInstall.download({
+          version: version || 'latest',
+          ghaNoCache: !inputs.cacheBinary
+        });
       });
     }
     if (toolPath) {

@@ -130,6 +130,20 @@ function addClusterLocalRegistryConfig(buildkitConfig: string): string {
     };
   }
 
+  const dockerhubProxy = process.env.BP_DOCKERHUB_PROXY;
+  if (dockerhubProxy && dockerhubProxy.length) {
+    if (!inlineToml['registry']['docker.io']) {
+      inlineToml['registry']['docker.io'] = {};
+    }
+    inlineToml['registry']['docker.io']['mirrors'] = [dockerhubProxy];
+
+    if (!inlineToml['registry'][dockerhubProxy]) {
+      inlineToml['registry'][dockerhubProxy] = {};
+    }
+    inlineToml['registry'][dockerhubProxy]['http'] = true;
+    inlineToml['registry'][dockerhubProxy]['insecure'] = true;
+  }
+
   return TOML.stringify(inlineToml);
 }
 

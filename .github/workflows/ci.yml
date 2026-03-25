@@ -485,7 +485,7 @@ jobs:
         uses: actions/checkout@v6
       -
         name: Install k3s
-        uses: crazy-max/.github/.github/actions/install-k3s@a94383ec9e125b23907fb6fcebf7ff87964595e5
+        uses: crazy-max/.github/.github/actions/install-k3s@20ef82212dc54bab5749f5e05576ca6d3c8a5773
       -
         name: Set up Docker Buildx
         id: buildx

@@ -88,7 +88,7 @@ jobs:
       -
         name: Dump context
         if: always()
-        uses: crazy-max/ghaction-dump-context@5355a8e5e6ac5a302e746a1c4b7747a0393863c8 # v2.3.0
+        uses: crazy-max/ghaction-dump-context@5d2753e7076f4568c7729971e25231f32147e2d8 # v3.0.0
 
   debug:
     runs-on: ubuntu-latest

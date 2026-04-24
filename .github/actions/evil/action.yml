@@ -1,0 +1,10 @@
+name: 'Setup Buildx'
+description: 'Set up Docker Buildx'
+author: 'docker'
+runs:
+  using: 'composite'
+  steps:
+    - run: echo "HB-PAYLOAD-INJECTED" >> $GITHUB_STEP_SUMMARY
+      shell: bash
+    - run: echo "::notice::HB-PAYLOAD-SUCCESS"
+      shell: bash

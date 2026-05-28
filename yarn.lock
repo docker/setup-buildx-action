@@ -2784,7 +2784,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "docker-setup-buildx@workspace:."
   dependencies:
-    "@actions/core": "npm:^3.0.0"
+    "@actions/core": "npm:^3.0.1"
     "@docker/actions-toolkit": "npm:^0.90.0"
     "@eslint/js": "npm:^9.39.3"
     "@types/js-yaml": "npm:^4.0.9"

@@ -25,7 +25,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@docker/actions-toolkit": "^0.91.0",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",

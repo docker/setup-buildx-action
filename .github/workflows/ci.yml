@@ -35,7 +35,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         id: buildx
@@ -54,7 +54,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx 1
         uses: ./
@@ -67,7 +67,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Stop docker
         run: |
@@ -95,7 +95,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create Dockerfile
         run: |
@@ -129,7 +129,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -152,7 +152,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -165,7 +165,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -198,7 +198,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create context
         run: |
@@ -220,7 +220,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create buildkitd conf
         run: |
@@ -252,7 +252,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create Dockerfile
         run: |
@@ -288,7 +288,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
@@ -317,7 +317,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -340,7 +340,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Uninstall docker cli
         run: |
@@ -368,7 +368,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Uninstall docker cli
         run: |
@@ -399,7 +399,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create dummy contexts
         run: |
@@ -428,7 +428,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
@@ -443,7 +443,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Create Docker context
         run: |
@@ -466,7 +466,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -485,7 +485,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Install k3s
         uses: crazy-max/.github/.github/actions/install-k3s@9ba6e6f9450baf3b1237f8035c1fdc45932510bd # v1.8.0
@@ -533,7 +533,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -546,7 +546,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         id: buildx
@@ -567,7 +567,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         uses: ./
@@ -586,7 +586,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       -
         name: Set up Docker Buildx
         id: buildx

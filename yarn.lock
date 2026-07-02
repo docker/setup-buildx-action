@@ -1702,18 +1702,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/verify@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@sigstore/verify@npm:3.1.0"
-  dependencies:
-    "@sigstore/bundle": "npm:^4.0.0"
-    "@sigstore/core": "npm:^3.1.0"
-    "@sigstore/protobuf-specs": "npm:^0.5.0"
-  checksum: 10/c85713cc326236ef39608e4b061c1192306fd3edd7a1334237d5d53dbb132f04e3f9d3cfd4bb2d521bf0c95a9f98945a748c97ecb06e5f36cfd09488a0d3d73f
-  languageName: node
-  linkType: hard
-
-"@sigstore/verify@npm:^3.1.1":
+"@sigstore/verify@npm:^3.1.0, @sigstore/verify@npm:^3.1.1":
   version: 3.1.1
   resolution: "@sigstore/verify@npm:3.1.1"
   dependencies:

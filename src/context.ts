@@ -52,6 +52,9 @@ export async function getBuilderName(name: string, driver: string): Promise<stri
 
 export async function getCreateArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<string>> {
   const args: Array<string> = ['create', '--name', inputs.name, '--driver', inputs.driver];
+  if (inputs.driver === 'cloud' && !inputs.version.startsWith('cloud:') && !inputs.version.startsWith('lab:') && !(await toolkit.buildx.versionSatisfies('>=0.37.0-0'))) {
+    throw new Error(`Docker Build Cloud with official Buildx requires Buildx v0.37.0 or later. Set version to cloud:<version> or lab:<version> to use the legacy Docker Build Cloud release channel.`);
+  }
   if (await toolkit.buildx.versionSatisfies('>=0.3.0')) {
     await Util.asyncForEach(inputs.driverOpts, async (driverOpt: string) => {
       args.push('--driver-opt', driverOpt);
@@ -115,18 +118,4 @@ export async function getInspectArgs(inputs: Inputs, toolkit: Toolkit): Promise<
 
 function driverSupportsBuildkitdFlags(driver: string): boolean {
   return driver == '' || driver == 'docker-container' || driver == 'docker' || driver == 'kubernetes';
-}
-
-export function getVersion(inputs: Inputs): string {
-  const version = inputs.version;
-  if (inputs.driver === 'cloud') {
-    if (!version || version === 'latest') {
-      return 'cloud:latest';
-    }
-    if (version.startsWith('cloud:') || version.startsWith('lab:')) {
-      return version;
-    }
-    return `cloud:${version}`;
-  }
-  return version;
 }

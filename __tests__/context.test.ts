@@ -234,7 +234,7 @@ describe('getCreateArgs', () => {
     ],
     [
       10,
-      'v0.10.3',
+      'v0.37.0',
       new Map<string, string>([
         ['use', 'false'],
         ['driver', 'cloud'],
@@ -301,6 +301,25 @@ describe('getCreateArgs', () => {
       expect(res).toEqual(expected);
     }
   );
+
+  test('rejects cloud driver with unsupported official Buildx', async () => {
+    setInput('version', 'v0.36.1');
+    setInput('driver', 'cloud');
+    setInput('use', 'true');
+    setInput('cache-binary', 'true');
+    setInput('cleanup', 'true');
+    setInput('keep-state', 'false');
+    const toolkit = new Toolkit();
+    const versionSpy = vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      return 'v0.36.1';
+    });
+    try {
+      const inp = await context.getInputs();
+      await expect(context.getCreateArgs(inp, toolkit)).rejects.toThrow(/requires Buildx v0.37.0 or later/);
+    } finally {
+      versionSpy.mockRestore();
+    }
+  });
 });
 
 describe('getAppendArgs', () => {
@@ -357,140 +376,6 @@ describe('getAppendArgs', () => {
       const inp = await context.getInputs();
       const res = await context.getAppendArgs(inp, node, toolkit);
       expect(res).toEqual(expected);
-    }
-  );
-});
-
-describe('getVersion', () => {
-  beforeEach(() => {
-    process.env = Object.keys(process.env).reduce((object, key) => {
-      if (!key.startsWith('INPUT_')) {
-        object[key] = process.env[key];
-      }
-      return object;
-    }, {});
-  });
-
-  // prettier-ignore
-  test.each([
-    [
-      0,
-      new Map<string, string>([
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      ''
-    ],
-    [
-      1,
-      new Map<string, string>([
-        ['version', 'latest'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'latest'
-    ],
-    [
-      2,
-      new Map<string, string>([
-        ['version', 'edge'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'edge'
-    ],
-    [
-      3,
-      new Map<string, string>([
-        ['version', 'v0.19.2'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'v0.19.2'
-    ],
-    [
-      4,
-      new Map<string, string>([
-        ['version', 'latest'],
-        ['driver', 'cloud'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'cloud:latest'
-    ],
-    [
-      5,
-      new Map<string, string>([
-        ['version', 'edge'],
-        ['driver', 'cloud'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'cloud:edge'
-    ],
-    [
-      6,
-      new Map<string, string>([
-        ['driver', 'cloud'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'cloud:latest'
-    ],
-    [
-      7,
-      new Map<string, string>([
-        ['version', 'cloud:v0.11.2-desktop.2'],
-        ['driver', 'cloud'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'cloud:v0.11.2-desktop.2'
-    ],
-    [
-      8,
-      new Map<string, string>([
-        ['version', 'cloud:v0.11.2-desktop.2'],
-        // defaults
-        ['use', 'true'],
-        ['cache-binary', 'true'],
-        ['cleanup', 'true'],
-        ['keep-state', 'false']
-      ]),
-      'cloud:v0.11.2-desktop.2'
-    ],
-  ])(
-    '[%d] given %o as inputs, returns version %o',
-    async (num: number, inputs: Map<string, string>, expected: string) => {
-      inputs.forEach((value: string, name: string) => {
-        setInput(name, value);
-      });
-      const inp = await context.getInputs();
-      expect(context.getVersion(inp)).toEqual(expected);
     }
   );
 });

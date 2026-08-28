@@ -2840,7 +2840,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.5"
     generate-license-file: "npm:^4.1.1"
     globals: "npm:^17.3.0"
-    js-yaml: "npm:^5.3.0"
+    js-yaml: "npm:^5.4.0"
     prettier: "npm:^3.8.1"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
@@ -4005,6 +4005,17 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.mjs
   checksum: 10/6c7e8ea8dd5643d9df73f4aa796f3572537284e9b819b74ef919467452bfa4624f8f7477cfc775c91db7e2f32387133b1b6c4e95aef9702be6bb042ae554884a
+  languageName: node
+  linkType: hard
+
+"js-yaml@npm:^5.4.0":
+  version: 5.4.0
+  resolution: "js-yaml@npm:5.4.0"
+  dependencies:
+    argparse: "npm:^2.0.1"
+  bin:
+    js-yaml: bin/js-yaml.mjs
+  checksum: 10/d8216083212772b203a1ee16be2ea96a1638c6d7f0ff769ba4da274b5ad29e858bd26d96761feb8937fce1aa47e8acfa79b2cd21a8ced724cc5555c11b4d056c
   languageName: node
   linkType: hard
 

@@ -216,7 +216,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - @docker/actions-toolkit@0.95.0
+ - @docker/actions-toolkit@0.96.0
 
 This package contains the following license:
 
@@ -1790,12 +1790,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - js-yaml@5.3.0
  - js-yaml@5.4.1
 
-These packages each contain the following license:
+This package contains the following license:
 
 (The MIT License)
 
@@ -4314,7 +4313,7 @@ The following npm packages may be included in this product:
  - pump@2.0.1
  - pumpify@1.5.1
  - tar-stream@3.1.7
- - tar-stream@3.2.0
+ - tar-stream@3.2.1
 
 These packages each contain the following license:
 

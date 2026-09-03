@@ -124,9 +124,20 @@ actionsToolkit.run(
       }
     }
 
+    let builderExists = false;
+    if (inputs.driver !== 'docker') {
+      builderExists = await toolkit.builder.exists(inputs.name);
+    }
+
+    if (!standalone && !builderExists && inputs.driver == 'docker-container') {
+      await core.group(`Pulling BuildKit image`, async () => {
+        await Docker.pull(resolveBuildKitImage(inputs.driverOpts));
+      });
+    }
+
     if (inputs.driver !== 'docker') {
       await core.group(`Creating a new builder instance`, async () => {
-        if (await toolkit.builder.exists(inputs.name)) {
+        if (builderExists) {
           core.info(`Builder ${inputs.name} already exists, skipping creation`);
         } else {
           const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, inputs.endpoint, {
@@ -149,11 +160,20 @@ actionsToolkit.run(
       });
     }
 
-    if (inputs.append) {
+    const appendNodes = inputs.append ? (yaml.load(inputs.append) as Node[]) : [];
+
+    if (appendNodes.length > 0) {
+      if (!standalone && inputs.driver == 'docker-container') {
+        await core.group(`Pulling BuildKit image for append node(s)`, async () => {
+          for (const node of appendNodes) {
+            await Docker.pull(resolveBuildKitImage(node['driver-opts']));
+          }
+        });
+      }
+
       await core.group(`Appending node(s) to builder`, async () => {
         let nodeIndex = 1;
-        const nodes = yaml.load(inputs.append) as Node[];
-        for (const node of nodes) {
+        for (const node of appendNodes) {
           const certsDriverOpts = Buildx.resolveCertsDriverOpts(inputs.driver, `${node.endpoint}`, {
             cacert: process.env[`${context.builderNodeEnvPrefix}_${nodeIndex}_AUTH_TLS_CACERT`],
             cert: process.env[`${context.builderNodeEnvPrefix}_${nodeIndex}_AUTH_TLS_CERT`],
@@ -274,3 +294,12 @@ actionsToolkit.run(
     }
   }
 );
+
+function resolveBuildKitImage(driverOpts: string[] = []): string {
+  return (
+    driverOpts
+      .find(driverOpt => driverOpt.trim().startsWith('image='))
+      ?.trim()
+      .substring('image='.length) || 'moby/buildkit:buildx-stable-1'
+  );
+}

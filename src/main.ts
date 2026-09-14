@@ -90,8 +90,8 @@ actionsToolkit.run(
           ignoreReturnCode: true,
           silent: true
         }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.info(`Cannot inspect default docker context: ${res.stderr.trim()}`);
+          if (res.exitCode != 0) {
+            core.info(`Cannot inspect default docker context: ${Docker.getErrorMessage(res.stderr)}`);
           } else {
             try {
               const contextInfo = (<Array<ContextInfo>>JSON.parse(res.stdout.trim()))[0];
@@ -112,8 +112,8 @@ actionsToolkit.run(
           await Docker.getExecOutput(['context', 'create', tmpDockerContext], {
             ignoreReturnCode: true
           }).then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.warning(`Cannot create docker context ${tmpDockerContext}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+            if (res.exitCode != 0) {
+              core.warning(`Cannot create docker context ${tmpDockerContext}: ${Docker.getErrorMessage(res.stderr)}`);
             } else {
               core.info(`Setting builder endpoint to ${tmpDockerContext} context`);
               inputs.endpoint = tmpDockerContext;
@@ -141,8 +141,8 @@ actionsToolkit.run(
           await Exec.getExecOutput(createCmd.command, createCmd.args, {
             ignoreReturnCode: true
           }).then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+            if (res.exitCode != 0) {
+              throw new Error(`Failed to create builder ${inputs.name}: ${Buildx.getErrorMessage(res.stderr)}`);
             }
           });
         }
@@ -166,8 +166,8 @@ actionsToolkit.run(
           await Exec.getExecOutput(appendCmd.command, appendCmd.args, {
             ignoreReturnCode: true
           }).then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              throw new Error(`Failed to append node ${node.name}: ${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+            if (res.exitCode != 0) {
+              throw new Error(`Failed to append node ${node.name}: ${Buildx.getErrorMessage(res.stderr)}`);
             }
           });
           nodeIndex++;
@@ -180,8 +180,8 @@ actionsToolkit.run(
       await Exec.getExecOutput(inspectCmd.command, inspectCmd.args, {
         ignoreReturnCode: true
       }).then(res => {
-        if (res.stderr.length > 0 && res.exitCode != 0) {
-          throw new Error(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+        if (res.exitCode != 0) {
+          throw new Error(`Failed to boot builder: ${Buildx.getErrorMessage(res.stderr)}`);
         }
       });
     });
@@ -225,8 +225,8 @@ actionsToolkit.run(
         await Docker.getExecOutput(['logs', `${stateHelper.containerName}`], {
           ignoreReturnCode: true
         }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.warning(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+          if (res.exitCode != 0) {
+            core.warning(`Failed to display BuildKit logs: ${Docker.getErrorMessage(res.stderr)}`);
           }
         });
       });
@@ -245,8 +245,8 @@ actionsToolkit.run(
           await Exec.getExecOutput(rmCmd.command, rmCmd.args, {
             ignoreReturnCode: true
           }).then(res => {
-            if (res.stderr.length > 0 && res.exitCode != 0) {
-              core.warning(res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error');
+            if (res.exitCode != 0) {
+              core.warning(`Failed to remove builder ${stateHelper.builderName}: ${Buildx.getErrorMessage(res.stderr)}`);
             }
           });
         } else {
@@ -260,8 +260,8 @@ actionsToolkit.run(
         await Exec.getExecOutput('docker', ['context', 'rm', '-f', stateHelper.tmpDockerContext], {
           ignoreReturnCode: true
         }).then(res => {
-          if (res.stderr.length > 0 && res.exitCode != 0) {
-            core.warning(`${res.stderr.match(/(.*)\s*$/)?.[0]?.trim() ?? 'unknown error'}`);
+          if (res.exitCode != 0) {
+            core.warning(`Failed to remove temp docker context ${stateHelper.tmpDockerContext}: ${Docker.getErrorMessage(res.stderr)}`);
           }
         });
       });

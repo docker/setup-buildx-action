@@ -182,6 +182,15 @@ jobs:
 
   endpoint:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        endpoint:
+          - mycontext
+          - tcp://127.0.0.1:2375
+    env:
+      # only the explicit endpoint should provide access to a daemon.
+      DOCKER_HOST: unix:///tmp/nonexistent-docker.sock
     services:
       dind:
         image: docker:29.3-dind@sha256:4d90f1f6c400315c2dba96d3ec93c01e64198395cbba04f79d12adce4f737029
@@ -209,11 +218,19 @@ jobs:
           docker --context mycontext info
       -
         name: Set up Docker Buildx
+        id: buildx
         uses: ./
         with:
-          endpoint: mycontext
+          endpoint: ${{ matrix.endpoint }}
+      -
+        name: Build
         env:
-          DOCKER_CONTEXT: mycontext
+          BUILDER: ${{ steps.buildx.outputs.name }}
+        run: |
+          docker buildx build --builder "$BUILDER" - <<'EOF'
+          FROM scratch
+          LABEL test=endpoint
+          EOF
 
   buildkitd-config:
     runs-on: ubuntu-latest

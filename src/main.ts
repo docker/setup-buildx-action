@@ -133,11 +133,13 @@ actionsToolkit.run(
 
     if (!standalone && inputs.driver == 'docker-container') {
       const buildkitImages = new Set<string>();
-      if (!builderExists) {
+      if (!builderExists && !inputs.endpoint) {
         buildkitImages.add(resolveBuildKitImage(inputs.driverOpts));
       }
       for (const node of appendNodes) {
-        buildkitImages.add(resolveBuildKitImage(node['driver-opts']));
+        if (!node.endpoint) {
+          buildkitImages.add(resolveBuildKitImage(node['driver-opts']));
+        }
       }
       if (buildkitImages.size > 0) {
         await core.group(`Pulling BuildKit image(s)`, async () => {

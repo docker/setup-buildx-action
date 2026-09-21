@@ -216,7 +216,7 @@ Apache License
 
 The following npm package may be included in this product:
 
- - @docker/actions-toolkit@0.100.0
+ - @docker/actions-toolkit@0.101.0
 
 This package contains the following license:
 
@@ -1790,12 +1790,11 @@ SOFTWARE.
 
 -----------
 
-The following npm packages may be included in this product:
+The following npm package may be included in this product:
 
- - js-yaml@5.4.1
  - js-yaml@5.4.2
 
-These packages each contain the following license:
+This package contains the following license:
 
 (The MIT License)
 

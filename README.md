@@ -38,7 +38,7 @@ on:
 
 jobs:
   buildx:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout

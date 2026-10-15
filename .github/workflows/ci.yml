@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +50,7 @@ jobs:
           EOF
 
   multi:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -65,7 +65,7 @@ jobs:
         uses: ./
 
   error:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -95,7 +95,7 @@ jobs:
         uses: crazy-max/ghaction-dump-context@5355a8e5e6ac5a302e746a1c4b7747a0393863c8 # v2
 
   debug:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -125,7 +125,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/ppc64le
 
   install:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -143,7 +143,7 @@ jobs:
           docker build --help
 
   use:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -166,7 +166,7 @@ jobs:
         run: docker buildx ls
 
   driver:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -189,7 +189,7 @@ jobs:
           driver-opts: ${{ matrix.driver-opts }}
 
   docker-driver:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -211,7 +211,7 @@ jobs:
           docker buildx inspect | grep Status | grep running
 
   endpoint:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     services:
       dind:
         image: docker:dind
@@ -248,7 +248,7 @@ jobs:
           DOCKER_CONTEXT: mycontext
 
   config:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -282,7 +282,7 @@ jobs:
           context: .
 
   config-inline:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -311,7 +311,7 @@ jobs:
           context: .
 
   with-qemu:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -343,7 +343,7 @@ jobs:
         run: echo ${{ steps.buildx.outputs.platforms }}
 
   build-ref:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -376,7 +376,7 @@ jobs:
           context: .
 
   standalone-cmd:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -406,7 +406,7 @@ jobs:
           buildx build .
 
   standalone-action:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -439,7 +439,7 @@ jobs:
           context: .
 
   standalone-install-error:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -471,7 +471,7 @@ jobs:
           fi
 
   append:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -502,7 +502,7 @@ jobs:
         run: echo ${{ steps.buildx.outputs.platforms }}
 
   platforms:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -519,7 +519,7 @@ jobs:
           platforms: linux/amd64
 
   docker-context:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     steps:
       -
         name: Checkout
@@ -538,7 +538,7 @@ jobs:
           driver: docker
 
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:
@@ -610,7 +610,7 @@ jobs:
           context: .
 
   cache-binary:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     strategy:
       fail-fast: false
       matrix:

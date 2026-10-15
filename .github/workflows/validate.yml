@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     outputs:
       targets: ${{ steps.targets.outputs.matrix }}
     steps:
@@ -32,7 +32,7 @@ jobs:
           echo "matrix=$(docker buildx bake validate --print | jq -cr '.group.validate.targets')" >> $GITHUB_OUTPUT
 
   validate:
-    runs-on: ubuntu-latest
+    runs-on: 4cpu-gh-ubuntu24-x64
     needs:
       - prepare
     strategy:

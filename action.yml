@@ -34,7 +34,7 @@ inputs:
     description: 'Name of the builder. If not specified, one will be generated or if it already exists, it will be used instead of creating a new one.'
     required: false
   endpoint:
-    description: 'Optional address for docker socket or context from `docker context ls`'
+    description: 'Optional address for docker socket or context from `docker context ls` (defaults to BUILDKIT_HOST for remote driver)'
     required: false
   platforms:
     description: 'Fixed platforms for current node. If not empty, values take priority over the detected ones'

@@ -28,15 +28,16 @@ export interface Inputs {
 }
 
 export async function getInputs(): Promise<Inputs> {
+  const driver = core.getInput('driver') || 'docker-container';
   return {
     version: core.getInput('version'),
-    name: await getBuilderName(core.getInput('name'), core.getInput('driver') || 'docker-container'),
-    driver: core.getInput('driver') || 'docker-container',
+    name: await getBuilderName(core.getInput('name'), driver),
+    driver: driver,
     driverOpts: Util.getInputList('driver-opts', {ignoreComma: true, quote: false}),
     buildkitdFlags: core.getInput('buildkitd-flags'),
     platforms: Util.getInputList('platforms'),
     use: core.getBooleanInput('use'),
-    endpoint: core.getInput('endpoint'),
+    endpoint: core.getInput('endpoint') || (driver === 'remote' ? process.env.BUILDKIT_HOST || '' : ''),
     buildkitdConfig: core.getInput('buildkitd-config'),
     buildkitdConfigInline: core.getInput('buildkitd-config-inline'),
     append: core.getInput('append'),

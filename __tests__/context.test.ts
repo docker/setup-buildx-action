@@ -320,6 +320,70 @@ describe('getCreateArgs', () => {
       versionSpy.mockRestore();
     }
   });
+
+  test('derives endpoint from BUILDKIT_HOST env var when driver is remote', async () => {
+    process.env.BUILDKIT_HOST = 'tcp://127.0.0.1:1234';
+    setInput('driver', 'remote');
+    setInput('use', 'true');
+    setInput('cache-binary', 'true');
+    setInput('cleanup', 'true');
+    setInput('keep-state', 'false');
+    const toolkit = new Toolkit();
+    const versionSpy = vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      return 'v0.10.3';
+    });
+    try {
+      const inp = await context.getInputs();
+      expect(inp.endpoint).toBe('tcp://127.0.0.1:1234');
+      const res = await context.getCreateArgs(inp, toolkit);
+      expect(res).toEqual(['create', '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d', '--driver', 'remote', '--use', 'tcp://127.0.0.1:1234']);
+    } finally {
+      versionSpy.mockRestore();
+      delete process.env.BUILDKIT_HOST;
+    }
+  });
+
+  test('endpoint input takes precedence over BUILDKIT_HOST env var when driver is remote', async () => {
+    process.env.BUILDKIT_HOST = 'tcp://127.0.0.1:1234';
+    setInput('driver', 'remote');
+    setInput('endpoint', 'tcp://10.0.0.1:5678');
+    setInput('use', 'true');
+    setInput('cache-binary', 'true');
+    setInput('cleanup', 'true');
+    setInput('keep-state', 'false');
+    const toolkit = new Toolkit();
+    const versionSpy = vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      return 'v0.10.3';
+    });
+    try {
+      const inp = await context.getInputs();
+      expect(inp.endpoint).toBe('tcp://10.0.0.1:5678');
+      const res = await context.getCreateArgs(inp, toolkit);
+      expect(res).toEqual(['create', '--name', 'builder-9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d', '--driver', 'remote', '--use', 'tcp://10.0.0.1:5678']);
+    } finally {
+      versionSpy.mockRestore();
+      delete process.env.BUILDKIT_HOST;
+    }
+  });
+
+  test('does not derive endpoint from BUILDKIT_HOST when driver is not remote', async () => {
+    process.env.BUILDKIT_HOST = 'tcp://127.0.0.1:1234';
+    setInput('driver', 'docker-container');
+    setInput('use', 'true');
+    setInput('cache-binary', 'true');
+    setInput('cleanup', 'true');
+    setInput('keep-state', 'false');
+    const versionSpy = vi.spyOn(Buildx.prototype, 'version').mockImplementation(async (): Promise<string> => {
+      return 'v0.10.3';
+    });
+    try {
+      const inp = await context.getInputs();
+      expect(inp.endpoint).toBe('');
+    } finally {
+      versionSpy.mockRestore();
+      delete process.env.BUILDKIT_HOST;
+    }
+  });
 });
 
 describe('getAppendArgs', () => {
